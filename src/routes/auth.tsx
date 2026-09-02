@@ -26,8 +26,6 @@ function AuthPage() {
   const [carregando, setCarregando] = useState(false);
   const [email, setEmail] = useState("");
   const [senha, setSenha] = useState("");
-  const [nome, setNome] = useState("");
-  const [tab, setTab] = useState<"entrar" | "criar">("entrar");
 
   const pillsData = useMemo(() => {
     const seed = [
@@ -73,26 +71,6 @@ function AuthPage() {
       return;
     }
     toast.success("Bem-vindo de volta!");
-    navigate({ to: "/dashboard" });
-  }
-
-  async function cadastrar(e: React.FormEvent) {
-    e.preventDefault();
-    setCarregando(true);
-    const { error } = await supabase.auth.signUp({
-      email,
-      password: senha,
-      options: {
-        data: { nome },
-        emailRedirectTo: `${window.location.origin}/dashboard`,
-      },
-    });
-    setCarregando(false);
-    if (error) {
-      toast.error("Não foi possível criar a conta", { description: error.message });
-      return;
-    }
-    toast.success("Conta criada", { description: "Você já pode acessar o sistema." });
     navigate({ to: "/dashboard" });
   }
 
@@ -206,48 +184,6 @@ function AuthPage() {
 
         .cl-header h1 .cl-green {
           color: var(--cl-green);
-        }
-
-        .cl-tab-row {
-          display: flex;
-          gap: 0;
-          margin-bottom: 36px;
-          border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-        }
-
-        .cl-tab {
-          flex: 1;
-          background: none;
-          border: none;
-          color: var(--cl-dim);
-          font-family: inherit;
-          font-size: 12px;
-          font-weight: 600;
-          letter-spacing: 1.5px;
-          text-transform: uppercase;
-          padding: 12px 0;
-          cursor: pointer;
-          position: relative;
-          transition: color 0.3s;
-        }
-
-        .cl-tab:hover {
-          color: rgba(255, 255, 255, 0.7);
-        }
-
-        .cl-tab.cl-active {
-          color: var(--cl-text);
-        }
-
-        .cl-tab.cl-active::after {
-          content: '';
-          position: absolute;
-          bottom: -1px;
-          left: 0;
-          width: 100%;
-          height: 2px;
-          background: var(--cl-green);
-          box-shadow: 0 0 12px var(--cl-green);
         }
 
         .cl-form-group {
@@ -431,103 +367,38 @@ function AuthPage() {
           </h1>
         </header>
 
-        <div className="cl-tab-row">
-          <button
-            type="button"
-            className={`cl-tab ${tab === "entrar" ? "cl-active" : ""}`}
-            onClick={() => setTab("entrar")}
-          >
-            Entrar
-          </button>
-          <button
-            type="button"
-            className={`cl-tab ${tab === "criar" ? "cl-active" : ""}`}
-            onClick={() => setTab("criar")}
-          >
-            Criar conta
-          </button>
-        </div>
+        <form autoComplete="off" onSubmit={entrar}>
+          <div className="cl-form-group">
+            <label>E-mail</label>
+            <input
+              type="email"
+              placeholder="seu@email.com"
+              required
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+            />
+            <div className="cl-input-glow" />
+          </div>
 
-        {tab === "entrar" ? (
-          <form autoComplete="off" onSubmit={entrar}>
-            <div className="cl-form-group">
-              <label>E-mail</label>
-              <input
-                type="email"
-                placeholder="seu@email.com"
-                required
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-              />
-              <div className="cl-input-glow" />
-            </div>
+          <div className="cl-form-group">
+            <label>Senha</label>
+            <input
+              type="password"
+              placeholder="••••••••"
+              required
+              value={senha}
+              onChange={(e) => setSenha(e.target.value)}
+            />
+            <div className="cl-input-glow" />
+          </div>
 
-            <div className="cl-form-group">
-              <label>Senha</label>
-              <input
-                type="password"
-                placeholder="••••••••"
-                required
-                value={senha}
-                onChange={(e) => setSenha(e.target.value)}
-              />
-              <div className="cl-input-glow" />
-            </div>
-
-            <div className="cl-submit-wrap">
-              <div className="cl-mercury-drop" />
-              <button type="submit" className="cl-btn-base" disabled={carregando}>
-                {carregando ? "Entrando..." : "Entrar"}
-              </button>
-            </div>
-          </form>
-        ) : (
-          <form autoComplete="off" onSubmit={cadastrar}>
-            <div className="cl-form-group">
-              <label>Nome completo</label>
-              <input
-                type="text"
-                placeholder="Seu nome"
-                required
-                value={nome}
-                onChange={(e) => setNome(e.target.value)}
-              />
-              <div className="cl-input-glow" />
-            </div>
-
-            <div className="cl-form-group">
-              <label>E-mail</label>
-              <input
-                type="email"
-                placeholder="seu@email.com"
-                required
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-              />
-              <div className="cl-input-glow" />
-            </div>
-
-            <div className="cl-form-group">
-              <label>Senha</label>
-              <input
-                type="password"
-                placeholder="••••••••"
-                required
-                minLength={6}
-                value={senha}
-                onChange={(e) => setSenha(e.target.value)}
-              />
-              <div className="cl-input-glow" />
-            </div>
-
-            <div className="cl-submit-wrap">
-              <div className="cl-mercury-drop" />
-              <button type="submit" className="cl-btn-base" disabled={carregando}>
-                {carregando ? "Criando conta..." : "Criar conta"}
-              </button>
-            </div>
-          </form>
-        )}
+          <div className="cl-submit-wrap">
+            <div className="cl-mercury-drop" />
+            <button type="submit" className="cl-btn-base" disabled={carregando}>
+              {carregando ? "Entrando..." : "Entrar"}
+            </button>
+          </div>
+        </form>
 
         <footer className="cl-footer-nav">
           <a href="#recuperar">Esqueci minha senha</a>
