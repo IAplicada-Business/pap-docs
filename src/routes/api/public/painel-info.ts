@@ -11,7 +11,7 @@ export const Route = createFileRoute("/api/public/painel-info")({
         const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
         const { data: cliente } = await supabaseAdmin
           .from("clientes")
-          .select("id, nome_fantasia, nome, ativo, deleted_at, org_id")
+          .select("id, nome_fantasia, nome, ativo, deleted_at, org_id, logo_url, cor_primaria")
           .eq("painel_token", token)
           .maybeSingle();
 
@@ -55,6 +55,10 @@ export const Route = createFileRoute("/api/public/painel-info")({
 
         return Response.json({
           nome_fantasia: cliente.nome_fantasia ?? cliente.nome ?? "",
+          cliente_branding: {
+            logo_url: cliente.logo_url,
+            cor_primaria: cliente.cor_primaria,
+          },
           escritorio: escritorio
             ? {
                 nome: escritorio.nome,

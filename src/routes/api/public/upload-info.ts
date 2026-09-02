@@ -11,7 +11,7 @@ export const Route = createFileRoute("/api/public/upload-info")({
         const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
         const { data } = await supabaseAdmin
           .from("clientes")
-          .select("nome_fantasia, nome, ativo, deleted_at, org_id")
+          .select("nome_fantasia, nome, ativo, deleted_at, org_id, logo_url, cor_primaria")
           .eq("upload_token", token)
           .maybeSingle();
 
@@ -27,6 +27,10 @@ export const Route = createFileRoute("/api/public/upload-info")({
 
         return Response.json({
           nome_fantasia: data.nome_fantasia ?? data.nome ?? "",
+          cliente_branding: {
+            logo_url: data.logo_url,
+            cor_primaria: data.cor_primaria,
+          },
           escritorio: escritorio
             ? {
                 nome: escritorio.nome,

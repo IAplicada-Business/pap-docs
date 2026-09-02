@@ -78,12 +78,19 @@ function PainelPublico() {
         if (!r.ok) throw new Error("invalido");
         const json = (await r.json()) as {
           nome_fantasia: string;
+          cliente_branding?: { logo_url: string | null; cor_primaria: string };
           escritorio: Escritorio | null;
           competencias: Competencia[];
           relatorios: Relatorio[];
         };
         setNomeFantasia(json.nome_fantasia);
-        if (json.escritorio) setEscritorio(json.escritorio);
+        const cb = json.cliente_branding;
+        const esc = json.escritorio;
+        setEscritorio({
+          nome: esc?.nome ?? "ConcilIA",
+          logo_url: cb?.logo_url ?? esc?.logo_url ?? null,
+          cor_primaria: cb?.cor_primaria ?? esc?.cor_primaria ?? null,
+        });
         setCompetencias(json.competencias);
         setRelatorios(json.relatorios);
       })
