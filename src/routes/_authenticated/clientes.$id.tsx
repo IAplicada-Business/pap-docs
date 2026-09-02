@@ -3,6 +3,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { ArrowLeft, Copy, Download, RefreshCw } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import type { Database } from "@/integrations/supabase/types";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -40,6 +41,8 @@ import {
 } from "@/lib/formatadores";
 import { baixarDocumento } from "@/lib/documentos";
 import { badgeStatus } from "@/components/status-badge";
+
+type AtualizacaoCliente = Database["public"]["Tables"]["clientes"]["Update"];
 
 export const Route = createFileRoute("/_authenticated/clientes/$id")({
   head: () => ({
@@ -99,7 +102,7 @@ function ClienteDetalhe() {
   });
 
   const salvar = useMutation({
-    mutationFn: async (valores: Parameters<ReturnType<typeof supabase.from<"clientes">>["update"]>[0]) => {
+    mutationFn: async (valores: AtualizacaoCliente) => {
       const { error } = await supabase.from("clientes").update(valores).eq("id", id);
       if (error) throw error;
     },
