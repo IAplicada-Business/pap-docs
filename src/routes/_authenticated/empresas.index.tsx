@@ -69,31 +69,24 @@ function EmpresasPage() {
     queryFn: async () => {
       const inicio = inicioMesAtual();
 
-      const [empresasRes, clientesRes, docsMesRes, docsErroRes] =
-        await Promise.all([
-          supabase
-            .from("organizations")
-            .select(
-              "id, nome, logo_url, cor_primaria, status, modulos_habilitados",
-            )
-            .is("deleted_at", null)
-            .order("nome"),
-          supabase
-            .from("clientes")
-            .select("id, org_id")
-            .eq("ativo", true)
-            .is("deleted_at", null),
-          supabase
-            .from("documentos")
-            .select("id, org_id")
-            .gte("enviado_em", inicio)
-            .is("deleted_at", null),
-          supabase
-            .from("documentos")
-            .select("id, org_id")
-            .eq("status_processamento", "erro")
-            .is("deleted_at", null),
-        ]);
+      const [empresasRes, clientesRes, docsMesRes, docsErroRes] = await Promise.all([
+        supabase
+          .from("organizations")
+          .select("id, nome, logo_url, cor_primaria, status, modulos_habilitados")
+          .is("deleted_at", null)
+          .order("nome"),
+        supabase.from("clientes").select("id, org_id").eq("ativo", true).is("deleted_at", null),
+        supabase
+          .from("documentos")
+          .select("id, org_id")
+          .gte("enviado_em", inicio)
+          .is("deleted_at", null),
+        supabase
+          .from("documentos")
+          .select("id, org_id")
+          .eq("status_processamento", "erro")
+          .is("deleted_at", null),
+      ]);
 
       if (empresasRes.error) throw empresasRes.error;
 
@@ -134,8 +127,7 @@ function EmpresasPage() {
 
   const firstName = perfil?.nome?.split(" ")[0] ?? "equipe";
   const hora = new Date().getHours();
-  const saudacao =
-    hora < 12 ? "Bom dia" : hora < 18 ? "Boa tarde" : "Boa noite";
+  const saudacao = hora < 12 ? "Bom dia" : hora < 18 ? "Boa tarde" : "Boa noite";
 
   const filtradas = useMemo(() => {
     const todas = data?.empresas ?? [];
@@ -191,9 +183,7 @@ function EmpresasPage() {
           <h1 className="page-title">
             {saudacao}, {firstName}
           </h1>
-          <p className="page-subtitle">
-            Visao geral de todas as empresas e seus indicadores.
-          </p>
+          <p className="page-subtitle">Visao geral de todas as empresas e seus indicadores.</p>
         </div>
         <Button asChild className="rounded-xl">
           <Link to="/empresas/nova">
@@ -217,22 +207,16 @@ function EmpresasPage() {
                 <TrendingUp className="size-4 text-success opacity-60 transition-opacity group-hover:opacity-100" />
               )}
               {destaque && (data?.totalDocsErro ?? 0) > 0 && (
-                <span className="text-xs font-semibold text-destructive">
-                  Atencao
-                </span>
+                <span className="text-xs font-semibold text-destructive">Atencao</span>
               )}
             </div>
             <div className="mt-4">
               {isLoading ? (
                 <Skeleton className="h-9 w-16" />
               ) : (
-                <div className="text-3xl font-bold tracking-tight">
-                  {valor ?? 0}
-                </div>
+                <div className="text-3xl font-bold tracking-tight">{valor ?? 0}</div>
               )}
-              <p className="mt-0.5 text-[0.8125rem] text-muted-foreground">
-                {label}
-              </p>
+              <p className="mt-0.5 text-[0.8125rem] text-muted-foreground">{label}</p>
             </div>
           </div>
         ))}
@@ -314,9 +298,7 @@ function EmpresasPage() {
                     )}
 
                     <div className="min-w-0 flex-1">
-                      <span className="block truncate text-sm font-semibold">
-                        {empresa.nome}
-                      </span>
+                      <span className="block truncate text-sm font-semibold">{empresa.nome}</span>
                       <span
                         className={`status-dot mt-0.5 ${
                           empresa.status === "ativa"
@@ -347,15 +329,11 @@ function EmpresasPage() {
                   {/* quick stats row */}
                   <div className="grid grid-cols-3 gap-2 rounded-lg bg-muted/50 px-3 py-2 text-center text-xs">
                     <div>
-                      <div className="font-bold text-foreground">
-                        {nClientes}
-                      </div>
+                      <div className="font-bold text-foreground">{nClientes}</div>
                       <div className="text-muted-foreground">Clientes</div>
                     </div>
                     <div>
-                      <div className="font-bold text-foreground">
-                        {nDocsMes}
-                      </div>
+                      <div className="font-bold text-foreground">{nDocsMes}</div>
                       <div className="text-muted-foreground">Docs/mes</div>
                     </div>
                     <div>
@@ -385,30 +363,15 @@ function EmpresasPage() {
 
                   {/* action buttons */}
                   <div className="flex items-center gap-2 pt-1">
-                    <Button
-                      asChild
-                      size="sm"
-                      className="flex-1 rounded-xl text-xs"
-                    >
-                      <Link
-                        to="/empresas/$id"
-                        params={{ id: empresa.id }}
-                      >
+                    <Button asChild size="sm" className="flex-1 rounded-xl text-xs">
+                      <Link to="/empresas/$id" params={{ id: empresa.id }}>
                         Acessar
                       </Link>
                     </Button>
-                    <Button
-                      asChild
-                      size="sm"
-                      variant="outline"
-                      className="rounded-xl text-xs"
-                    >
-                      <Link
-                        to="/empresas/$id/configuracoes"
-                        params={{ id: empresa.id }}
-                      >
+                    <Button asChild size="sm" variant="outline" className="rounded-xl text-xs">
+                      <Link to="/empresas/$id/gerenciar" params={{ id: empresa.id }}>
                         <Settings className="size-3.5" />
-                        Configurar
+                        Gerenciar
                       </Link>
                     </Button>
                   </div>
