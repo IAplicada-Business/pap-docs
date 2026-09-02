@@ -131,32 +131,30 @@ function ClientesPage() {
         </Button>
       </div>
 
-      <div className="rounded-2xl border border-border bg-card shadow-card">
-        <div className="border-b border-border/60 p-4">
-          <div className="flex flex-wrap gap-3">
-            <div className="relative min-w-56 flex-1">
-              <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
-              <Input
-                className="rounded-xl pl-9"
-                placeholder="Buscar por nome ou CNPJ"
-                value={busca}
-                onChange={(e) => setBusca(e.target.value)}
-              />
-            </div>
-            <Select value={filtro} onValueChange={(v) => setFiltro(v as typeof filtro)}>
-              <SelectTrigger className="w-44 rounded-xl">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="todos">Todos</SelectItem>
-                <SelectItem value="ativos">Somente ativos</SelectItem>
-                <SelectItem value="inativos">Somente inativos</SelectItem>
-              </SelectContent>
-            </Select>
+      <div className="card-section">
+        <div className="filter-bar">
+          <div className="relative min-w-56 flex-1">
+            <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+            <Input
+              className="rounded-xl pl-9"
+              placeholder="Buscar por nome ou CNPJ"
+              value={busca}
+              onChange={(e) => setBusca(e.target.value)}
+            />
           </div>
+          <Select value={filtro} onValueChange={(v) => setFiltro(v as typeof filtro)}>
+            <SelectTrigger className="w-44 rounded-xl">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="todos">Todos</SelectItem>
+              <SelectItem value="ativos">Somente ativos</SelectItem>
+              <SelectItem value="inativos">Somente inativos</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
 
-        <div className="p-2">
+        <div className="card-section-body">
           {isLoading ? (
             <div className="space-y-2 p-4">
               {[1, 2, 3].map((i) => (
@@ -164,22 +162,22 @@ function ClientesPage() {
               ))}
             </div>
           ) : filtrados.length === 0 ? (
-            <div className="py-16 text-center">
-              <Building2 className="mx-auto size-10 text-muted-foreground/30" />
-              <p className="mt-3 text-sm text-muted-foreground">
+            <div className="empty-state">
+              <Building2 className="empty-state-icon" />
+              <p className="empty-state-text">
                 Nenhum cliente ainda — cadastre o primeiro.
               </p>
             </div>
           ) : (
-            <div className="divide-y divide-border/50">
+            <div className="divide-y divide-border/40">
               {filtrados.map((c) => (
                 <Link
                   key={c.id}
                   to="/clientes/$id"
                   params={{ id: c.id }}
-                  className="flex flex-wrap items-center gap-3 rounded-xl px-4 py-3 transition-colors hover:bg-muted/50"
+                  className="list-row"
                 >
-                  <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-primary/8 text-primary">
+                  <div className="list-row-icon bg-gradient-to-br from-primary/15 to-primary/5 text-primary">
                     <Building2 className="size-4" />
                   </div>
                   <div className="min-w-0 flex-1">

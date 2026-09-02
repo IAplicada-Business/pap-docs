@@ -89,6 +89,7 @@ function Dashboard() {
       valor: data?.clientesAtivos,
       icone: Users,
       cor: "bg-primary/10 text-primary",
+      gradiente: "from-primary/20 to-primary/5",
       destaque: false,
     },
     {
@@ -96,6 +97,7 @@ function Dashboard() {
       valor: data?.documentosMes,
       icone: FileText,
       cor: "bg-accent/10 text-accent",
+      gradiente: "from-accent/20 to-accent/5",
       destaque: false,
     },
     {
@@ -103,6 +105,7 @@ function Dashboard() {
       valor: data?.documentosErro,
       icone: AlertTriangle,
       cor: "bg-destructive/10 text-destructive",
+      gradiente: "from-destructive/20 to-destructive/5",
       destaque: (data?.documentosErro ?? 0) > 0,
     },
     {
@@ -110,6 +113,7 @@ function Dashboard() {
       valor: data?.competenciasAbertas,
       icone: CalendarRange,
       cor: "bg-warning/10 text-warning-foreground",
+      gradiente: "from-warning/20 to-warning/5",
       destaque: false,
     },
   ];
@@ -126,17 +130,17 @@ function Dashboard() {
       </div>
 
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        {cards.map(({ label, valor, icone: Icone, cor, destaque }) => (
-          <div key={label} className="stat-card">
+        {cards.map(({ label, valor, icone: Icone, cor, gradiente, destaque }) => (
+          <div key={label} className="stat-card group">
             {destaque && (
-              <div className="absolute inset-x-0 top-0 h-0.5 bg-destructive" />
+              <div className="absolute inset-x-0 top-0 h-0.5 bg-gradient-to-r from-destructive to-destructive/50" />
             )}
             <div className="flex items-start justify-between">
-              <div className={`stat-card-icon ${cor}`}>
-                <Icone className="size-[1.125rem]" />
+              <div className={`stat-card-icon bg-gradient-to-br ${gradiente}`}>
+                <Icone className={`size-[1.125rem] ${cor.split(" ").pop()}`} />
               </div>
               {!destaque && (
-                <TrendingUp className="size-4 text-success" />
+                <TrendingUp className="size-4 text-success opacity-60 transition-opacity group-hover:opacity-100" />
               )}
               {destaque && (data?.documentosErro ?? 0) > 0 && (
                 <span className="text-xs font-semibold text-destructive">
@@ -160,25 +164,25 @@ function Dashboard() {
         ))}
       </div>
 
-      <div className="rounded-2xl border border-border bg-card shadow-card">
-        <div className="flex items-center justify-between border-b border-border/60 px-6 py-4">
+      <div className="card-section">
+        <div className="card-section-header">
           <div>
             <h2 className="text-base font-semibold">
               Ultimos documentos recebidos
             </h2>
-            <p className="text-[0.8125rem] text-muted-foreground">
+            <p className="mt-0.5 text-[0.8125rem] text-muted-foreground">
               Documentos mais recentes enviados pelos clientes
             </p>
           </div>
           <Link
             to="/documentos"
-            className="flex items-center gap-1 text-sm font-medium text-primary hover:underline"
+            className="flex items-center gap-1 rounded-lg px-2.5 py-1.5 text-sm font-medium text-primary transition-colors hover:bg-primary/5"
           >
             Ver todos
             <ArrowUpRight className="size-3.5" />
           </Link>
         </div>
-        <div className="p-2">
+        <div className="card-section-body">
           {isLoading ? (
             <div className="space-y-2 p-4">
               {[1, 2, 3].map((i) => (
@@ -186,13 +190,10 @@ function Dashboard() {
               ))}
             </div>
           ) : data && data.ultimos.length > 0 ? (
-            <div className="divide-y divide-border/50">
+            <div className="divide-y divide-border/40">
               {data.ultimos.map((doc) => (
-                <div
-                  key={doc.id}
-                  className="flex flex-wrap items-center gap-3 rounded-xl px-4 py-3 transition-colors hover:bg-muted/50"
-                >
-                  <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-primary/8 text-primary">
+                <div key={doc.id} className="list-row">
+                  <div className="list-row-icon bg-gradient-to-br from-primary/15 to-primary/5 text-primary">
                     <FileText className="size-4" />
                   </div>
                   <div className="min-w-0 flex-1">
@@ -215,14 +216,14 @@ function Dashboard() {
               ))}
             </div>
           ) : (
-            <div className="py-14 text-center">
-              <FileText className="mx-auto size-10 text-muted-foreground/30" />
-              <p className="mt-3 text-sm text-muted-foreground">
+            <div className="empty-state">
+              <FileText className="empty-state-icon" />
+              <p className="empty-state-text">
                 Nenhum documento recebido ainda.
               </p>
               <Link
                 to="/clientes"
-                className="mt-1 inline-block text-sm font-medium text-primary hover:underline"
+                className="mt-2 inline-block text-sm font-medium text-primary hover:underline"
               >
                 Cadastre um cliente e compartilhe o link de upload.
               </Link>

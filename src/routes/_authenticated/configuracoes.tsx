@@ -22,13 +22,13 @@ import { toast } from "sonner";
 export const Route = createFileRoute("/_authenticated/configuracoes")({
   head: () => ({
     meta: [
-      { title: "Configurações — ConcilIA" },
+      { title: "Configuracoes — ConcilIA" },
       {
         name: "description",
-        content: "Dados do escritório, perfil do usuário e plano de contas por cliente.",
+        content: "Dados do escritorio, perfil do usuario e plano de contas por cliente.",
       },
-      { property: "og:title", content: "Configurações — ConcilIA" },
-      { property: "og:description", content: "Ajustes do escritório e plano de contas." },
+      { property: "og:title", content: "Configuracoes — ConcilIA" },
+      { property: "og:description", content: "Ajustes do escritorio e plano de contas." },
     ],
   }),
   component: ConfiguracoesPage,
@@ -73,10 +73,10 @@ function ConfiguracoesPage() {
 
   const criarConta = useMutation({
     mutationFn: async () => {
-      if (!perfil) throw new Error("Perfil não carregado.");
+      if (!perfil) throw new Error("Perfil nao carregado.");
       if (!clienteSel) throw new Error("Selecione um cliente.");
       if (!conta.codigo.trim() || !conta.descricao.trim())
-        throw new Error("Informe código e descrição.");
+        throw new Error("Informe codigo e descricao.");
       const { error } = await supabase.from("plano_contas").insert({
         org_id: perfil.org_id,
         cliente_id: clienteSel,
@@ -92,7 +92,7 @@ function ConfiguracoesPage() {
       setConta({ codigo: "", descricao: "", tipo: "" });
       queryClient.invalidateQueries({ queryKey: ["plano-contas", clienteSel] });
     },
-    onError: (e: Error) => toast.error("Não foi possível salvar", { description: e.message }),
+    onError: (e: Error) => toast.error("Nao foi possivel salvar", { description: e.message }),
   });
 
   const removerConta = useMutation({
@@ -107,22 +107,22 @@ function ConfiguracoesPage() {
       toast.success("Conta removida");
       queryClient.invalidateQueries({ queryKey: ["plano-contas", clienteSel] });
     },
-    onError: (e: Error) => toast.error("Não foi possível remover", { description: e.message }),
+    onError: (e: Error) => toast.error("Nao foi possivel remover", { description: e.message }),
   });
 
   return (
     <div className="space-y-6">
       <div className="page-header">
         <div>
-          <h1 className="page-title">Configurações</h1>
-          <p className="page-subtitle">Escritório, perfil e plano de contas.</p>
+          <h1 className="page-title">Configuracoes</h1>
+          <p className="page-subtitle">Escritorio, perfil e plano de contas.</p>
         </div>
       </div>
 
       <Tabs defaultValue="escritorio">
         <TabsList className="rounded-xl">
           <TabsTrigger value="escritorio" className="rounded-lg">
-            <Building2 className="mr-1.5 size-3.5" /> Escritório
+            <Building2 className="mr-1.5 size-3.5" /> Escritorio
           </TabsTrigger>
           <TabsTrigger value="perfil" className="rounded-lg">
             <User className="mr-1.5 size-3.5" /> Meu perfil
@@ -133,14 +133,14 @@ function ConfiguracoesPage() {
         </TabsList>
 
         <TabsContent value="escritorio">
-          <div className="rounded-2xl border border-border bg-card shadow-card">
-            <div className="border-b border-border/60 p-5">
+          <div className="card-section">
+            <div className="card-section-header">
               <div className="flex items-center gap-3">
-                <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-primary/8 text-primary">
+                <div className="list-row-icon bg-gradient-to-br from-primary/15 to-primary/5 text-primary">
                   <Settings className="size-4" />
                 </div>
                 <div>
-                  <h2 className="text-sm font-semibold">Dados do escritório</h2>
+                  <h2 className="text-sm font-semibold">Dados do escritorio</h2>
                   <p className="text-xs text-muted-foreground">
                     {podeEditar
                       ? "Identidade visual e dados cadastrais."
@@ -164,7 +164,7 @@ function ConfiguracoesPage() {
                         .update({ nome: e.target.value })
                         .eq("id", escritorio.id)
                         .then(({ error }) => {
-                          if (error) toast.error("Não foi possível salvar", { description: error.message });
+                          if (error) toast.error("Nao foi possivel salvar", { description: error.message });
                           else {
                             toast.success("Nome atualizado");
                             queryClient.invalidateQueries({ queryKey: ["escritorio"] });
@@ -174,10 +174,9 @@ function ConfiguracoesPage() {
                   />
                 </div>
 
-
                 <div className="space-y-2">
                   <Label className="flex items-center gap-1.5">
-                    <Palette className="size-3.5" /> Cor primária
+                    <Palette className="size-3.5" /> Cor primaria
                   </Label>
                   <div className="flex items-center gap-2">
                     <Input
@@ -191,7 +190,7 @@ function ConfiguracoesPage() {
                           .update({ cor_primaria: e.target.value })
                           .eq("id", escritorio.id)
                           .then(({ error }) => {
-                            if (error) toast.error("Não foi possível salvar", { description: error.message });
+                            if (error) toast.error("Nao foi possivel salvar", { description: error.message });
                             else {
                               toast.success("Cor atualizada");
                               queryClient.invalidateQueries({ queryKey: ["escritorio"] });
@@ -207,18 +206,16 @@ function ConfiguracoesPage() {
                     )}
                   </div>
                 </div>
-
-
               </div>
             </div>
           </div>
         </TabsContent>
 
         <TabsContent value="perfil">
-          <div className="rounded-2xl border border-border bg-card shadow-card">
-            <div className="border-b border-border/60 p-5">
+          <div className="card-section">
+            <div className="card-section-header">
               <div className="flex items-center gap-3">
-                <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-primary/8 text-primary">
+                <div className="list-row-icon bg-gradient-to-br from-primary/15 to-primary/5 text-primary">
                   <User className="size-4" />
                 </div>
                 <div>
@@ -252,16 +249,16 @@ function ConfiguracoesPage() {
         </TabsContent>
 
         <TabsContent value="plano">
-          <div className="rounded-2xl border border-border bg-card shadow-card">
-            <div className="border-b border-border/60 p-5">
+          <div className="card-section">
+            <div className="card-section-header">
               <div className="flex items-center gap-3">
-                <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-primary/8 text-primary">
+                <div className="list-row-icon bg-gradient-to-br from-primary/15 to-primary/5 text-primary">
                   <BookOpen className="size-4" />
                 </div>
                 <div>
                   <h2 className="text-sm font-semibold">Plano de contas</h2>
                   <p className="text-xs text-muted-foreground">
-                    Cadastro simples por cliente. A importação do layout IOB virá em uma próxima etapa.
+                    Cadastro simples por cliente. A importacao do layout IOB vira em uma proxima etapa.
                   </p>
                 </div>
               </div>
@@ -285,13 +282,13 @@ function ConfiguracoesPage() {
                   <div className="grid gap-3 sm:grid-cols-4">
                     <Input
                       className="rounded-xl"
-                      placeholder="Código"
+                      placeholder="Codigo"
                       value={conta.codigo}
                       onChange={(e) => setConta({ ...conta, codigo: e.target.value })}
                     />
                     <Input
                       className="sm:col-span-2 rounded-xl"
-                      placeholder="Descrição"
+                      placeholder="Descricao"
                       value={conta.descricao}
                       onChange={(e) => setConta({ ...conta, descricao: e.target.value })}
                     />
@@ -313,19 +310,16 @@ function ConfiguracoesPage() {
                   </div>
 
                   {!contas || contas.length === 0 ? (
-                    <div className="py-12 text-center">
-                      <BookOpen className="mx-auto size-10 text-muted-foreground/30" />
-                      <p className="mt-3 text-sm text-muted-foreground">
+                    <div className="empty-state">
+                      <BookOpen className="empty-state-icon" />
+                      <p className="empty-state-text">
                         Nenhuma conta cadastrada — adicione a primeira acima.
                       </p>
                     </div>
                   ) : (
-                    <div className="divide-y divide-border/50">
+                    <div className="divide-y divide-border/40">
                       {contas.map((c) => (
-                        <div
-                          key={c.id}
-                          className="flex items-center gap-3 rounded-xl px-4 py-3 transition-colors hover:bg-muted/50"
-                        >
+                        <div key={c.id} className="list-row">
                           <span className="min-w-16 font-mono text-xs font-semibold text-primary">
                             {c.codigo}
                           </span>
