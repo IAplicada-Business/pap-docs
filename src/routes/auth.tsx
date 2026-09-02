@@ -164,16 +164,6 @@ function AuthPage() {
           text-align: left;
         }
 
-        .cl-brand-label {
-          font-size: 10px;
-          font-weight: 500;
-          letter-spacing: 4px;
-          text-transform: uppercase;
-          color: var(--cl-dim);
-          margin-bottom: 10px;
-          display: block;
-        }
-
         .cl-header h1 {
           font-weight: 800;
           font-size: 2.8rem;
@@ -309,12 +299,6 @@ function AuthPage() {
           color: var(--cl-text);
         }
 
-        .cl-logo {
-          margin-bottom: 16px;
-          height: 32px;
-          width: auto;
-        }
-
         .cl-svg-hidden {
           position: absolute;
           width: 0;
@@ -359,8 +343,6 @@ function AuthPage() {
 
       <main className="cl-auth-container">
         <header className="cl-header">
-          <img src="/logo-concilia-dark.svg" alt="ConcilIA" className="cl-logo" />
-          <span className="cl-brand-label">Contabilidade inteligente</span>
           <h1>
             Acesse seu<br />
             escritório<span className="cl-green">.</span>
