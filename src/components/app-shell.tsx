@@ -32,15 +32,33 @@ export function AppShell({ children }: { children: ReactNode }) {
   useEffect(() => {
     if (!escritorio) return;
     const root = document.documentElement;
+    const props: string[] = [];
+
+    function set(name: string, value: string) {
+      root.style.setProperty(name, value);
+      props.push(name);
+    }
+
     if (escritorio.cor_primaria) {
-      root.style.setProperty("--tenant-primary", escritorio.cor_primaria);
+      const p = escritorio.cor_primaria;
+      set("--primary", p);
+      set("--ring", p);
+      set("--chart-1", p);
+      set("--sidebar", `color-mix(in srgb, ${p}, #0a1520 55%)`);
+      set("--sidebar-accent", `color-mix(in srgb, ${p}, #0a1520 40%)`);
+      set("--sidebar-border", `color-mix(in srgb, ${p}, #0a1520 30%)`);
+      set("--sidebar-ring", `color-mix(in srgb, ${p}, #fff 20%)`);
     }
     if (escritorio.cor_acento) {
-      root.style.setProperty("--tenant-accent", escritorio.cor_acento);
+      const a = escritorio.cor_acento;
+      set("--accent", a);
+      set("--accent-foreground", "#fff");
+      set("--sidebar-primary", a);
+      set("--chart-2", a);
     }
+
     return () => {
-      root.style.removeProperty("--tenant-primary");
-      root.style.removeProperty("--tenant-accent");
+      props.forEach((name) => root.style.removeProperty(name));
     };
   }, [escritorio]);
 

@@ -26,6 +26,8 @@ type ConviteInfo = {
   email: string;
   escritorio_nome: string;
   escritorio_logo_url: string | null;
+  escritorio_cor_primaria: string | null;
+  escritorio_cor_acento: string | null;
 };
 
 function ConvitePage() {
@@ -51,6 +53,17 @@ function ConvitePage() {
       .catch(() => setInvalido(true))
       .finally(() => setCarregando(false));
   }, [token]);
+
+  useEffect(() => {
+    if (!info?.escritorio_cor_primaria) return;
+    const root = document.documentElement;
+    root.style.setProperty("--primary", info.escritorio_cor_primaria);
+    if (info.escritorio_cor_acento) root.style.setProperty("--accent", info.escritorio_cor_acento);
+    return () => {
+      root.style.removeProperty("--primary");
+      root.style.removeProperty("--accent");
+    };
+  }, [info]);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();

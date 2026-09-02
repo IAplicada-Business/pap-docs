@@ -11,7 +11,7 @@ export const Route = createFileRoute("/api/public/convite-info")({
         const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
         const { data, error } = await supabaseAdmin
           .from("convites")
-          .select("email, escritorios(nome, logo_url)")
+          .select("email, escritorios(nome, logo_url, cor_primaria, cor_acento)")
           .eq("token", token)
           .is("aceito_em", null)
           .is("deleted_at", null)
@@ -25,12 +25,19 @@ export const Route = createFileRoute("/api/public/convite-info")({
           );
         }
 
-        const escritorio = data.escritorios as { nome: string; logo_url: string | null } | null;
+        const escritorio = data.escritorios as {
+          nome: string;
+          logo_url: string | null;
+          cor_primaria: string | null;
+          cor_acento: string | null;
+        } | null;
 
         return Response.json({
           email: data.email,
           escritorio_nome: escritorio?.nome ?? "",
           escritorio_logo_url: escritorio?.logo_url ?? null,
+          escritorio_cor_primaria: escritorio?.cor_primaria ?? null,
+          escritorio_cor_acento: escritorio?.cor_acento ?? null,
         });
       },
     },

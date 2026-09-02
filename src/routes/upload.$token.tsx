@@ -188,6 +188,17 @@ function UploadPublico() {
     );
   }
 
+  useEffect(() => {
+    if (!escritorio?.cor_primaria) return;
+    const root = document.documentElement;
+    root.style.setProperty("--primary", escritorio.cor_primaria);
+    if (escritorio.cor_acento) root.style.setProperty("--accent", escritorio.cor_acento);
+    return () => {
+      root.style.removeProperty("--primary");
+      root.style.removeProperty("--accent");
+    };
+  }, [escritorio]);
+
   const pendentes = itens.filter((i) => i.status === "pendente").length;
 
   return (
