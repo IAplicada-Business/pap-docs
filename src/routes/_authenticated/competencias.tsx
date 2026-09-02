@@ -105,7 +105,7 @@ function CompetenciasPage() {
       if (!perfil) throw new Error("Perfil nao carregado.");
       if (!nova.cliente) throw new Error("Selecione o cliente.");
       const { error } = await supabase.from("competencias").insert({
-        escritorio_id: perfil.escritorio_id,
+        org_id: perfil.org_id,
         cliente_id: nova.cliente,
         mes_ano: `${nova.mes}-01`,
         status: "aberta",

@@ -120,7 +120,7 @@ function DocumentosPage() {
       if (!envio.cliente) throw new Error("Selecione o cliente.");
       if (!arquivo) throw new Error("Selecione um arquivo.");
       await enviarDocumentoEquipe({
-        escritorioId: perfil.escritorio_id,
+        orgId: perfil.org_id,
         clienteId: envio.cliente,
         tipo: envio.tipo,
         mesAno: envio.mes,

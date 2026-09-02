@@ -53,13 +53,7 @@ export function AppShell({ children }: { children: ReactNode }) {
       set("--sidebar-border", `color-mix(in srgb, ${p}, #0a1520 35%)`);
       set("--sidebar-ring", `color-mix(in srgb, ${p}, #fff 20%)`);
     }
-    if (escritorio.cor_acento) {
-      const a = escritorio.cor_acento;
-      set("--accent", a);
-      set("--accent-foreground", "#fff");
-      set("--sidebar-primary", a);
-      set("--chart-2", a);
-    }
+
 
     return () => {
       props.forEach((name) => root.style.removeProperty(name));
@@ -77,7 +71,7 @@ export function AppShell({ children }: { children: ReactNode }) {
   );
 
   const papelLabel =
-    perfil?.papel === "admin_escritorio"
+    perfil?.papel === "admin"
       ? "Administrador"
       : perfil?.papel === "super_admin"
         ? "Super Admin"
@@ -156,11 +150,7 @@ export function AppShell({ children }: { children: ReactNode }) {
         </div>
         <div className="mt-2 px-3">
           <div className="rounded-lg bg-sidebar-accent/30 px-2.5 py-1 text-center text-[0.625rem] font-semibold uppercase tracking-wider text-sidebar-foreground/40">
-            {escritorio?.plano === "pro"
-              ? "Plano Pro"
-              : escritorio?.plano === "enterprise"
-                ? "Enterprise"
-                : "Starter"}
+            ConcilIA
           </div>
         </div>
       </div>

@@ -91,7 +91,7 @@ function ClientesPage() {
       if (!form.razao_social.trim()) throw new Error("Informe a razao social.");
       if (!cnpjValido(form.cnpj)) throw new Error("CNPJ invalido.");
       const { error } = await supabase.from("clientes").insert({
-        escritorio_id: perfil.escritorio_id,
+        org_id: perfil.org_id,
         nome: form.nome_fantasia || form.razao_social,
         razao_social: form.razao_social,
         nome_fantasia: form.nome_fantasia || form.razao_social,
