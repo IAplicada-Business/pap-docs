@@ -42,7 +42,7 @@ import {
 } from "@/lib/dominio";
 import { formatarDataHora, mesAnterior } from "@/lib/formatadores";
 import { baixarDocumento, enviarDocumentoEquipe } from "@/lib/documentos";
-import { badgeStatus } from "./dashboard";
+import { badgeStatus } from "@/components/status-badge";
 
 export const Route = createFileRoute("/_authenticated/documentos")({
   head: () => ({

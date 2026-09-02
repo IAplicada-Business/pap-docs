@@ -39,7 +39,7 @@ import {
   formatarTelefone,
 } from "@/lib/formatadores";
 import { baixarDocumento } from "@/lib/documentos";
-import { badgeStatus } from "./dashboard";
+import { badgeStatus } from "@/components/status-badge";
 
 export const Route = createFileRoute("/_authenticated/clientes/$id")({
   head: () => ({

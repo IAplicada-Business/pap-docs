@@ -6,7 +6,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { formatarDataHora } from "@/lib/formatadores";
-import { rotuloTipo, STATUS_PROCESSAMENTO } from "@/lib/dominio";
+import { rotuloTipo } from "@/lib/dominio";
+import { badgeStatus } from "@/components/status-badge";
 
 export const Route = createFileRoute("/_authenticated/dashboard")({
   head: () => ({
@@ -22,22 +23,6 @@ export const Route = createFileRoute("/_authenticated/dashboard")({
   }),
   component: Dashboard,
 });
-
-export function badgeStatus(status: string) {
-  const cor =
-    status === "processado"
-      ? "bg-success/15 text-success"
-      : status === "erro"
-        ? "bg-destructive/15 text-destructive"
-        : status === "processando"
-          ? "bg-warning/20 text-warning-foreground"
-          : "bg-secondary text-secondary-foreground";
-  return (
-    <Badge variant="secondary" className={cor}>
-      {STATUS_PROCESSAMENTO[status] ?? status}
-    </Badge>
-  );
-}
 
 function Dashboard() {
   const { data, isLoading } = useQuery({
