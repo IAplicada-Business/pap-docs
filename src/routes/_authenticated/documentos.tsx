@@ -1,13 +1,12 @@
 import { useMemo, useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Download, RotateCcw, Upload } from "lucide-react";
+import { Download, FileText, RotateCcw, Upload } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { usePerfil } from "@/hooks/use-perfil";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
   Dialog,
@@ -24,14 +23,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
 import { toast } from "sonner";
 import {
   EXTENSOES_ACEITAS,
@@ -50,7 +41,7 @@ export const Route = createFileRoute("/_authenticated/documentos")({
       { title: "Documentos — ConcilIA" },
       {
         name: "description",
-        content: "Documentos contábeis recebidos dos clientes, com filtros, download e reenvio.",
+        content: "Documentos contabeis recebidos dos clientes, com filtros, download e reenvio.",
       },
       { property: "og:title", content: "Documentos — ConcilIA" },
       { property: "og:description", content: "Central de documentos recebidos." },
@@ -125,7 +116,7 @@ function DocumentosPage() {
 
   const enviar = useMutation({
     mutationFn: async () => {
-      if (!perfil) throw new Error("Perfil não carregado.");
+      if (!perfil) throw new Error("Perfil nao carregado.");
       if (!envio.cliente) throw new Error("Selecione o cliente.");
       if (!arquivo) throw new Error("Selecione um arquivo.");
       await enviarDocumentoEquipe({
@@ -142,26 +133,26 @@ function DocumentosPage() {
       setArquivo(null);
       queryClient.invalidateQueries({ queryKey: ["documentos"] });
     },
-    onError: (e: Error) => toast.error("Não foi possível enviar", { description: e.message }),
+    onError: (e: Error) => toast.error("Nao foi possivel enviar", { description: e.message }),
   });
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-wrap items-end justify-between gap-4">
+      <div className="page-header">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight">Documentos</h1>
-          <p className="text-sm text-muted-foreground">Todos os arquivos recebidos dos clientes.</p>
+          <h1 className="page-title">Documentos</h1>
+          <p className="page-subtitle">Todos os arquivos recebidos dos clientes.</p>
         </div>
-        <Button onClick={() => setAberto(true)}>
+        <Button onClick={() => setAberto(true)} className="rounded-xl">
           <Upload className="size-4" /> Upload manual
         </Button>
       </div>
 
-      <Card>
-        <CardContent className="space-y-4 pt-6">
+      <div className="rounded-2xl border border-border bg-card shadow-card">
+        <div className="border-b border-border/60 p-4">
           <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
             <Select value={fCliente} onValueChange={setFCliente}>
-              <SelectTrigger>
+              <SelectTrigger className="rounded-xl">
                 <SelectValue placeholder="Cliente" />
               </SelectTrigger>
               <SelectContent>
@@ -174,7 +165,7 @@ function DocumentosPage() {
               </SelectContent>
             </Select>
             <Select value={fTipo} onValueChange={setFTipo}>
-              <SelectTrigger>
+              <SelectTrigger className="rounded-xl">
                 <SelectValue placeholder="Tipo" />
               </SelectTrigger>
               <SelectContent>
@@ -187,7 +178,7 @@ function DocumentosPage() {
               </SelectContent>
             </Select>
             <Select value={fStatus} onValueChange={setFStatus}>
-              <SelectTrigger>
+              <SelectTrigger className="rounded-xl">
                 <SelectValue placeholder="Status" />
               </SelectTrigger>
               <SelectContent>
@@ -201,78 +192,88 @@ function DocumentosPage() {
             </Select>
             <Input
               type="month"
+              className="rounded-xl"
               value={fPeriodo}
               onChange={(e) => setFPeriodo(e.target.value)}
-              aria-label="Período"
+              aria-label="Periodo"
             />
           </div>
+        </div>
 
+        <div className="p-2">
           {isLoading ? (
-            <div className="space-y-2">
+            <div className="space-y-2 p-4">
               {[1, 2, 3].map((i) => (
-                <Skeleton key={i} className="h-12 w-full" />
+                <Skeleton key={i} className="h-14 w-full rounded-xl" />
               ))}
             </div>
           ) : filtrados.length === 0 ? (
-            <p className="py-12 text-center text-sm text-muted-foreground">
-              Nenhum documento encontrado com esses filtros.
-            </p>
+            <div className="py-16 text-center">
+              <FileText className="mx-auto size-10 text-muted-foreground/30" />
+              <p className="mt-3 text-sm text-muted-foreground">
+                Nenhum documento encontrado com esses filtros.
+              </p>
+            </div>
           ) : (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Cliente</TableHead>
-                  <TableHead>Arquivo</TableHead>
-                  <TableHead>Tipo</TableHead>
-                  <TableHead>Origem</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead>Data</TableHead>
-                  <TableHead className="text-right">Ações</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {filtrados.map((d) => (
-                  <TableRow key={d.id}>
-                    <TableCell>{d.clientes?.nome_fantasia ?? d.clientes?.nome ?? "—"}</TableCell>
-                    <TableCell className="max-w-56 truncate font-medium">
+            <div className="divide-y divide-border/50">
+              {filtrados.map((d) => (
+                <div
+                  key={d.id}
+                  className="flex flex-wrap items-center gap-3 rounded-xl px-4 py-3 transition-colors hover:bg-muted/50"
+                >
+                  <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-primary/8 text-primary">
+                    <FileText className="size-4" />
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <span className="block truncate text-sm font-medium">
                       {d.nome_original ?? "Arquivo"}
-                    </TableCell>
-                    <TableCell>{rotuloTipo(d.tipo)}</TableCell>
-                    <TableCell>{ORIGENS_RECEBIMENTO[d.origem ?? ""] ?? "—"}</TableCell>
-                    <TableCell>{badgeStatus(d.status_processamento)}</TableCell>
-                    <TableCell>{formatarDataHora(d.enviado_em)}</TableCell>
-                    <TableCell className="space-x-1 text-right">
+                    </span>
+                    <span className="text-xs text-muted-foreground">
+                      {d.clientes?.nome_fantasia ?? d.clientes?.nome ?? "—"}
+                      {" · "}
+                      {rotuloTipo(d.tipo)}
+                      {d.origem ? ` · ${ORIGENS_RECEBIMENTO[d.origem] ?? ""}` : ""}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    {badgeStatus(d.status_processamento)}
+                    <span className="hidden text-xs text-muted-foreground lg:block">
+                      {formatarDataHora(d.enviado_em)}
+                    </span>
+                    <div className="flex items-center gap-0.5">
                       <Button
                         variant="ghost"
-                        size="sm"
+                        size="icon"
+                        className="size-8 rounded-lg"
                         title="Baixar"
                         onClick={() =>
                           baixarDocumento(d.arquivo_path, d.nome_original).catch(() =>
-                            toast.error("Não foi possível baixar o arquivo"),
+                            toast.error("Nao foi possivel baixar o arquivo"),
                           )
                         }
                       >
-                        <Download className="size-4" />
+                        <Download className="size-3.5" />
                       </Button>
                       <Button
                         variant="ghost"
-                        size="sm"
+                        size="icon"
+                        className="size-8 rounded-lg"
                         title="Reprocessar"
                         onClick={() => reprocessar.mutate(d.id)}
                       >
-                        <RotateCcw className="size-4" />
+                        <RotateCcw className="size-3.5" />
                       </Button>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
           )}
-        </CardContent>
-      </Card>
+        </div>
+      </div>
 
       <Dialog open={aberto} onOpenChange={setAberto}>
-        <DialogContent>
+        <DialogContent className="sm:max-w-lg">
           <DialogHeader>
             <DialogTitle>Upload manual</DialogTitle>
             <DialogDescription>
@@ -286,7 +287,7 @@ function DocumentosPage() {
                 value={envio.cliente}
                 onValueChange={(v) => setEnvio({ ...envio, cliente: v })}
               >
-                <SelectTrigger>
+                <SelectTrigger className="rounded-xl">
                   <SelectValue placeholder="Selecione" />
                 </SelectTrigger>
                 <SelectContent>
@@ -301,7 +302,7 @@ function DocumentosPage() {
             <div className="space-y-2">
               <Label>Tipo</Label>
               <Select value={envio.tipo} onValueChange={(v) => setEnvio({ ...envio, tipo: v })}>
-                <SelectTrigger>
+                <SelectTrigger className="rounded-xl">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -314,9 +315,10 @@ function DocumentosPage() {
               </Select>
             </div>
             <div className="space-y-2">
-              <Label>Mês de referência</Label>
+              <Label>Mes de referencia</Label>
               <Input
                 type="month"
+                className="rounded-xl"
                 value={envio.mes}
                 onChange={(e) => setEnvio({ ...envio, mes: e.target.value })}
               />
@@ -325,16 +327,17 @@ function DocumentosPage() {
               <Label>Arquivo</Label>
               <Input
                 type="file"
+                className="rounded-xl"
                 accept={EXTENSOES_ACEITAS}
                 onChange={(e) => setArquivo(e.target.files?.[0] ?? null)}
               />
             </div>
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setAberto(false)}>
+            <Button variant="outline" onClick={() => setAberto(false)} className="rounded-xl">
               Cancelar
             </Button>
-            <Button onClick={() => enviar.mutate()} disabled={enviar.isPending}>
+            <Button onClick={() => enviar.mutate()} disabled={enviar.isPending} className="rounded-xl">
               {enviar.isPending ? "Enviando..." : "Enviar"}
             </Button>
           </DialogFooter>

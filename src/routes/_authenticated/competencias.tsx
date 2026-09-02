@@ -1,14 +1,12 @@
 import { useMemo, useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Lock, Plus } from "lucide-react";
+import { CalendarRange, Lock, Plus } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { usePerfil } from "@/hooks/use-perfil";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Badge } from "@/components/ui/badge";
-import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
   Dialog,
@@ -35,14 +33,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
 import { toast } from "sonner";
 import { STATUS_COMPETENCIA } from "@/lib/dominio";
 import { formatarCompetencia, formatarDataHora, mesAtual } from "@/lib/formatadores";
@@ -50,17 +40,25 @@ import { formatarCompetencia, formatarDataHora, mesAtual } from "@/lib/formatado
 export const Route = createFileRoute("/_authenticated/competencias")({
   head: () => ({
     meta: [
-      { title: "Competências — ConcilIA" },
+      { title: "Competencias — ConcilIA" },
       {
         name: "description",
-        content: "Controle dos períodos contábeis por cliente: abertura, conciliação e fechamento.",
+        content: "Controle dos periodos contabeis por cliente: abertura, conciliacao e fechamento.",
       },
-      { property: "og:title", content: "Competências — ConcilIA" },
-      { property: "og:description", content: "Períodos contábeis por cliente e mês." },
+      { property: "og:title", content: "Competencias — ConcilIA" },
+      { property: "og:description", content: "Periodos contabeis por cliente e mes." },
     ],
   }),
   component: CompetenciasPage,
 });
+
+function statusConfig(status: string) {
+  if (status === "fechada")
+    return { dot: "bg-muted-foreground/50", bg: "bg-muted", text: "text-muted-foreground" };
+  if (status === "em_conciliacao")
+    return { dot: "bg-warning animate-pulse", bg: "bg-warning/10", text: "text-warning-foreground" };
+  return { dot: "bg-success", bg: "bg-success/10", text: "text-success" };
+}
 
 function CompetenciasPage() {
   const { data: perfil } = usePerfil();
@@ -104,7 +102,7 @@ function CompetenciasPage() {
 
   const criar = useMutation({
     mutationFn: async () => {
-      if (!perfil) throw new Error("Perfil não carregado.");
+      if (!perfil) throw new Error("Perfil nao carregado.");
       if (!nova.cliente) throw new Error("Selecione o cliente.");
       const { error } = await supabase.from("competencias").insert({
         escritorio_id: perfil.escritorio_id,
@@ -115,17 +113,17 @@ function CompetenciasPage() {
       if (error) {
         throw new Error(
           error.code === "23505"
-            ? "Já existe uma competência deste cliente para o mês escolhido."
+            ? "Ja existe uma competencia deste cliente para o mes escolhido."
             : error.message,
         );
       }
     },
     onSuccess: () => {
-      toast.success("Competência criada");
+      toast.success("Competencia criada");
       setAberto(false);
       queryClient.invalidateQueries({ queryKey: ["competencias"] });
     },
-    onError: (e: Error) => toast.error("Não foi possível criar", { description: e.message }),
+    onError: (e: Error) => toast.error("Nao foi possivel criar", { description: e.message }),
   });
 
   const fecharCompetencia = useMutation({
@@ -141,31 +139,31 @@ function CompetenciasPage() {
       if (error) throw error;
     },
     onSuccess: () => {
-      toast.success("Competência fechada", { description: "Agora ela é somente leitura." });
+      toast.success("Competencia fechada", { description: "Agora ela e somente leitura." });
       setFechar(null);
       queryClient.invalidateQueries({ queryKey: ["competencias"] });
     },
-    onError: (e: Error) => toast.error("Não foi possível fechar", { description: e.message }),
+    onError: (e: Error) => toast.error("Nao foi possivel fechar", { description: e.message }),
   });
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-wrap items-end justify-between gap-4">
+      <div className="page-header">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight">Competências</h1>
-          <p className="text-sm text-muted-foreground">
-            Períodos contábeis por cliente e mês de referência.
+          <h1 className="page-title">Competencias</h1>
+          <p className="page-subtitle">
+            Periodos contabeis por cliente e mes de referencia.
           </p>
         </div>
-        <Button onClick={() => setAberto(true)}>
-          <Plus className="size-4" /> Nova competência
+        <Button onClick={() => setAberto(true)} className="rounded-xl">
+          <Plus className="size-4" /> Nova competencia
         </Button>
       </div>
 
-      <Card>
-        <CardContent className="space-y-4 pt-6">
+      <div className="rounded-2xl border border-border bg-card shadow-card">
+        <div className="border-b border-border/60 p-4">
           <Select value={fCliente} onValueChange={setFCliente}>
-            <SelectTrigger className="w-full sm:w-72">
+            <SelectTrigger className="w-full rounded-xl sm:w-72">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -177,54 +175,52 @@ function CompetenciasPage() {
               ))}
             </SelectContent>
           </Select>
+        </div>
 
+        <div className="p-2">
           {isLoading ? (
-            <div className="space-y-2">
+            <div className="space-y-2 p-4">
               {[1, 2, 3].map((i) => (
-                <Skeleton key={i} className="h-12 w-full" />
+                <Skeleton key={i} className="h-14 w-full rounded-xl" />
               ))}
             </div>
           ) : filtradas.length === 0 ? (
-            <p className="py-12 text-center text-sm text-muted-foreground">
-              Nenhuma competência ainda — crie a competência do mês para começar.
-            </p>
+            <div className="py-16 text-center">
+              <CalendarRange className="mx-auto size-10 text-muted-foreground/30" />
+              <p className="mt-3 text-sm text-muted-foreground">
+                Nenhuma competencia ainda — crie a competencia do mes para comecar.
+              </p>
+            </div>
           ) : (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Cliente</TableHead>
-                  <TableHead>Competência</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead>Fechada em</TableHead>
-                  <TableHead className="text-right">Ações</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {filtradas.map((c) => (
-                  <TableRow key={c.id}>
-                    <TableCell>{c.clientes?.nome_fantasia ?? c.clientes?.nome ?? "—"}</TableCell>
-                    <TableCell className="font-medium capitalize">
-                      {formatarCompetencia(c.mes_ano)}
-                    </TableCell>
-                    <TableCell>
-                      <Badge
-                        variant="secondary"
-                        className={
-                          c.status === "fechada"
-                            ? "bg-muted text-muted-foreground"
-                            : c.status === "em_conciliacao"
-                              ? "bg-warning/20 text-warning-foreground"
-                              : "bg-success/15 text-success"
-                        }
-                      >
+            <div className="divide-y divide-border/50">
+              {filtradas.map((c) => {
+                const sc = statusConfig(c.status);
+                return (
+                  <div
+                    key={c.id}
+                    className="flex flex-wrap items-center gap-3 rounded-xl px-4 py-3 transition-colors hover:bg-muted/50"
+                  >
+                    <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-primary/8 text-primary">
+                      <CalendarRange className="size-4" />
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <span className="block text-sm font-semibold capitalize">
+                        {formatarCompetencia(c.mes_ano)}
+                      </span>
+                      <span className="text-xs text-muted-foreground">
+                        {c.clientes?.nome_fantasia ?? c.clientes?.nome ?? "—"}
+                        {c.fechada_em ? ` · Fechada em ${formatarDataHora(c.fechada_em)}` : ""}
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className={`status-dot ${sc.bg} ${sc.text}`}>
+                        <span className={`size-1.5 rounded-full ${sc.dot}`} />
                         {STATUS_COMPETENCIA[c.status] ?? c.status}
-                      </Badge>
-                    </TableCell>
-                    <TableCell>{formatarDataHora(c.fechada_em)}</TableCell>
-                    <TableCell className="text-right">
+                      </span>
                       <Button
                         variant="outline"
                         size="sm"
+                        className="rounded-lg"
                         disabled={c.status === "fechada"}
                         onClick={() =>
                           setFechar({
@@ -233,28 +229,28 @@ function CompetenciasPage() {
                           })
                         }
                       >
-                        <Lock className="size-4" /> Fechar
+                        <Lock className="size-3.5" /> Fechar
                       </Button>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
           )}
-        </CardContent>
-      </Card>
+        </div>
+      </div>
 
       <Dialog open={aberto} onOpenChange={setAberto}>
-        <DialogContent>
+        <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle>Nova competência</DialogTitle>
-            <DialogDescription>Escolha o cliente e o mês de referência.</DialogDescription>
+            <DialogTitle>Nova competencia</DialogTitle>
+            <DialogDescription>Escolha o cliente e o mes de referencia.</DialogDescription>
           </DialogHeader>
           <div className="space-y-4">
             <div className="space-y-2">
               <Label>Cliente</Label>
               <Select value={nova.cliente} onValueChange={(v) => setNova({ ...nova, cliente: v })}>
-                <SelectTrigger>
+                <SelectTrigger className="rounded-xl">
                   <SelectValue placeholder="Selecione" />
                 </SelectTrigger>
                 <SelectContent>
@@ -267,19 +263,20 @@ function CompetenciasPage() {
               </Select>
             </div>
             <div className="space-y-2">
-              <Label>Mês</Label>
+              <Label>Mes</Label>
               <Input
                 type="month"
+                className="rounded-xl"
                 value={nova.mes}
                 onChange={(e) => setNova({ ...nova, mes: e.target.value })}
               />
             </div>
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setAberto(false)}>
+            <Button variant="outline" onClick={() => setAberto(false)} className="rounded-xl">
               Cancelar
             </Button>
-            <Button onClick={() => criar.mutate()} disabled={criar.isPending}>
+            <Button onClick={() => criar.mutate()} disabled={criar.isPending} className="rounded-xl">
               {criar.isPending ? "Criando..." : "Criar"}
             </Button>
           </DialogFooter>
@@ -289,15 +286,15 @@ function CompetenciasPage() {
       <AlertDialog open={!!fechar} onOpenChange={(v) => !v && setFechar(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Fechar competência?</AlertDialogTitle>
+            <AlertDialogTitle>Fechar competencia?</AlertDialogTitle>
             <AlertDialogDescription>
-              {fechar?.rotulo} ficará somente leitura após o fechamento.
+              {fechar?.rotulo} ficara somente leitura apos o fechamento.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancelar</AlertDialogCancel>
             <AlertDialogAction onClick={() => fechar && fecharCompetencia.mutate(fechar.id)}>
-              Fechar competência
+              Fechar competencia
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
