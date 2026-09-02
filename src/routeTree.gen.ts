@@ -15,6 +15,7 @@ import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
 import { Route as UploadTokenRouteImport } from './routes/upload.$token'
 import { Route as AuthenticatedClientesIndexRouteImport } from './routes/_authenticated/clientes.index'
+import { Route as AuthenticatedClientesIdRouteImport } from './routes/_authenticated/clientes.$id'
 import { Route as ApiPublicUploadRouteImport } from './routes/api/public/upload'
 import { Route as ApiPublicUploadInfoRouteImport } from './routes/api/public/upload-info'
 
@@ -48,6 +49,11 @@ const AuthenticatedClientesIndexRoute =
     path: '/clientes/',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedClientesIdRoute = AuthenticatedClientesIdRouteImport.update({
+  id: '/clientes/$id',
+  path: '/clientes/$id',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const ApiPublicUploadRoute = ApiPublicUploadRouteImport.update({
   id: '/api/public/upload',
   path: '/api/public/upload',
@@ -64,6 +70,7 @@ export interface FileRoutesByFullPath {
   '/auth': typeof AuthRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/upload/$token': typeof UploadTokenRoute
+  '/clientes/$id': typeof AuthenticatedClientesIdRoute
   '/api/public/upload': typeof ApiPublicUploadRoute
   '/api/public/upload-info': typeof ApiPublicUploadInfoRoute
   '/clientes/': typeof AuthenticatedClientesIndexRoute
@@ -73,6 +80,7 @@ export interface FileRoutesByTo {
   '/auth': typeof AuthRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/upload/$token': typeof UploadTokenRoute
+  '/clientes/$id': typeof AuthenticatedClientesIdRoute
   '/api/public/upload': typeof ApiPublicUploadRoute
   '/api/public/upload-info': typeof ApiPublicUploadInfoRoute
   '/clientes': typeof AuthenticatedClientesIndexRoute
@@ -84,6 +92,7 @@ export interface FileRoutesById {
   '/auth': typeof AuthRoute
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
   '/upload/$token': typeof UploadTokenRoute
+  '/_authenticated/clientes/$id': typeof AuthenticatedClientesIdRoute
   '/api/public/upload': typeof ApiPublicUploadRoute
   '/api/public/upload-info': typeof ApiPublicUploadInfoRoute
   '/_authenticated/clientes/': typeof AuthenticatedClientesIndexRoute
@@ -95,6 +104,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/dashboard'
     | '/upload/$token'
+    | '/clientes/$id'
     | '/api/public/upload'
     | '/api/public/upload-info'
     | '/clientes/'
@@ -104,6 +114,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/dashboard'
     | '/upload/$token'
+    | '/clientes/$id'
     | '/api/public/upload'
     | '/api/public/upload-info'
     | '/clientes'
@@ -114,6 +125,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/_authenticated/dashboard'
     | '/upload/$token'
+    | '/_authenticated/clientes/$id'
     | '/api/public/upload'
     | '/api/public/upload-info'
     | '/_authenticated/clientes/'
@@ -172,6 +184,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedClientesIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/clientes/$id': {
+      id: '/_authenticated/clientes/$id'
+      path: '/clientes/$id'
+      fullPath: '/clientes/$id'
+      preLoaderRoute: typeof AuthenticatedClientesIdRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/api/public/upload': {
       id: '/api/public/upload'
       path: '/api/public/upload'
@@ -191,11 +210,13 @@ declare module '@tanstack/react-router' {
 
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
+  AuthenticatedClientesIdRoute: typeof AuthenticatedClientesIdRoute
   AuthenticatedClientesIndexRoute: typeof AuthenticatedClientesIndexRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
+  AuthenticatedClientesIdRoute: AuthenticatedClientesIdRoute,
   AuthenticatedClientesIndexRoute: AuthenticatedClientesIndexRoute,
 }
 
