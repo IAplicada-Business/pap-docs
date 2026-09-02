@@ -160,8 +160,8 @@ function CompetenciasPage() {
         </Button>
       </div>
 
-      <div className="rounded-2xl border border-border bg-card shadow-card">
-        <div className="border-b border-border/60 p-4">
+      <div className="card-section">
+        <div className="filter-bar">
           <Select value={fCliente} onValueChange={setFCliente}>
             <SelectTrigger className="w-full rounded-xl sm:w-72">
               <SelectValue />
@@ -177,7 +177,7 @@ function CompetenciasPage() {
           </Select>
         </div>
 
-        <div className="p-2">
+        <div className="card-section-body">
           {isLoading ? (
             <div className="space-y-2 p-4">
               {[1, 2, 3].map((i) => (
@@ -185,22 +185,19 @@ function CompetenciasPage() {
               ))}
             </div>
           ) : filtradas.length === 0 ? (
-            <div className="py-16 text-center">
-              <CalendarRange className="mx-auto size-10 text-muted-foreground/30" />
-              <p className="mt-3 text-sm text-muted-foreground">
+            <div className="empty-state">
+              <CalendarRange className="empty-state-icon" />
+              <p className="empty-state-text">
                 Nenhuma competencia ainda — crie a competencia do mes para comecar.
               </p>
             </div>
           ) : (
-            <div className="divide-y divide-border/50">
+            <div className="divide-y divide-border/40">
               {filtradas.map((c) => {
                 const sc = statusConfig(c.status);
                 return (
-                  <div
-                    key={c.id}
-                    className="flex flex-wrap items-center gap-3 rounded-xl px-4 py-3 transition-colors hover:bg-muted/50"
-                  >
-                    <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-primary/8 text-primary">
+                  <div key={c.id} className="list-row">
+                    <div className="list-row-icon bg-gradient-to-br from-primary/15 to-primary/5 text-primary">
                       <CalendarRange className="size-4" />
                     </div>
                     <div className="min-w-0 flex-1">

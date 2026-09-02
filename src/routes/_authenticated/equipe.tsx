@@ -382,11 +382,11 @@ function EquipeContent({
         </Button>
       </div>
 
-      <div className="rounded-2xl border border-border bg-card shadow-card">
-        <div className="flex items-center justify-between border-b border-border/60 px-6 py-4">
+      <div className="card-section">
+        <div className="card-section-header">
           <div>
             <h2 className="text-base font-semibold">Membros</h2>
-            <p className="text-[0.8125rem] text-muted-foreground">
+            <p className="mt-0.5 text-[0.8125rem] text-muted-foreground">
               Usuarios com acesso ao escritorio.
             </p>
           </div>
@@ -401,7 +401,7 @@ function EquipeContent({
           </div>
         </div>
 
-        <div className="p-2">
+        <div className="card-section-body">
           {isLoading ? (
             <div className="space-y-2 p-4">
               {[1, 2, 3].map((i) => (
@@ -409,20 +409,20 @@ function EquipeContent({
               ))}
             </div>
           ) : filtrados.length === 0 ? (
-            <div className="py-16 text-center">
-              <UsersRound className="mx-auto size-10 text-muted-foreground/30" />
-              <p className="mt-3 text-sm text-muted-foreground">Nenhum membro encontrado.</p>
+            <div className="empty-state">
+              <UsersRound className="empty-state-icon" />
+              <p className="empty-state-text">Nenhum membro encontrado.</p>
             </div>
           ) : (
-            <div className="divide-y divide-border/50">
+            <div className="divide-y divide-border/40">
               {filtrados.map((m) => {
                 const cp = corPapel(m.papel);
                 return (
                   <div
                     key={m.id}
-                    className={`flex flex-wrap items-center gap-3 rounded-xl px-4 py-3 transition-colors hover:bg-muted/50 ${!m.ativo ? "opacity-50" : ""}`}
+                    className={`list-row ${!m.ativo ? "opacity-50" : ""}`}
                   >
-                    <div className="flex size-10 shrink-0 items-center justify-center rounded-full bg-primary/10 text-xs font-bold text-primary">
+                    <div className="flex size-10 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-primary/20 to-primary/5 text-xs font-bold text-primary">
                       {iniciais(m.nome)}
                     </div>
                     <div className="min-w-0 flex-1">
@@ -506,46 +506,47 @@ function EquipeContent({
       </div>
 
       {(convites ?? []).length > 0 && (
-        <div className="rounded-2xl border border-border bg-card shadow-card">
-          <div className="border-b border-border/60 px-6 py-4">
-            <h2 className="text-base font-semibold">Convites pendentes</h2>
-            <p className="text-[0.8125rem] text-muted-foreground">
-              Convites enviados que ainda nao foram aceitos.
-            </p>
+        <div className="card-section">
+          <div className="card-section-header">
+            <div>
+              <h2 className="text-base font-semibold">Convites pendentes</h2>
+              <p className="mt-0.5 text-[0.8125rem] text-muted-foreground">
+                Convites enviados que ainda nao foram aceitos.
+              </p>
+            </div>
           </div>
-          <div className="divide-y divide-border/50 p-2">
-            {(convites ?? []).map((c) => {
-              const cp = corPapel(c.papel);
-              return (
-                <div
-                  key={c.id}
-                  className="flex flex-wrap items-center gap-3 rounded-xl px-4 py-3 transition-colors hover:bg-muted/50"
-                >
-                  <div className="flex size-10 shrink-0 items-center justify-center rounded-full bg-muted text-xs font-bold text-muted-foreground">
-                    ?
-                  </div>
-                  <div className="min-w-0 flex-1">
-                    <span className="block truncate text-sm font-medium">{c.email}</span>
-                    <span className="text-xs text-muted-foreground">
-                      Enviado em {formatarData(c.created_at)} · Expira em{" "}
-                      {formatarData(c.expira_em)}
+          <div className="card-section-body">
+            <div className="divide-y divide-border/40">
+              {(convites ?? []).map((c) => {
+                const cp = corPapel(c.papel);
+                return (
+                  <div key={c.id} className="list-row">
+                    <div className="flex size-10 shrink-0 items-center justify-center rounded-full bg-muted text-xs font-bold text-muted-foreground">
+                      ?
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <span className="block truncate text-sm font-medium">{c.email}</span>
+                      <span className="text-xs text-muted-foreground">
+                        Enviado em {formatarData(c.created_at)} · Expira em{" "}
+                        {formatarData(c.expira_em)}
+                      </span>
+                    </div>
+                    <span className={`status-dot ${cp.bg} ${cp.text}`}>
+                      <span className={`size-1.5 rounded-full ${cp.dot}`} />
+                      {rotulopapel(c.papel)}
                     </span>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="rounded-lg"
+                      onClick={() => copiarLink(c.token)}
+                    >
+                      <Copy className="size-3.5" /> Copiar link
+                    </Button>
                   </div>
-                  <span className={`status-dot ${cp.bg} ${cp.text}`}>
-                    <span className={`size-1.5 rounded-full ${cp.dot}`} />
-                    {rotulopapel(c.papel)}
-                  </span>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="rounded-lg"
-                    onClick={() => copiarLink(c.token)}
-                  >
-                    <Copy className="size-3.5" /> Copiar link
-                  </Button>
-                </div>
-              );
-            })}
+                );
+              })}
+            </div>
           </div>
         </div>
       )}
@@ -594,7 +595,7 @@ function EquipeContent({
             <div className="space-y-3">
               <Label>Permissoes por modulo</Label>
               {MODULOS.map((mod) => (
-                <div key={mod.chave} className="flex items-center justify-between rounded-lg bg-muted/50 px-3 py-2">
+                <div key={mod.chave} className="flex items-center justify-between rounded-xl bg-muted/50 px-3 py-2.5">
                   <span className="text-sm">{mod.rotulo}</span>
                   <Switch
                     checked={
@@ -658,7 +659,7 @@ function EquipeContent({
             <div className="space-y-3">
               <Label>Permissoes por modulo</Label>
               {MODULOS.map((mod) => (
-                <div key={mod.chave} className="flex items-center justify-between rounded-lg bg-muted/50 px-3 py-2">
+                <div key={mod.chave} className="flex items-center justify-between rounded-xl bg-muted/50 px-3 py-2.5">
                   <span className="text-sm">{mod.rotulo}</span>
                   <Switch
                     checked={

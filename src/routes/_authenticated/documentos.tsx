@@ -148,59 +148,57 @@ function DocumentosPage() {
         </Button>
       </div>
 
-      <div className="rounded-2xl border border-border bg-card shadow-card">
-        <div className="border-b border-border/60 p-4">
-          <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-            <Select value={fCliente} onValueChange={setFCliente}>
-              <SelectTrigger className="rounded-xl">
-                <SelectValue placeholder="Cliente" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="todos">Todos os clientes</SelectItem>
-                {(clientes ?? []).map((c) => (
-                  <SelectItem key={c.id} value={c.id}>
-                    {c.nome_fantasia ?? c.nome}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            <Select value={fTipo} onValueChange={setFTipo}>
-              <SelectTrigger className="rounded-xl">
-                <SelectValue placeholder="Tipo" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="todos">Todos os tipos</SelectItem>
-                {TIPOS_DOCUMENTO.map((t) => (
-                  <SelectItem key={t.value} value={t.value}>
-                    {t.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            <Select value={fStatus} onValueChange={setFStatus}>
-              <SelectTrigger className="rounded-xl">
-                <SelectValue placeholder="Status" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="todos">Todos os status</SelectItem>
-                {Object.entries(STATUS_PROCESSAMENTO).map(([valor, rotulo]) => (
-                  <SelectItem key={valor} value={valor}>
-                    {rotulo}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            <Input
-              type="month"
-              className="rounded-xl"
-              value={fPeriodo}
-              onChange={(e) => setFPeriodo(e.target.value)}
-              aria-label="Periodo"
-            />
-          </div>
+      <div className="card-section">
+        <div className="filter-bar">
+          <Select value={fCliente} onValueChange={setFCliente}>
+            <SelectTrigger className="min-w-40 flex-1 rounded-xl sm:flex-none">
+              <SelectValue placeholder="Cliente" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="todos">Todos os clientes</SelectItem>
+              {(clientes ?? []).map((c) => (
+                <SelectItem key={c.id} value={c.id}>
+                  {c.nome_fantasia ?? c.nome}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <Select value={fTipo} onValueChange={setFTipo}>
+            <SelectTrigger className="min-w-36 flex-1 rounded-xl sm:flex-none">
+              <SelectValue placeholder="Tipo" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="todos">Todos os tipos</SelectItem>
+              {TIPOS_DOCUMENTO.map((t) => (
+                <SelectItem key={t.value} value={t.value}>
+                  {t.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <Select value={fStatus} onValueChange={setFStatus}>
+            <SelectTrigger className="min-w-36 flex-1 rounded-xl sm:flex-none">
+              <SelectValue placeholder="Status" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="todos">Todos os status</SelectItem>
+              {Object.entries(STATUS_PROCESSAMENTO).map(([valor, rotulo]) => (
+                <SelectItem key={valor} value={valor}>
+                  {rotulo}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <Input
+            type="month"
+            className="min-w-36 flex-1 rounded-xl sm:flex-none"
+            value={fPeriodo}
+            onChange={(e) => setFPeriodo(e.target.value)}
+            aria-label="Periodo"
+          />
         </div>
 
-        <div className="p-2">
+        <div className="card-section-body">
           {isLoading ? (
             <div className="space-y-2 p-4">
               {[1, 2, 3].map((i) => (
@@ -208,20 +206,17 @@ function DocumentosPage() {
               ))}
             </div>
           ) : filtrados.length === 0 ? (
-            <div className="py-16 text-center">
-              <FileText className="mx-auto size-10 text-muted-foreground/30" />
-              <p className="mt-3 text-sm text-muted-foreground">
+            <div className="empty-state">
+              <FileText className="empty-state-icon" />
+              <p className="empty-state-text">
                 Nenhum documento encontrado com esses filtros.
               </p>
             </div>
           ) : (
-            <div className="divide-y divide-border/50">
+            <div className="divide-y divide-border/40">
               {filtrados.map((d) => (
-                <div
-                  key={d.id}
-                  className="flex flex-wrap items-center gap-3 rounded-xl px-4 py-3 transition-colors hover:bg-muted/50"
-                >
-                  <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-primary/8 text-primary">
+                <div key={d.id} className="list-row">
+                  <div className="list-row-icon bg-gradient-to-br from-primary/15 to-primary/5 text-primary">
                     <FileText className="size-4" />
                   </div>
                   <div className="min-w-0 flex-1">

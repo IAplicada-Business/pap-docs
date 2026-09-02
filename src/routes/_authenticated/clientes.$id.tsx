@@ -263,7 +263,7 @@ function ClienteDetalhe() {
 
       {/* Client branded header */}
       <div
-        className="relative overflow-hidden rounded-2xl border border-border shadow-card"
+        className="card-section relative"
         style={{
           background: `linear-gradient(135deg, ${corCliente}18 0%, ${corCliente}08 50%, transparent 100%)`,
         }}
@@ -406,18 +406,25 @@ function ClienteDetalhe() {
 
         {/* Tab: Documentos */}
         <TabsContent value="documentos">
-          <div className="rounded-2xl border border-border bg-card shadow-card">
-            <div className="border-b border-border/60 p-5">
-              <h2 className="text-sm font-semibold">Documentos recebidos</h2>
-              <p className="text-xs text-muted-foreground">
-                Arquivos enviados pelo cliente via link de upload ou manualmente.
-              </p>
+          <div className="card-section">
+            <div className="card-section-header">
+              <div className="flex items-center gap-3">
+                <div className="list-row-icon bg-gradient-to-br from-primary/15 to-primary/5 text-primary">
+                  <FileText className="size-4" />
+                </div>
+                <div>
+                  <h2 className="text-sm font-semibold">Documentos recebidos</h2>
+                  <p className="text-xs text-muted-foreground">
+                    Arquivos enviados pelo cliente via link de upload ou manualmente.
+                  </p>
+                </div>
+              </div>
             </div>
-            <div className="p-2">
+            <div className="card-section-body">
               {!documentos || documentos.length === 0 ? (
-                <div className="py-16 text-center">
-                  <FileText className="mx-auto size-10 text-muted-foreground/30" />
-                  <p className="mt-3 text-sm text-muted-foreground">
+                <div className="empty-state">
+                  <FileText className="empty-state-icon" />
+                  <p className="empty-state-text">
                     Nenhum documento recebido deste cliente ainda.
                   </p>
                   <p className="mt-1 text-xs text-muted-foreground">
@@ -425,13 +432,10 @@ function ClienteDetalhe() {
                   </p>
                 </div>
               ) : (
-                <div className="divide-y divide-border/50">
+                <div className="divide-y divide-border/40">
                   {documentos.map((d) => (
-                    <div
-                      key={d.id}
-                      className="flex flex-wrap items-center gap-3 rounded-xl px-4 py-3 transition-colors hover:bg-muted/50"
-                    >
-                      <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-primary/8 text-primary">
+                    <div key={d.id} className="list-row">
+                      <div className="list-row-icon bg-gradient-to-br from-primary/15 to-primary/5 text-primary">
                         <FileText className="size-4" />
                       </div>
                       <div className="min-w-0 flex-1">
@@ -484,32 +488,36 @@ function ClienteDetalhe() {
 
         {/* Tab: Lancamentos */}
         <TabsContent value="lancamentos">
-          <div className="rounded-2xl border border-border bg-card shadow-card">
-            <div className="border-b border-border/60 p-5">
-              <h2 className="text-sm font-semibold">Lancamentos contabeis</h2>
-              <p className="text-xs text-muted-foreground">
-                Movimentacoes extraidas dos documentos e classificadas pela IA.
-              </p>
+          <div className="card-section">
+            <div className="card-section-header">
+              <div className="flex items-center gap-3">
+                <div className="list-row-icon bg-gradient-to-br from-primary/15 to-primary/5 text-primary">
+                  <BookOpen className="size-4" />
+                </div>
+                <div>
+                  <h2 className="text-sm font-semibold">Lancamentos contabeis</h2>
+                  <p className="text-xs text-muted-foreground">
+                    Movimentacoes extraidas dos documentos e classificadas pela IA.
+                  </p>
+                </div>
+              </div>
             </div>
-            <div className="p-2">
+            <div className="card-section-body">
               {!lancamentos || lancamentos.length === 0 ? (
-                <div className="py-16 text-center">
-                  <BookOpen className="mx-auto size-10 text-muted-foreground/30" />
-                  <p className="mt-3 text-sm text-muted-foreground">Nenhum lancamento ainda.</p>
+                <div className="empty-state">
+                  <BookOpen className="empty-state-icon" />
+                  <p className="empty-state-text">Nenhum lancamento ainda.</p>
                   <p className="mt-1 text-xs text-muted-foreground">
                     Os lancamentos serao criados automaticamente ao processar os documentos.
                   </p>
                 </div>
               ) : (
-                <div className="divide-y divide-border/50">
+                <div className="divide-y divide-border/40">
                   {lancamentos.map((l) => {
                     const sc = lancamentoStatusConfig(l.status);
                     return (
-                      <div
-                        key={l.id}
-                        className="flex flex-wrap items-center gap-3 rounded-xl px-4 py-3 transition-colors hover:bg-muted/50"
-                      >
-                        <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-primary/8 text-primary">
+                      <div key={l.id} className="list-row">
+                        <div className="list-row-icon bg-gradient-to-br from-primary/15 to-primary/5 text-primary">
                           <BookOpen className="size-4" />
                         </div>
                         <div className="min-w-0 flex-1">
@@ -545,32 +553,39 @@ function ClienteDetalhe() {
 
         {/* Tab: Conciliacao */}
         <TabsContent value="conciliacao">
-          <div className="rounded-2xl border border-border bg-card shadow-card">
-            <div className="border-b border-border/60 p-5">
-              <h2 className="text-sm font-semibold">Conciliacao bancaria</h2>
-              <p className="text-xs text-muted-foreground">
-                Conferencia automatica entre extrato bancario e lancamentos contabeis.
-              </p>
+          <div className="card-section">
+            <div className="card-section-header">
+              <div className="flex items-center gap-3">
+                <div className="list-row-icon bg-gradient-to-br from-primary/15 to-primary/5 text-primary">
+                  <Scale className="size-4" />
+                </div>
+                <div>
+                  <h2 className="text-sm font-semibold">Conciliacao bancaria</h2>
+                  <p className="text-xs text-muted-foreground">
+                    Conferencia automatica entre extrato bancario e lancamentos contabeis.
+                  </p>
+                </div>
+              </div>
             </div>
-            <div className="p-2">
+            <div className="card-section-body">
               {!competencias || competencias.length === 0 ? (
-                <div className="py-16 text-center">
-                  <Scale className="mx-auto size-10 text-muted-foreground/30" />
-                  <p className="mt-3 text-sm text-muted-foreground">
+                <div className="empty-state">
+                  <Scale className="empty-state-icon" />
+                  <p className="empty-state-text">
                     Crie uma competencia para iniciar a conciliacao.
                   </p>
                 </div>
               ) : (
-                <div className="divide-y divide-border/50">
+                <div className="divide-y divide-border/40">
                   {competencias
                     .filter((c) => c.status !== "fechada")
                     .map((c) => {
                       const taxa = c.taxa_conciliacao ?? 0;
                       return (
-                        <div key={c.id} className="rounded-xl px-4 py-4 transition-colors hover:bg-muted/50">
+                        <div key={c.id} className="list-row flex-col !items-stretch !gap-0">
                           <div className="flex items-center justify-between gap-3">
                             <div className="flex items-center gap-3">
-                              <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-primary/8 text-primary">
+                              <div className="list-row-icon bg-gradient-to-br from-primary/15 to-primary/5 text-primary">
                                 <Scale className="size-4" />
                               </div>
                               <div>
@@ -599,9 +614,9 @@ function ClienteDetalhe() {
                       );
                     })}
                   {competencias.filter((c) => c.status !== "fechada").length === 0 && (
-                    <div className="py-16 text-center">
+                    <div className="empty-state">
                       <CheckCircle2 className="mx-auto size-10 text-success/30" />
-                      <p className="mt-3 text-sm text-muted-foreground">
+                      <p className="empty-state-text">
                         Todas as competencias estao fechadas.
                       </p>
                     </div>
@@ -614,30 +629,34 @@ function ClienteDetalhe() {
 
         {/* Tab: Relatorios */}
         <TabsContent value="relatorios">
-          <div className="rounded-2xl border border-border bg-card shadow-card">
-            <div className="border-b border-border/60 p-5">
-              <h2 className="text-sm font-semibold">Relatorios</h2>
-              <p className="text-xs text-muted-foreground">
-                Balancete, DRE, Balanco patrimonial e DFC gerados para o cliente.
-              </p>
+          <div className="card-section">
+            <div className="card-section-header">
+              <div className="flex items-center gap-3">
+                <div className="list-row-icon bg-gradient-to-br from-primary/15 to-primary/5 text-primary">
+                  <FileBarChart className="size-4" />
+                </div>
+                <div>
+                  <h2 className="text-sm font-semibold">Relatorios</h2>
+                  <p className="text-xs text-muted-foreground">
+                    Balancete, DRE, Balanco patrimonial e DFC gerados para o cliente.
+                  </p>
+                </div>
+              </div>
             </div>
-            <div className="p-2">
+            <div className="card-section-body">
               {!relatorios || relatorios.length === 0 ? (
-                <div className="py-16 text-center">
-                  <FileBarChart className="mx-auto size-10 text-muted-foreground/30" />
-                  <p className="mt-3 text-sm text-muted-foreground">Nenhum relatorio gerado ainda.</p>
+                <div className="empty-state">
+                  <FileBarChart className="empty-state-icon" />
+                  <p className="empty-state-text">Nenhum relatorio gerado ainda.</p>
                   <p className="mt-1 text-xs text-muted-foreground">
                     Os relatorios serao gerados apos o fechamento da competencia.
                   </p>
                 </div>
               ) : (
-                <div className="divide-y divide-border/50">
+                <div className="divide-y divide-border/40">
                   {relatorios.map((r) => (
-                    <div
-                      key={r.id}
-                      className="flex flex-wrap items-center gap-3 rounded-xl px-4 py-3 transition-colors hover:bg-muted/50"
-                    >
-                      <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-primary/8 text-primary">
+                    <div key={r.id} className="list-row">
+                      <div className="list-row-icon bg-gradient-to-br from-primary/15 to-primary/5 text-primary">
                         <FileBarChart className="size-4" />
                       </div>
                       <div className="min-w-0 flex-1">
@@ -689,31 +708,35 @@ function ClienteDetalhe() {
 
         {/* Tab: Competencias */}
         <TabsContent value="competencias">
-          <div className="rounded-2xl border border-border bg-card shadow-card">
-            <div className="flex items-center justify-between border-b border-border/60 p-5">
-              <h2 className="text-sm font-semibold">Competencias</h2>
+          <div className="card-section">
+            <div className="card-section-header">
+              <div className="flex items-center gap-3">
+                <div className="list-row-icon bg-gradient-to-br from-primary/15 to-primary/5 text-primary">
+                  <CalendarRange className="size-4" />
+                </div>
+                <div>
+                  <h2 className="text-sm font-semibold">Competencias</h2>
+                </div>
+              </div>
               <Link to="/competencias" className="text-xs font-medium text-primary hover:underline">
                 Gerenciar competencias
               </Link>
             </div>
-            <div className="p-2">
+            <div className="card-section-body">
               {!competencias || competencias.length === 0 ? (
-                <div className="py-16 text-center">
-                  <CalendarRange className="mx-auto size-10 text-muted-foreground/30" />
-                  <p className="mt-3 text-sm text-muted-foreground">
+                <div className="empty-state">
+                  <CalendarRange className="empty-state-icon" />
+                  <p className="empty-state-text">
                     Nenhuma competencia criada para este cliente.
                   </p>
                 </div>
               ) : (
-                <div className="divide-y divide-border/50">
+                <div className="divide-y divide-border/40">
                   {competencias.map((c) => {
                     const sc = competenciaStatusConfig(c.status);
                     return (
-                      <div
-                        key={c.id}
-                        className="flex items-center gap-3 rounded-xl px-4 py-3 transition-colors hover:bg-muted/50"
-                      >
-                        <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-primary/8 text-primary">
+                      <div key={c.id} className="list-row">
+                        <div className="list-row-icon bg-gradient-to-br from-primary/15 to-primary/5 text-primary">
                           <CalendarRange className="size-4" />
                         </div>
                         <span className="flex-1 text-sm font-medium capitalize">
@@ -746,9 +769,14 @@ function ClienteDetalhe() {
         <TabsContent value="dados">
           <div className="grid gap-4 lg:grid-cols-2">
             {/* Dados cadastrais */}
-            <div className="rounded-2xl border border-border bg-card shadow-card">
-              <div className="border-b border-border/60 p-5">
-                <h2 className="text-sm font-semibold">Dados cadastrais</h2>
+            <div className="card-section">
+              <div className="card-section-header">
+                <div className="flex items-center gap-3">
+                  <div className="list-row-icon bg-gradient-to-br from-primary/15 to-primary/5 text-primary">
+                    <ClipboardList className="size-4" />
+                  </div>
+                  <h2 className="text-sm font-semibold">Dados cadastrais</h2>
+                </div>
               </div>
               <div className="space-y-4 p-5">
                 <div className="grid gap-4 sm:grid-cols-2">
@@ -824,12 +852,19 @@ function ClienteDetalhe() {
             </div>
 
             {/* Branding */}
-            <div className="rounded-2xl border border-border bg-card shadow-card">
-              <div className="border-b border-border/60 p-5">
-                <h2 className="text-sm font-semibold">Identidade visual</h2>
-                <p className="text-xs text-muted-foreground">
-                  Logo e cor que aparecem no ambiente do cliente.
-                </p>
+            <div className="card-section">
+              <div className="card-section-header">
+                <div className="flex items-center gap-3">
+                  <div className="list-row-icon bg-gradient-to-br from-primary/15 to-primary/5 text-primary">
+                    <Palette className="size-4" />
+                  </div>
+                  <div>
+                    <h2 className="text-sm font-semibold">Identidade visual</h2>
+                    <p className="text-xs text-muted-foreground">
+                      Logo e cor que aparecem no ambiente do cliente.
+                    </p>
+                  </div>
+                </div>
               </div>
               <div className="space-y-5 p-5">
                 {/* Logo preview */}
@@ -930,10 +965,10 @@ function ClienteDetalhe() {
         <TabsContent value="links">
           <div className="grid gap-4 lg:grid-cols-2">
             {/* Upload link */}
-            <div className="rounded-2xl border border-border bg-card shadow-card">
-              <div className="border-b border-border/60 p-5">
+            <div className="card-section">
+              <div className="card-section-header">
                 <div className="flex items-center gap-3">
-                  <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-primary/8 text-primary">
+                  <div className="list-row-icon bg-gradient-to-br from-primary/15 to-primary/5 text-primary">
                     <LinkIcon className="size-4" />
                   </div>
                   <div>
@@ -975,10 +1010,10 @@ function ClienteDetalhe() {
             </div>
 
             {/* Panel link */}
-            <div className="rounded-2xl border border-border bg-card shadow-card">
-              <div className="border-b border-border/60 p-5">
+            <div className="card-section">
+              <div className="card-section-header">
                 <div className="flex items-center gap-3">
-                  <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-success/10 text-success">
+                  <div className="list-row-icon bg-gradient-to-br from-success/15 to-success/5 text-success">
                     <ExternalLink className="size-4" />
                   </div>
                   <div>
