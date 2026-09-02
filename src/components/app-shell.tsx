@@ -220,13 +220,6 @@ export function AppShell({ children }: { children: ReactNode }) {
         }`}
       >
         {sidebarContent(false)}
-        <button
-          onClick={() => setCollapsed((c) => !c)}
-          className="flex h-10 items-center justify-center border-t border-sidebar-border text-sidebar-foreground/30 transition-colors hover:bg-sidebar-accent hover:text-sidebar-foreground"
-          title={collapsed ? "Expandir menu" : "Recolher menu"}
-        >
-          {collapsed ? <PanelLeftOpen className="size-4" /> : <PanelLeftClose className="size-4" />}
-        </button>
       </aside>
 
       {mobileOpen && (
@@ -254,6 +247,13 @@ export function AppShell({ children }: { children: ReactNode }) {
             className="flex size-9 items-center justify-center rounded-xl border border-border text-muted-foreground hover:bg-muted md:hidden"
           >
             <Menu className="size-5" />
+          </button>
+          <button
+            onClick={() => setCollapsed((c) => !c)}
+            className="hidden size-9 items-center justify-center rounded-xl border border-border text-muted-foreground transition-colors hover:bg-muted md:flex"
+            title={collapsed ? "Expandir menu" : "Recolher menu"}
+          >
+            {collapsed ? <PanelLeftOpen className="size-4" /> : <PanelLeftClose className="size-4" />}
           </button>
           <div className="hidden flex-1 md:block" />
           <div className="flex flex-1 items-center justify-end gap-3 md:flex-none">
