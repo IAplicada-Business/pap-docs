@@ -34,6 +34,7 @@ import { Route as AuthenticatedEmpresasIdCompetenciasRouteImport } from './route
 import { Route as AuthenticatedEmpresasIdConciliacaoRouteImport } from './routes/_authenticated/empresas.$id/conciliacao'
 import { Route as AuthenticatedEmpresasIdConfiguracoesRouteImport } from './routes/_authenticated/empresas.$id/configuracoes'
 import { Route as AuthenticatedEmpresasIdDocumentosRouteImport } from './routes/_authenticated/empresas.$id/documentos'
+import { Route as AuthenticatedEmpresasIdGerenciarRouteImport } from './routes/_authenticated/empresas.$id/gerenciar'
 import { Route as AuthenticatedEmpresasIdRelatoriosRouteImport } from './routes/_authenticated/empresas.$id/relatorios'
 import { Route as AuthenticatedEmpresasIdClientesIndexRouteImport } from './routes/_authenticated/empresas.$id/clientes.index'
 import { Route as AuthenticatedEmpresasIdClientesClienteIdRouteImport } from './routes/_authenticated/empresas.$id/clientes.$clienteId'
@@ -173,6 +174,12 @@ const AuthenticatedEmpresasIdDocumentosRoute =
     path: '/documentos',
     getParentRoute: () => AuthenticatedEmpresasIdRouteRoute,
   } as any)
+const AuthenticatedEmpresasIdGerenciarRoute =
+  AuthenticatedEmpresasIdGerenciarRouteImport.update({
+    id: '/gerenciar',
+    path: '/gerenciar',
+    getParentRoute: () => AuthenticatedEmpresasIdRouteRoute,
+  } as any)
 const AuthenticatedEmpresasIdRelatoriosRoute =
   AuthenticatedEmpresasIdRelatoriosRouteImport.update({
     id: '/relatorios',
@@ -216,6 +223,7 @@ export interface FileRoutesByFullPath {
   '/empresas/$id/conciliacao': typeof AuthenticatedEmpresasIdConciliacaoRoute
   '/empresas/$id/configuracoes': typeof AuthenticatedEmpresasIdConfiguracoesRoute
   '/empresas/$id/documentos': typeof AuthenticatedEmpresasIdDocumentosRoute
+  '/empresas/$id/gerenciar': typeof AuthenticatedEmpresasIdGerenciarRoute
   '/empresas/$id/relatorios': typeof AuthenticatedEmpresasIdRelatoriosRoute
   '/empresas/$id/': typeof AuthenticatedEmpresasIdIndexRoute
   '/empresas/$id/clientes/$clienteId': typeof AuthenticatedEmpresasIdClientesClienteIdRoute
@@ -244,6 +252,7 @@ export interface FileRoutesByTo {
   '/empresas/$id/conciliacao': typeof AuthenticatedEmpresasIdConciliacaoRoute
   '/empresas/$id/configuracoes': typeof AuthenticatedEmpresasIdConfiguracoesRoute
   '/empresas/$id/documentos': typeof AuthenticatedEmpresasIdDocumentosRoute
+  '/empresas/$id/gerenciar': typeof AuthenticatedEmpresasIdGerenciarRoute
   '/empresas/$id/relatorios': typeof AuthenticatedEmpresasIdRelatoriosRoute
   '/empresas/$id': typeof AuthenticatedEmpresasIdIndexRoute
   '/empresas/$id/clientes/$clienteId': typeof AuthenticatedEmpresasIdClientesClienteIdRoute
@@ -275,6 +284,7 @@ export interface FileRoutesById {
   '/_authenticated/empresas/$id/conciliacao': typeof AuthenticatedEmpresasIdConciliacaoRoute
   '/_authenticated/empresas/$id/configuracoes': typeof AuthenticatedEmpresasIdConfiguracoesRoute
   '/_authenticated/empresas/$id/documentos': typeof AuthenticatedEmpresasIdDocumentosRoute
+  '/_authenticated/empresas/$id/gerenciar': typeof AuthenticatedEmpresasIdGerenciarRoute
   '/_authenticated/empresas/$id/relatorios': typeof AuthenticatedEmpresasIdRelatoriosRoute
   '/_authenticated/empresas/$id/': typeof AuthenticatedEmpresasIdIndexRoute
   '/_authenticated/empresas/$id/clientes/$clienteId': typeof AuthenticatedEmpresasIdClientesClienteIdRoute
@@ -306,6 +316,7 @@ export interface FileRouteTypes {
     | '/empresas/$id/conciliacao'
     | '/empresas/$id/configuracoes'
     | '/empresas/$id/documentos'
+    | '/empresas/$id/gerenciar'
     | '/empresas/$id/relatorios'
     | '/empresas/$id/'
     | '/empresas/$id/clientes/$clienteId'
@@ -334,6 +345,7 @@ export interface FileRouteTypes {
     | '/empresas/$id/conciliacao'
     | '/empresas/$id/configuracoes'
     | '/empresas/$id/documentos'
+    | '/empresas/$id/gerenciar'
     | '/empresas/$id/relatorios'
     | '/empresas/$id'
     | '/empresas/$id/clientes/$clienteId'
@@ -364,6 +376,7 @@ export interface FileRouteTypes {
     | '/_authenticated/empresas/$id/conciliacao'
     | '/_authenticated/empresas/$id/configuracoes'
     | '/_authenticated/empresas/$id/documentos'
+    | '/_authenticated/empresas/$id/gerenciar'
     | '/_authenticated/empresas/$id/relatorios'
     | '/_authenticated/empresas/$id/'
     | '/_authenticated/empresas/$id/clientes/$clienteId'
@@ -560,6 +573,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedEmpresasIdDocumentosRouteImport
       parentRoute: typeof AuthenticatedEmpresasIdRouteRoute
     }
+    '/_authenticated/empresas/$id/gerenciar': {
+      id: '/_authenticated/empresas/$id/gerenciar'
+      path: '/gerenciar'
+      fullPath: '/empresas/$id/gerenciar'
+      preLoaderRoute: typeof AuthenticatedEmpresasIdGerenciarRouteImport
+      parentRoute: typeof AuthenticatedEmpresasIdRouteRoute
+    }
     '/_authenticated/empresas/$id/relatorios': {
       id: '/_authenticated/empresas/$id/relatorios'
       path: '/relatorios'
@@ -589,6 +609,7 @@ interface AuthenticatedEmpresasIdRouteRouteChildren {
   AuthenticatedEmpresasIdConciliacaoRoute: typeof AuthenticatedEmpresasIdConciliacaoRoute
   AuthenticatedEmpresasIdConfiguracoesRoute: typeof AuthenticatedEmpresasIdConfiguracoesRoute
   AuthenticatedEmpresasIdDocumentosRoute: typeof AuthenticatedEmpresasIdDocumentosRoute
+  AuthenticatedEmpresasIdGerenciarRoute: typeof AuthenticatedEmpresasIdGerenciarRoute
   AuthenticatedEmpresasIdRelatoriosRoute: typeof AuthenticatedEmpresasIdRelatoriosRoute
   AuthenticatedEmpresasIdIndexRoute: typeof AuthenticatedEmpresasIdIndexRoute
   AuthenticatedEmpresasIdClientesClienteIdRoute: typeof AuthenticatedEmpresasIdClientesClienteIdRoute
@@ -605,6 +626,8 @@ const AuthenticatedEmpresasIdRouteRouteChildren: AuthenticatedEmpresasIdRouteRou
       AuthenticatedEmpresasIdConfiguracoesRoute,
     AuthenticatedEmpresasIdDocumentosRoute:
       AuthenticatedEmpresasIdDocumentosRoute,
+    AuthenticatedEmpresasIdGerenciarRoute:
+      AuthenticatedEmpresasIdGerenciarRoute,
     AuthenticatedEmpresasIdRelatoriosRoute:
       AuthenticatedEmpresasIdRelatoriosRoute,
     AuthenticatedEmpresasIdIndexRoute: AuthenticatedEmpresasIdIndexRoute,

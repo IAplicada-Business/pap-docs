@@ -157,6 +157,7 @@ const PAGE_LABELS: Record<string, string> = {
   equipe: "Equipe",
   empresas: "Empresas",
   nova: "Nova empresa",
+  gerenciar: "Gerenciar",
 };
 
 export function AppShell({ children }: { children: ReactNode }) {
@@ -172,11 +173,14 @@ export function AppShell({ children }: { children: ReactNode }) {
 
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const searchStr = useRouterState({ select: (s) => s.location.searchStr });
-  const empresaMatch = pathname.match(/^\/empresas\/([^/]+)/);
+  const empresaMatch = pathname.match(/^\/empresas\/([^/]+)(\/gerenciar)?/);
   const empresaId = empresaMatch?.[1] ?? null;
-  const modoEmpresa = !!empresaId && empresaId !== "nova";
+  const empresaValida = !!empresaId && empresaId !== "nova";
+  // /empresas/:id/gerenciar é visão administrativa da ConcilIA: sem menu nem cores da empresa.
+  const modoGerenciar = empresaValida && !!empresaMatch?.[2];
+  const modoEmpresa = empresaValida && !modoGerenciar;
 
-  const { data: empresa } = useEmpresa(modoEmpresa ? empresaId : undefined);
+  const { data: empresa } = useEmpresa(empresaValida ? empresaId : undefined);
 
   useEffect(() => {
     localStorage.setItem("sidebar-collapsed", String(collapsed));
@@ -282,6 +286,10 @@ export function AppShell({ children }: { children: ReactNode }) {
         });
         if (rest.length > 1) out.push({ label: "Detalhe" });
       }
+    } else if (modoGerenciar && empresaId) {
+      out.push({ label: "Empresas", to: "/empresas" });
+      out.push({ label: empresa?.nome ?? "Empresa" });
+      out.push({ label: "Gerenciar" });
     } else {
       out.push({ label: "ConcilIA", to: "/empresas" });
       parts.forEach((seg, i) => {
@@ -291,7 +299,7 @@ export function AppShell({ children }: { children: ReactNode }) {
       if (out.length === 1) out.push({ label: "Empresas" });
     }
     return out;
-  }, [pathname, modoEmpresa, empresaId, empresa]);
+  }, [pathname, modoEmpresa, modoGerenciar, empresaId, empresa]);
 
   const sidebarContent = (mobile: boolean) => {
     const mini = collapsed && !mobile;
