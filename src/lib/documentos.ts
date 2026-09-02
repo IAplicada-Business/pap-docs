@@ -9,17 +9,17 @@ export async function calcularHash(arquivo: File) {
 }
 
 export function caminhoArquivo(
-  orgId: string,
+  escritorioId: string,
   clienteId: string,
   mesAno: string,
   nomeArquivo: string,
 ) {
   const seguro = nomeArquivo.replace(/[^\w.\-]+/g, "_");
-  return `${orgId}/${clienteId}/${mesAno}/${crypto.randomUUID()}-${seguro}`;
+  return `${escritorioId}/${clienteId}/${mesAno}/${crypto.randomUUID()}-${seguro}`;
 }
 
 /** Garante que exista a competência do cliente para o mês (yyyy-MM). */
-export async function garantirCompetencia(orgId: string, clienteId: string, mesAno: string) {
+export async function garantirCompetencia(escritorioId: string, clienteId: string, mesAno: string) {
   const primeiroDia = `${mesAno}-01`;
   const { data: existente } = await supabase
     .from("competencias")
@@ -30,7 +30,7 @@ export async function garantirCompetencia(orgId: string, clienteId: string, mesA
   if (existente) return existente.id;
   const { data, error } = await supabase
     .from("competencias")
-    .insert({ org_id: orgId, cliente_id: clienteId, mes_ano: primeiroDia, status: "aberta" })
+    .insert({ escritorio_id: escritorioId, cliente_id: clienteId, mes_ano: primeiroDia, status: "aberta" })
     .select("id")
     .single();
   if (error) throw error;
@@ -38,13 +38,13 @@ export async function garantirCompetencia(orgId: string, clienteId: string, mesA
 }
 
 export async function enviarDocumentoEquipe(params: {
-  orgId: string;
+  escritorioId: string;
   clienteId: string;
   tipo: string;
   mesAno: string;
   arquivo: File;
 }) {
-  const { orgId, clienteId, tipo, mesAno, arquivo } = params;
+  const { escritorioId, clienteId, tipo, mesAno, arquivo } = params;
   const hash = await calcularHash(arquivo);
 
   const { data: duplicado } = await supabase
@@ -60,16 +60,16 @@ export async function enviarDocumentoEquipe(params: {
     );
   }
 
-  const path = caminhoArquivo(orgId, clienteId, mesAno, arquivo.name);
+  const path = caminhoArquivo(escritorioId, clienteId, mesAno, arquivo.name);
   const { error: erroUpload } = await supabase.storage
     .from("documentos")
     .upload(path, arquivo, { contentType: arquivo.type || "application/octet-stream" });
   if (erroUpload) throw erroUpload;
 
-  const competenciaId = await garantirCompetencia(orgId, clienteId, mesAno);
+  const competenciaId = await garantirCompetencia(escritorioId, clienteId, mesAno);
 
   const { error } = await supabase.from("documentos").insert({
-    org_id: orgId,
+    escritorio_id: escritorioId,
     cliente_id: clienteId,
     competencia_id: competenciaId,
     tipo,

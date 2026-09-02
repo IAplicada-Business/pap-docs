@@ -34,7 +34,7 @@ export const Route = createFileRoute("/api/public/upload")({
 
           const { data: cliente } = await supabaseAdmin
             .from("clientes")
-            .select("id, org_id, ativo, deleted_at")
+            .select("id, escritorio_id, ativo, deleted_at")
             .eq("upload_token", token)
             .maybeSingle();
 
@@ -64,7 +64,7 @@ export const Route = createFileRoute("/api/public/upload")({
           }
 
           const nomeSeguro = arquivo.name.replace(/[^\w.\-]+/g, "_");
-          const path = `${cliente.org_id}/${cliente.id}/${mes}/${crypto.randomUUID()}-${nomeSeguro}`;
+          const path = `${cliente.escritorio_id}/${cliente.id}/${mes}/${crypto.randomUUID()}-${nomeSeguro}`;
 
           const { error: erroUpload } = await supabaseAdmin.storage
             .from("documentos")
@@ -89,7 +89,7 @@ export const Route = createFileRoute("/api/public/upload")({
             const { data: nova } = await supabaseAdmin
               .from("competencias")
               .insert({
-                org_id: cliente.org_id,
+                escritorio_id: cliente.escritorio_id,
                 cliente_id: cliente.id,
                 mes_ano: primeiroDia,
                 status: "aberta",
@@ -100,7 +100,7 @@ export const Route = createFileRoute("/api/public/upload")({
           }
 
           const { error } = await supabaseAdmin.from("documentos").insert({
-            org_id: cliente.org_id,
+            escritorio_id: cliente.escritorio_id,
             cliente_id: cliente.id,
             competencia_id: competenciaId,
             tipo,

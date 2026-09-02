@@ -11,15 +11,15 @@ import { toast } from "sonner";
 export const Route = createFileRoute("/auth")({
   head: () => ({
     meta: [
-      { title: "Acesso da equipe — P&A Consultoria" },
+      { title: "Entrar — ConcilIA" },
       {
         name: "description",
-        content: "Área restrita da equipe da P&A Consultoria: acesse com e-mail e senha.",
+        content: "Plataforma de contabilidade inteligente para escritórios contábeis.",
       },
-      { property: "og:title", content: "Acesso da equipe — P&A Consultoria" },
+      { property: "og:title", content: "ConcilIA — Contabilidade inteligente" },
       {
         property: "og:description",
-        content: "Área restrita da equipe da P&A Consultoria.",
+        content: "Plataforma SaaS de conciliação contábil para escritórios.",
       },
     ],
   }),
@@ -70,19 +70,20 @@ function AuthPage() {
     <div className="flex min-h-screen items-center justify-center bg-secondary/60 px-4 py-10">
       <div className="w-full max-w-md">
         <div className="mb-6 text-center">
-          <h1 className="text-2xl font-extrabold tracking-tight text-primary">
-            P&amp;A Consultoria
-          </h1>
-          <p className="mt-1 text-sm text-muted-foreground">
-            Sistema de contabilidade inteligente
+          <img
+            src="/logo-concilia.svg"
+            alt="ConcilIA"
+            className="mx-auto mb-3 h-10 w-auto"
+          />
+          <p className="text-sm text-muted-foreground">
+            Contabilidade inteligente para escritórios
           </p>
         </div>
         <Card className="shadow-sm">
           <CardHeader>
             <CardTitle>Acesso da equipe</CardTitle>
             <CardDescription>
-              Somente a equipe do escritório acessa esta área. Clientes usam o link público de
-              envio de documentos.
+              Entre com seu e-mail e senha para acessar o ambiente do seu escritório.
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -102,7 +103,7 @@ function AuthPage() {
                       required
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
-                      placeholder="voce@pea.com.br"
+                      placeholder="seu@email.com"
                     />
                   </div>
                   <div className="space-y-2">
@@ -161,6 +162,9 @@ function AuthPage() {
             </Tabs>
           </CardContent>
         </Card>
+        <p className="mt-4 text-center text-xs text-muted-foreground">
+          Clientes: usem o link de envio de documentos fornecido pelo seu escritório.
+        </p>
       </div>
     </div>
   );

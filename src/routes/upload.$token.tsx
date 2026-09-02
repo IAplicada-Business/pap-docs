@@ -22,13 +22,13 @@ import { formatarTamanho, mesAnterior } from "@/lib/formatadores";
 export const Route = createFileRoute("/upload/$token")({
   head: () => ({
     meta: [
-      { title: "Envio de documentos — P&A Consultoria" },
+      { title: "Envio de documentos — ConcilIA" },
       {
         name: "description",
         content:
-          "Página segura para envio de documentos contábeis à P&A Consultoria. Não é preciso fazer login.",
+          "Página segura para envio de documentos contábeis. Não é preciso fazer login.",
       },
-      { property: "og:title", content: "Envio de documentos — P&A Consultoria" },
+      { property: "og:title", content: "Envio de documentos — ConcilIA" },
       {
         property: "og:description",
         content: "Envie extratos, relatórios e notas em poucos cliques.",
@@ -63,6 +63,7 @@ function UploadPublico() {
   const { token } = Route.useParams();
   const [carregando, setCarregando] = useState(true);
   const [nomeFantasia, setNomeFantasia] = useState<string | null>(null);
+  const [escritorio, setEscritorio] = useState<{ nome: string; logo_url: string | null; cor_primaria: string | null; cor_acento: string | null } | null>(null);
   const [linkInvalido, setLinkInvalido] = useState(false);
   const [tipo, setTipo] = useState<string>("extrato");
   const [mes, setMes] = useState<string>(mesAnterior());
@@ -75,8 +76,9 @@ function UploadPublico() {
     fetch(`/api/public/upload-info?token=${encodeURIComponent(token)}`)
       .then(async (r) => {
         if (!r.ok) throw new Error("invalido");
-        const json = (await r.json()) as { nome_fantasia: string };
+        const json = (await r.json()) as { nome_fantasia: string; escritorio?: { nome: string; logo_url: string | null; cor_primaria: string | null; cor_acento: string | null } };
         setNomeFantasia(json.nome_fantasia);
+        if (json.escritorio) setEscritorio(json.escritorio);
       })
       .catch(() => setLinkInvalido(true))
       .finally(() => setCarregando(false));
@@ -178,7 +180,7 @@ function UploadPublico() {
             <FileWarning className="mx-auto size-10 text-destructive" />
             <h1 className="text-lg font-semibold">Este link não está mais válido</h1>
             <p className="text-sm text-muted-foreground">
-              Peça um novo link para a equipe da P&amp;A Consultoria e tente novamente.
+              Peça um novo link para a equipe do seu escritório e tente novamente.
             </p>
           </CardContent>
         </Card>
@@ -192,8 +194,13 @@ function UploadPublico() {
     <div className="min-h-screen bg-secondary/50 px-4 py-8">
       <div className="mx-auto w-full max-w-lg space-y-5">
         <header className="text-center">
+          {escritorio?.logo_url ? (
+            <img src={escritorio.logo_url} alt={escritorio.nome} className="mx-auto mb-2 h-10 w-auto" />
+          ) : (
+            <img src="/logo-concilia.svg" alt="ConcilIA" className="mx-auto mb-2 h-8 w-auto" />
+          )}
           <p className="text-xs font-semibold uppercase tracking-wide text-primary">
-            P&amp;A Consultoria
+            {escritorio?.nome ?? "ConcilIA"}
           </p>
           <h1 className="mt-2 text-2xl font-bold">Olá, {nomeFantasia}!</h1>
           <p className="mt-2 text-sm text-muted-foreground">
@@ -310,7 +317,7 @@ function UploadPublico() {
         </Card>
 
         <p className="text-center text-xs text-muted-foreground">
-          Dúvidas? Fale com a equipe da P&amp;A Consultoria.
+          Dúvidas? Fale com a equipe do {escritorio?.nome ?? "seu escritório"}.
         </p>
       </div>
     </div>
