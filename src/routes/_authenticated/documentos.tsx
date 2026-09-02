@@ -47,12 +47,12 @@ import { badgeStatus } from "@/components/status-badge";
 export const Route = createFileRoute("/_authenticated/documentos")({
   head: () => ({
     meta: [
-      { title: "Documentos — P&A Consultoria" },
+      { title: "Documentos — ConcilIA" },
       {
         name: "description",
         content: "Documentos contábeis recebidos dos clientes, com filtros, download e reenvio.",
       },
-      { property: "og:title", content: "Documentos — P&A Consultoria" },
+      { property: "og:title", content: "Documentos — ConcilIA" },
       { property: "og:description", content: "Central de documentos recebidos." },
     ],
   }),
@@ -129,7 +129,7 @@ function DocumentosPage() {
       if (!envio.cliente) throw new Error("Selecione o cliente.");
       if (!arquivo) throw new Error("Selecione um arquivo.");
       await enviarDocumentoEquipe({
-        orgId: perfil.org_id,
+        escritorioId: perfil.escritorio_id,
         clienteId: envio.cliente,
         tipo: envio.tipo,
         mesAno: envio.mes,

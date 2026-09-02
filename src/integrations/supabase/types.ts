@@ -7,8 +7,6 @@ export type Json =
   | Json[]
 
 export type Database = {
-  // Allows to automatically instantiate createClient with right options
-  // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
     PostgrestVersion: "14.5"
   }
@@ -19,7 +17,7 @@ export type Database = {
           created_at: string
           evento: string
           id: string
-          org_id: string
+          escritorio_id: string
           payload: Json | null
           usuario: string | null
         }
@@ -27,7 +25,7 @@ export type Database = {
           created_at?: string
           evento: string
           id?: string
-          org_id: string
+          escritorio_id: string
           payload?: Json | null
           usuario?: string | null
         }
@@ -35,16 +33,16 @@ export type Database = {
           created_at?: string
           evento?: string
           id?: string
-          org_id?: string
+          escritorio_id?: string
           payload?: Json | null
           usuario?: string | null
         }
         Relationships: [
           {
-            foreignKeyName: "auditoria_org_id_fkey"
-            columns: ["org_id"]
+            foreignKeyName: "auditoria_escritorio_id_fkey"
+            columns: ["escritorio_id"]
             isOneToOne: false
-            referencedRelation: "organizations"
+            referencedRelation: "escritorios"
             referencedColumns: ["id"]
           },
         ]
@@ -59,7 +57,7 @@ export type Database = {
           id: string
           nome: string | null
           nome_fantasia: string | null
-          org_id: string
+          escritorio_id: string
           origem_documentos: string[]
           painel_token: string | null
           razao_social: string | null
@@ -78,7 +76,7 @@ export type Database = {
           id?: string
           nome?: string | null
           nome_fantasia?: string | null
-          org_id: string
+          escritorio_id: string
           origem_documentos?: string[]
           painel_token?: string | null
           razao_social?: string | null
@@ -97,7 +95,7 @@ export type Database = {
           id?: string
           nome?: string | null
           nome_fantasia?: string | null
-          org_id?: string
+          escritorio_id?: string
           origem_documentos?: string[]
           painel_token?: string | null
           razao_social?: string | null
@@ -109,10 +107,10 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "clientes_org_id_fkey"
-            columns: ["org_id"]
+            foreignKeyName: "clientes_escritorio_id_fkey"
+            columns: ["escritorio_id"]
             isOneToOne: false
-            referencedRelation: "organizations"
+            referencedRelation: "escritorios"
             referencedColumns: ["id"]
           },
         ]
@@ -126,7 +124,7 @@ export type Database = {
           fechada_por: string | null
           id: string
           mes_ano: string
-          org_id: string
+          escritorio_id: string
           status: string
           taxa_conciliacao: number | null
           updated_at: string
@@ -139,7 +137,7 @@ export type Database = {
           fechada_por?: string | null
           id?: string
           mes_ano: string
-          org_id: string
+          escritorio_id: string
           status?: string
           taxa_conciliacao?: number | null
           updated_at?: string
@@ -152,7 +150,7 @@ export type Database = {
           fechada_por?: string | null
           id?: string
           mes_ano?: string
-          org_id?: string
+          escritorio_id?: string
           status?: string
           taxa_conciliacao?: number | null
           updated_at?: string
@@ -166,10 +164,63 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "competencias_org_id_fkey"
-            columns: ["org_id"]
+            foreignKeyName: "competencias_escritorio_id_fkey"
+            columns: ["escritorio_id"]
             isOneToOne: false
-            referencedRelation: "organizations"
+            referencedRelation: "escritorios"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      convites: {
+        Row: {
+          id: string
+          escritorio_id: string
+          email: string
+          papel: string
+          permissoes: Json
+          token: string
+          expira_em: string
+          aceito_em: string | null
+          criado_por: string | null
+          created_at: string
+          updated_at: string
+          deleted_at: string | null
+        }
+        Insert: {
+          id?: string
+          escritorio_id: string
+          email: string
+          papel?: string
+          permissoes?: Json
+          token?: string
+          expira_em?: string
+          aceito_em?: string | null
+          criado_por?: string | null
+          created_at?: string
+          updated_at?: string
+          deleted_at?: string | null
+        }
+        Update: {
+          id?: string
+          escritorio_id?: string
+          email?: string
+          papel?: string
+          permissoes?: Json
+          token?: string
+          expira_em?: string
+          aceito_em?: string | null
+          criado_por?: string | null
+          created_at?: string
+          updated_at?: string
+          deleted_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "convites_escritorio_id_fkey"
+            columns: ["escritorio_id"]
+            isOneToOne: false
+            referencedRelation: "escritorios"
             referencedColumns: ["id"]
           },
         ]
@@ -187,7 +238,7 @@ export type Database = {
           hash_sha256: string | null
           id: string
           nome_original: string | null
-          org_id: string
+          escritorio_id: string
           origem: string | null
           publicado_painel: boolean
           status_processamento: string
@@ -207,7 +258,7 @@ export type Database = {
           hash_sha256?: string | null
           id?: string
           nome_original?: string | null
-          org_id: string
+          escritorio_id: string
           origem?: string | null
           publicado_painel?: boolean
           status_processamento?: string
@@ -227,7 +278,7 @@ export type Database = {
           hash_sha256?: string | null
           id?: string
           nome_original?: string | null
-          org_id?: string
+          escritorio_id?: string
           origem?: string | null
           publicado_painel?: boolean
           status_processamento?: string
@@ -251,10 +302,90 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "documentos_org_id_fkey"
-            columns: ["org_id"]
+            foreignKeyName: "documentos_escritorio_id_fkey"
+            columns: ["escritorio_id"]
             isOneToOne: false
-            referencedRelation: "organizations"
+            referencedRelation: "escritorios"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      escritorios: {
+        Row: {
+          cor_primaria: string
+          cor_acento: string
+          cnpj: string | null
+          plano: string
+          status: string
+          trial_expira_em: string | null
+          criado_por: string | null
+          created_at: string
+          deleted_at: string | null
+          id: string
+          logo_url: string | null
+          nome: string
+          updated_at: string
+        }
+        Insert: {
+          cor_primaria?: string
+          cor_acento?: string
+          cnpj?: string | null
+          plano?: string
+          status?: string
+          trial_expira_em?: string | null
+          criado_por?: string | null
+          created_at?: string
+          deleted_at?: string | null
+          id?: string
+          logo_url?: string | null
+          nome: string
+          updated_at?: string
+        }
+        Update: {
+          cor_primaria?: string
+          cor_acento?: string
+          cnpj?: string | null
+          plano?: string
+          status?: string
+          trial_expira_em?: string | null
+          criado_por?: string | null
+          created_at?: string
+          deleted_at?: string | null
+          id?: string
+          logo_url?: string | null
+          nome?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      eventos_uso: {
+        Row: {
+          id: string
+          escritorio_id: string
+          tipo_evento: string
+          metadata: Json | null
+          ocorrido_em: string
+        }
+        Insert: {
+          id?: string
+          escritorio_id: string
+          tipo_evento: string
+          metadata?: Json | null
+          ocorrido_em?: string
+        }
+        Update: {
+          id?: string
+          escritorio_id?: string
+          tipo_evento?: string
+          metadata?: Json | null
+          ocorrido_em?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "eventos_uso_escritorio_id_fkey"
+            columns: ["escritorio_id"]
+            isOneToOne: false
+            referencedRelation: "escritorios"
             referencedColumns: ["id"]
           },
         ]
@@ -272,7 +403,7 @@ export type Database = {
           descricao: string | null
           documento_id: string | null
           id: string
-          org_id: string
+          escritorio_id: string
           status: string
           updated_at: string
           valor: number
@@ -289,7 +420,7 @@ export type Database = {
           descricao?: string | null
           documento_id?: string | null
           id?: string
-          org_id: string
+          escritorio_id: string
           status?: string
           updated_at?: string
           valor: number
@@ -306,7 +437,7 @@ export type Database = {
           descricao?: string | null
           documento_id?: string | null
           id?: string
-          org_id?: string
+          escritorio_id?: string
           status?: string
           updated_at?: string
           valor?: number
@@ -348,43 +479,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "lancamentos_org_id_fkey"
-            columns: ["org_id"]
+            foreignKeyName: "lancamentos_escritorio_id_fkey"
+            columns: ["escritorio_id"]
             isOneToOne: false
-            referencedRelation: "organizations"
+            referencedRelation: "escritorios"
             referencedColumns: ["id"]
           },
         ]
-      }
-      organizations: {
-        Row: {
-          cor_primaria: string
-          created_at: string
-          deleted_at: string | null
-          id: string
-          logo_url: string | null
-          nome: string
-          updated_at: string
-        }
-        Insert: {
-          cor_primaria?: string
-          created_at?: string
-          deleted_at?: string | null
-          id?: string
-          logo_url?: string | null
-          nome: string
-          updated_at?: string
-        }
-        Update: {
-          cor_primaria?: string
-          created_at?: string
-          deleted_at?: string | null
-          id?: string
-          logo_url?: string | null
-          nome?: string
-          updated_at?: string
-        }
-        Relationships: []
       }
       plano_contas: {
         Row: {
@@ -395,7 +496,7 @@ export type Database = {
           deleted_at: string | null
           descricao: string
           id: string
-          org_id: string
+          escritorio_id: string
           tipo: string | null
           updated_at: string
         }
@@ -407,7 +508,7 @@ export type Database = {
           deleted_at?: string | null
           descricao: string
           id?: string
-          org_id: string
+          escritorio_id: string
           tipo?: string | null
           updated_at?: string
         }
@@ -419,7 +520,7 @@ export type Database = {
           deleted_at?: string | null
           descricao?: string
           id?: string
-          org_id?: string
+          escritorio_id?: string
           tipo?: string | null
           updated_at?: string
         }
@@ -432,10 +533,10 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "plano_contas_org_id_fkey"
-            columns: ["org_id"]
+            foreignKeyName: "plano_contas_escritorio_id_fkey"
+            columns: ["escritorio_id"]
             isOneToOne: false
-            referencedRelation: "organizations"
+            referencedRelation: "escritorios"
             referencedColumns: ["id"]
           },
         ]
@@ -447,8 +548,11 @@ export type Database = {
           email: string | null
           id: string
           nome: string | null
-          org_id: string
+          escritorio_id: string
           papel: string
+          permissoes: Json
+          ativo: boolean
+          ultimo_acesso_em: string | null
           updated_at: string
         }
         Insert: {
@@ -457,8 +561,11 @@ export type Database = {
           email?: string | null
           id: string
           nome?: string | null
-          org_id: string
+          escritorio_id: string
           papel?: string
+          permissoes?: Json
+          ativo?: boolean
+          ultimo_acesso_em?: string | null
           updated_at?: string
         }
         Update: {
@@ -467,16 +574,19 @@ export type Database = {
           email?: string | null
           id?: string
           nome?: string | null
-          org_id?: string
+          escritorio_id?: string
           papel?: string
+          permissoes?: Json
+          ativo?: boolean
+          ultimo_acesso_em?: string | null
           updated_at?: string
         }
         Relationships: [
           {
-            foreignKeyName: "profiles_org_id_fkey"
-            columns: ["org_id"]
+            foreignKeyName: "profiles_escritorio_id_fkey"
+            columns: ["escritorio_id"]
             isOneToOne: false
-            referencedRelation: "organizations"
+            referencedRelation: "escritorios"
             referencedColumns: ["id"]
           },
         ]
@@ -489,7 +599,7 @@ export type Database = {
           created_at: string
           deleted_at: string | null
           id: string
-          org_id: string
+          escritorio_id: string
           origem_regra: string | null
           padrao_descricao: string
           updated_at: string
@@ -501,7 +611,7 @@ export type Database = {
           created_at?: string
           deleted_at?: string | null
           id?: string
-          org_id: string
+          escritorio_id: string
           origem_regra?: string | null
           padrao_descricao: string
           updated_at?: string
@@ -513,7 +623,7 @@ export type Database = {
           created_at?: string
           deleted_at?: string | null
           id?: string
-          org_id?: string
+          escritorio_id?: string
           origem_regra?: string | null
           padrao_descricao?: string
           updated_at?: string
@@ -534,10 +644,10 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "regras_aprendizado_org_id_fkey"
-            columns: ["org_id"]
+            foreignKeyName: "regras_aprendizado_escritorio_id_fkey"
+            columns: ["escritorio_id"]
             isOneToOne: false
-            referencedRelation: "organizations"
+            referencedRelation: "escritorios"
             referencedColumns: ["id"]
           },
         ]
@@ -550,7 +660,7 @@ export type Database = {
           deleted_at: string | null
           enviado_em: string | null
           id: string
-          org_id: string
+          escritorio_id: string
           publicado_painel: boolean
           tipo: string
           updated_at: string
@@ -562,7 +672,7 @@ export type Database = {
           deleted_at?: string | null
           enviado_em?: string | null
           id?: string
-          org_id: string
+          escritorio_id: string
           publicado_painel?: boolean
           tipo: string
           updated_at?: string
@@ -574,7 +684,7 @@ export type Database = {
           deleted_at?: string | null
           enviado_em?: string | null
           id?: string
-          org_id?: string
+          escritorio_id?: string
           publicado_painel?: boolean
           tipo?: string
           updated_at?: string
@@ -588,10 +698,10 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "relatorios_org_id_fkey"
-            columns: ["org_id"]
+            foreignKeyName: "relatorios_escritorio_id_fkey"
+            columns: ["escritorio_id"]
             isOneToOne: false
-            referencedRelation: "organizations"
+            referencedRelation: "escritorios"
             referencedColumns: ["id"]
           },
         ]
@@ -601,7 +711,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      current_escritorio_id: { Args: never; Returns: string }
       current_org_id: { Args: never; Returns: string }
+      is_super_admin: { Args: never; Returns: boolean }
+      has_permission: { Args: { p_module: string }; Returns: boolean }
     }
     Enums: {
       [_ in never]: never

@@ -47,13 +47,13 @@ type AtualizacaoCliente = Database["public"]["Tables"]["clientes"]["Update"];
 export const Route = createFileRoute("/_authenticated/clientes/$id")({
   head: () => ({
     meta: [
-      { title: "Detalhe do cliente — P&A Consultoria" },
+      { title: "Detalhe do cliente — ConcilIA" },
       {
         name: "description",
         content: "Dados cadastrais, documentos, competências e link de upload do cliente.",
       },
-      { property: "og:title", content: "Detalhe do cliente — P&A Consultoria" },
-      { property: "og:description", content: "Ficha completa do cliente na P&A Consultoria." },
+      { property: "og:title", content: "Detalhe do cliente — ConcilIA" },
+      { property: "og:description", content: "Ficha completa do cliente na ConcilIA." },
     ],
   }),
   component: ClienteDetalhe,

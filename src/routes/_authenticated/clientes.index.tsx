@@ -41,12 +41,12 @@ import { apenasDigitos, cnpjValido, formatarCnpj, formatarTelefone } from "@/lib
 export const Route = createFileRoute("/_authenticated/clientes/")({
   head: () => ({
     meta: [
-      { title: "Clientes — P&A Consultoria" },
+      { title: "Clientes — ConcilIA" },
       {
         name: "description",
-        content: "Cadastro e gestão dos clientes atendidos pela P&A Consultoria.",
+        content: "Cadastro e gestão dos clientes atendidos pela ConcilIA.",
       },
-      { property: "og:title", content: "Clientes — P&A Consultoria" },
+      { property: "og:title", content: "Clientes — ConcilIA" },
       { property: "og:description", content: "Gerencie a carteira de clientes do escritório." },
     ],
   }),
@@ -100,7 +100,7 @@ function ClientesPage() {
       if (!form.razao_social.trim()) throw new Error("Informe a razão social.");
       if (!cnpjValido(form.cnpj)) throw new Error("CNPJ inválido.");
       const { error } = await supabase.from("clientes").insert({
-        org_id: perfil.org_id,
+        escritorio_id: perfil.escritorio_id,
         nome: form.nome_fantasia || form.razao_social,
         razao_social: form.razao_social,
         nome_fantasia: form.nome_fantasia || form.razao_social,

@@ -50,12 +50,12 @@ import { formatarCompetencia, formatarDataHora, mesAtual } from "@/lib/formatado
 export const Route = createFileRoute("/_authenticated/competencias")({
   head: () => ({
     meta: [
-      { title: "Competências — P&A Consultoria" },
+      { title: "Competências — ConcilIA" },
       {
         name: "description",
         content: "Controle dos períodos contábeis por cliente: abertura, conciliação e fechamento.",
       },
-      { property: "og:title", content: "Competências — P&A Consultoria" },
+      { property: "og:title", content: "Competências — ConcilIA" },
       { property: "og:description", content: "Períodos contábeis por cliente e mês." },
     ],
   }),
@@ -107,7 +107,7 @@ function CompetenciasPage() {
       if (!perfil) throw new Error("Perfil não carregado.");
       if (!nova.cliente) throw new Error("Selecione o cliente.");
       const { error } = await supabase.from("competencias").insert({
-        org_id: perfil.org_id,
+        escritorio_id: perfil.escritorio_id,
         cliente_id: nova.cliente,
         mes_ano: `${nova.mes}-01`,
         status: "aberta",

@@ -16,9 +16,12 @@ import { Route as AuthenticatedCompetenciasRouteImport } from './routes/_authent
 import { Route as AuthenticatedConfiguracoesRouteImport } from './routes/_authenticated/configuracoes'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
 import { Route as AuthenticatedDocumentosRouteImport } from './routes/_authenticated/documentos'
+import { Route as AuthenticatedEquipeRouteImport } from './routes/_authenticated/equipe'
+import { Route as ConviteTokenRouteImport } from './routes/convite.$token'
 import { Route as UploadTokenRouteImport } from './routes/upload.$token'
 import { Route as AuthenticatedClientesIndexRouteImport } from './routes/_authenticated/clientes.index'
 import { Route as AuthenticatedClientesIdRouteImport } from './routes/_authenticated/clientes.$id'
+import { Route as ApiPublicConviteInfoRouteImport } from './routes/api/public/convite-info'
 import { Route as ApiPublicUploadRouteImport } from './routes/api/public/upload'
 import { Route as ApiPublicUploadInfoRouteImport } from './routes/api/public/upload-info'
 
@@ -58,6 +61,16 @@ const AuthenticatedDocumentosRoute = AuthenticatedDocumentosRouteImport.update({
   path: '/documentos',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedEquipeRoute = AuthenticatedEquipeRouteImport.update({
+  id: '/equipe',
+  path: '/equipe',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const ConviteTokenRoute = ConviteTokenRouteImport.update({
+  id: '/convite/$token',
+  path: '/convite/$token',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const UploadTokenRoute = UploadTokenRouteImport.update({
   id: '/upload/$token',
   path: '/upload/$token',
@@ -73,6 +86,11 @@ const AuthenticatedClientesIdRoute = AuthenticatedClientesIdRouteImport.update({
   id: '/clientes/$id',
   path: '/clientes/$id',
   getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const ApiPublicConviteInfoRoute = ApiPublicConviteInfoRouteImport.update({
+  id: '/api/public/convite-info',
+  path: '/api/public/convite-info',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const ApiPublicUploadRoute = ApiPublicUploadRouteImport.update({
   id: '/api/public/upload',
@@ -92,8 +110,11 @@ export interface FileRoutesByFullPath {
   '/configuracoes': typeof AuthenticatedConfiguracoesRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/documentos': typeof AuthenticatedDocumentosRoute
+  '/equipe': typeof AuthenticatedEquipeRoute
+  '/convite/$token': typeof ConviteTokenRoute
   '/upload/$token': typeof UploadTokenRoute
   '/clientes/$id': typeof AuthenticatedClientesIdRoute
+  '/api/public/convite-info': typeof ApiPublicConviteInfoRoute
   '/api/public/upload': typeof ApiPublicUploadRoute
   '/api/public/upload-info': typeof ApiPublicUploadInfoRoute
   '/clientes/': typeof AuthenticatedClientesIndexRoute
@@ -105,8 +126,11 @@ export interface FileRoutesByTo {
   '/configuracoes': typeof AuthenticatedConfiguracoesRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/documentos': typeof AuthenticatedDocumentosRoute
+  '/equipe': typeof AuthenticatedEquipeRoute
+  '/convite/$token': typeof ConviteTokenRoute
   '/upload/$token': typeof UploadTokenRoute
   '/clientes/$id': typeof AuthenticatedClientesIdRoute
+  '/api/public/convite-info': typeof ApiPublicConviteInfoRoute
   '/api/public/upload': typeof ApiPublicUploadRoute
   '/api/public/upload-info': typeof ApiPublicUploadInfoRoute
   '/clientes': typeof AuthenticatedClientesIndexRoute
@@ -120,8 +144,11 @@ export interface FileRoutesById {
   '/_authenticated/configuracoes': typeof AuthenticatedConfiguracoesRoute
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
   '/_authenticated/documentos': typeof AuthenticatedDocumentosRoute
+  '/_authenticated/equipe': typeof AuthenticatedEquipeRoute
+  '/convite/$token': typeof ConviteTokenRoute
   '/upload/$token': typeof UploadTokenRoute
   '/_authenticated/clientes/$id': typeof AuthenticatedClientesIdRoute
+  '/api/public/convite-info': typeof ApiPublicConviteInfoRoute
   '/api/public/upload': typeof ApiPublicUploadRoute
   '/api/public/upload-info': typeof ApiPublicUploadInfoRoute
   '/_authenticated/clientes/': typeof AuthenticatedClientesIndexRoute
@@ -135,8 +162,11 @@ export interface FileRouteTypes {
     | '/configuracoes'
     | '/dashboard'
     | '/documentos'
+    | '/equipe'
+    | '/convite/$token'
     | '/upload/$token'
     | '/clientes/$id'
+    | '/api/public/convite-info'
     | '/api/public/upload'
     | '/api/public/upload-info'
     | '/clientes/'
@@ -148,8 +178,11 @@ export interface FileRouteTypes {
     | '/configuracoes'
     | '/dashboard'
     | '/documentos'
+    | '/equipe'
+    | '/convite/$token'
     | '/upload/$token'
     | '/clientes/$id'
+    | '/api/public/convite-info'
     | '/api/public/upload'
     | '/api/public/upload-info'
     | '/clientes'
@@ -162,8 +195,11 @@ export interface FileRouteTypes {
     | '/_authenticated/configuracoes'
     | '/_authenticated/dashboard'
     | '/_authenticated/documentos'
+    | '/_authenticated/equipe'
+    | '/convite/$token'
     | '/upload/$token'
     | '/_authenticated/clientes/$id'
+    | '/api/public/convite-info'
     | '/api/public/upload'
     | '/api/public/upload-info'
     | '/_authenticated/clientes/'
@@ -173,7 +209,9 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   AuthRoute: typeof AuthRoute
+  ConviteTokenRoute: typeof ConviteTokenRoute
   UploadTokenRoute: typeof UploadTokenRoute
+  ApiPublicConviteInfoRoute: typeof ApiPublicConviteInfoRoute
   ApiPublicUploadRoute: typeof ApiPublicUploadRoute
   ApiPublicUploadInfoRoute: typeof ApiPublicUploadInfoRoute
 }
@@ -229,6 +267,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedDocumentosRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/equipe': {
+      id: '/_authenticated/equipe'
+      path: '/equipe'
+      fullPath: '/equipe'
+      preLoaderRoute: typeof AuthenticatedEquipeRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/convite/$token': {
+      id: '/convite/$token'
+      path: '/convite/$token'
+      fullPath: '/convite/$token'
+      preLoaderRoute: typeof ConviteTokenRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/upload/$token': {
       id: '/upload/$token'
       path: '/upload/$token'
@@ -249,6 +301,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/clientes/$id'
       preLoaderRoute: typeof AuthenticatedClientesIdRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/api/public/convite-info': {
+      id: '/api/public/convite-info'
+      path: '/api/public/convite-info'
+      fullPath: '/api/public/convite-info'
+      preLoaderRoute: typeof ApiPublicConviteInfoRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/api/public/upload': {
       id: '/api/public/upload'
@@ -272,6 +331,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedConfiguracoesRoute: typeof AuthenticatedConfiguracoesRoute
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
   AuthenticatedDocumentosRoute: typeof AuthenticatedDocumentosRoute
+  AuthenticatedEquipeRoute: typeof AuthenticatedEquipeRoute
   AuthenticatedClientesIdRoute: typeof AuthenticatedClientesIdRoute
   AuthenticatedClientesIndexRoute: typeof AuthenticatedClientesIndexRoute
 }
@@ -281,6 +341,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedConfiguracoesRoute: AuthenticatedConfiguracoesRoute,
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
   AuthenticatedDocumentosRoute: AuthenticatedDocumentosRoute,
+  AuthenticatedEquipeRoute: AuthenticatedEquipeRoute,
   AuthenticatedClientesIdRoute: AuthenticatedClientesIdRoute,
   AuthenticatedClientesIndexRoute: AuthenticatedClientesIndexRoute,
 }
@@ -292,20 +353,12 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   AuthRoute: AuthRoute,
+  ConviteTokenRoute: ConviteTokenRoute,
   UploadTokenRoute: UploadTokenRoute,
+  ApiPublicConviteInfoRoute: ApiPublicConviteInfoRoute,
   ApiPublicUploadRoute: ApiPublicUploadRoute,
   ApiPublicUploadInfoRoute: ApiPublicUploadInfoRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}

@@ -3,7 +3,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Plus, Trash2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
-import { usePerfil } from "@/hooks/use-perfil";
+import { usePerfil, useEscritorio, temPermissao } from "@/hooks/use-perfil";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -30,12 +30,12 @@ import { toast } from "sonner";
 export const Route = createFileRoute("/_authenticated/configuracoes")({
   head: () => ({
     meta: [
-      { title: "Configurações — P&A Consultoria" },
+      { title: "Configurações — ConcilIA" },
       {
         name: "description",
         content: "Dados do escritório, perfil do usuário e plano de contas por cliente.",
       },
-      { property: "og:title", content: "Configurações — P&A Consultoria" },
+      { property: "og:title", content: "Configurações — ConcilIA" },
       { property: "og:description", content: "Ajustes do escritório e plano de contas." },
     ],
   }),
@@ -48,14 +48,8 @@ function ConfiguracoesPage() {
   const [clienteSel, setClienteSel] = useState("");
   const [conta, setConta] = useState({ codigo: "", descricao: "", tipo: "" });
 
-  const { data: organizacao } = useQuery({
-    queryKey: ["organizacao"],
-    queryFn: async () => {
-      const { data, error } = await supabase.from("organizations").select("*").limit(1).single();
-      if (error) throw error;
-      return data;
-    },
-  });
+  const { data: escritorio } = useEscritorio();
+  const podeEditar = temPermissao(perfil, "configuracoes");
 
   const { data: clientes } = useQuery({
     queryKey: ["clientes-select"],
@@ -92,7 +86,7 @@ function ConfiguracoesPage() {
       if (!conta.codigo.trim() || !conta.descricao.trim())
         throw new Error("Informe código e descrição.");
       const { error } = await supabase.from("plano_contas").insert({
-        org_id: perfil.org_id,
+        escritorio_id: perfil.escritorio_id,
         cliente_id: clienteSel,
         codigo: conta.codigo.trim(),
         descricao: conta.descricao.trim(),
@@ -142,16 +136,79 @@ function ConfiguracoesPage() {
           <Card>
             <CardHeader>
               <CardTitle>Dados do escritório</CardTitle>
-              <CardDescription>Identidade visual e nome do tenant.</CardDescription>
+              <CardDescription>
+                {podeEditar
+                  ? "Identidade visual e dados cadastrais do escritório."
+                  : "Somente administradores podem editar estas informações."}
+              </CardDescription>
             </CardHeader>
             <CardContent className="grid gap-4 sm:grid-cols-2">
               <div className="space-y-2">
                 <Label>Nome</Label>
-                <Input readOnly value={organizacao?.nome ?? ""} />
+                <Input
+                  readOnly={!podeEditar}
+                  defaultValue={escritorio?.nome ?? ""}
+                  onBlur={(e) => {
+                    if (!podeEditar || !escritorio) return;
+                    supabase
+                      .from("escritorios")
+                      .update({ nome: e.target.value })
+                      .eq("id", escritorio.id)
+                      .then(({ error }) => {
+                        if (error) toast.error("Não foi possível salvar", { description: error.message });
+                        else {
+                          toast.success("Nome atualizado");
+                          queryClient.invalidateQueries({ queryKey: ["escritorio"] });
+                        }
+                      });
+                  }}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>CNPJ</Label>
+                <Input readOnly value={escritorio?.cnpj ?? ""} />
               </div>
               <div className="space-y-2">
                 <Label>Cor primária</Label>
-                <Input readOnly value={organizacao?.cor_primaria ?? ""} />
+                <Input
+                  readOnly={!podeEditar}
+                  defaultValue={escritorio?.cor_primaria ?? ""}
+                  onBlur={(e) => {
+                    if (!podeEditar || !escritorio) return;
+                    supabase
+                      .from("escritorios")
+                      .update({ cor_primaria: e.target.value })
+                      .eq("id", escritorio.id)
+                      .then(({ error }) => {
+                        if (error) toast.error("Não foi possível salvar", { description: error.message });
+                        else {
+                          toast.success("Cor atualizada");
+                          queryClient.invalidateQueries({ queryKey: ["escritorio"] });
+                        }
+                      });
+                  }}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Cor de acento</Label>
+                <Input
+                  readOnly={!podeEditar}
+                  defaultValue={escritorio?.cor_acento ?? ""}
+                  onBlur={(e) => {
+                    if (!podeEditar || !escritorio) return;
+                    supabase
+                      .from("escritorios")
+                      .update({ cor_acento: e.target.value })
+                      .eq("id", escritorio.id)
+                      .then(({ error }) => {
+                        if (error) toast.error("Não foi possível salvar", { description: error.message });
+                        else {
+                          toast.success("Cor de acento atualizada");
+                          queryClient.invalidateQueries({ queryKey: ["escritorio"] });
+                        }
+                      });
+                  }}
+                />
               </div>
             </CardContent>
           </Card>

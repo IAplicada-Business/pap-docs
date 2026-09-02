@@ -11,13 +11,13 @@ import { badgeStatus } from "@/components/status-badge";
 export const Route = createFileRoute("/_authenticated/dashboard")({
   head: () => ({
     meta: [
-      { title: "Dashboard — P&A Consultoria" },
+      { title: "Dashboard — ConcilIA" },
       {
         name: "description",
-        content: "Resumo de clientes, documentos recebidos e competências abertas da P&A.",
+        content: "Resumo de clientes, documentos recebidos e competências abertas.",
       },
-      { property: "og:title", content: "Dashboard — P&A Consultoria" },
-      { property: "og:description", content: "Visão geral da operação contábil da P&A." },
+      { property: "og:title", content: "Dashboard — ConcilIA" },
+      { property: "og:description", content: "Visão geral da operação do escritório." },
     ],
   }),
   component: Dashboard,
