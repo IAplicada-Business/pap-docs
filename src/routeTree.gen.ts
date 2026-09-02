@@ -14,6 +14,7 @@ import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
 import { Route as UploadTokenRouteImport } from './routes/upload.$token'
+import { Route as AuthenticatedClientesIndexRouteImport } from './routes/_authenticated/clientes.index'
 import { Route as ApiPublicUploadRouteImport } from './routes/api/public/upload'
 import { Route as ApiPublicUploadInfoRouteImport } from './routes/api/public/upload-info'
 
@@ -41,6 +42,12 @@ const UploadTokenRoute = UploadTokenRouteImport.update({
   path: '/upload/$token',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthenticatedClientesIndexRoute =
+  AuthenticatedClientesIndexRouteImport.update({
+    id: '/clientes/',
+    path: '/clientes/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const ApiPublicUploadRoute = ApiPublicUploadRouteImport.update({
   id: '/api/public/upload',
   path: '/api/public/upload',
@@ -59,6 +66,7 @@ export interface FileRoutesByFullPath {
   '/upload/$token': typeof UploadTokenRoute
   '/api/public/upload': typeof ApiPublicUploadRoute
   '/api/public/upload-info': typeof ApiPublicUploadInfoRoute
+  '/clientes/': typeof AuthenticatedClientesIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -67,6 +75,7 @@ export interface FileRoutesByTo {
   '/upload/$token': typeof UploadTokenRoute
   '/api/public/upload': typeof ApiPublicUploadRoute
   '/api/public/upload-info': typeof ApiPublicUploadInfoRoute
+  '/clientes': typeof AuthenticatedClientesIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -77,6 +86,7 @@ export interface FileRoutesById {
   '/upload/$token': typeof UploadTokenRoute
   '/api/public/upload': typeof ApiPublicUploadRoute
   '/api/public/upload-info': typeof ApiPublicUploadInfoRoute
+  '/_authenticated/clientes/': typeof AuthenticatedClientesIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -87,6 +97,7 @@ export interface FileRouteTypes {
     | '/upload/$token'
     | '/api/public/upload'
     | '/api/public/upload-info'
+    | '/clientes/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -95,6 +106,7 @@ export interface FileRouteTypes {
     | '/upload/$token'
     | '/api/public/upload'
     | '/api/public/upload-info'
+    | '/clientes'
   id:
     | '__root__'
     | '/'
@@ -104,6 +116,7 @@ export interface FileRouteTypes {
     | '/upload/$token'
     | '/api/public/upload'
     | '/api/public/upload-info'
+    | '/_authenticated/clientes/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -152,6 +165,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof UploadTokenRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authenticated/clientes/': {
+      id: '/_authenticated/clientes/'
+      path: '/clientes'
+      fullPath: '/clientes/'
+      preLoaderRoute: typeof AuthenticatedClientesIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/api/public/upload': {
       id: '/api/public/upload'
       path: '/api/public/upload'
@@ -171,10 +191,12 @@ declare module '@tanstack/react-router' {
 
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
+  AuthenticatedClientesIndexRoute: typeof AuthenticatedClientesIndexRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
+  AuthenticatedClientesIndexRoute: AuthenticatedClientesIndexRoute,
 }
 
 const AuthenticatedRouteRouteWithChildren =
