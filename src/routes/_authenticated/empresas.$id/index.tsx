@@ -1,27 +1,45 @@
+import { useMemo, useState } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import {
   Activity,
   AlertTriangle,
   ArrowUpRight,
-  BookOpen,
+  Brain,
   CalendarRange,
-  ClipboardList,
+  CheckCircle2,
+  FileBarChart2,
   FileText,
-  Plus,
-  Settings,
-  TrendingUp,
+  Hourglass,
+  MessageCircle,
+  Scale,
   Upload,
   UserMinus,
   Users,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
-import { Skeleton } from "@/components/ui/skeleton";
+import { usePerfil, useEmpresa } from "@/hooks/use-perfil";
 import { Button } from "@/components/ui/button";
-import { formatarDataHora } from "@/lib/formatadores";
+import {
+  AreaTrend,
+  Bars,
+  CHART_COLORS,
+  DataTable,
+  Donut,
+  EmptyState,
+  KpiCard,
+  KpiGrid,
+  Legend,
+  PageHeader,
+  ProgressBar,
+  SectionCard,
+  Segmented,
+  pillDocumento,
+  type Column,
+} from "@/components/ui-kit";
+import { formatarCompetencia, formatarDataHora, mesAtual } from "@/lib/formatadores";
 import { rotuloTipo } from "@/lib/dominio";
-import { badgeStatus } from "@/components/status-badge";
-import { usePerfil } from "@/hooks/use-perfil";
+import { linkWhatsApp, mensagemCobranca } from "@/lib/cobranca";
 
 export const Route = createFileRoute("/_authenticated/empresas/$id/")({
   head: () => ({
@@ -29,486 +47,651 @@ export const Route = createFileRoute("/_authenticated/empresas/$id/")({
       { title: "Dashboard — ConcilIA" },
       {
         name: "description",
-        content:
-          "Painel administrativo com resumo de clientes, documentos, competencias e atividade recente.",
+        content: "Visão operacional: documentos, fila, erros, conciliação e fechamento do mês.",
       },
     ],
   }),
   component: EmpresaDashboard,
 });
 
-/* -------------------------------------------------------------------------- */
-/*  Types                                                                     */
-/* -------------------------------------------------------------------------- */
+type Periodo = "7" | "30" | "90";
 
-type AuditoriaRow = {
-  id: string;
-  evento: string;
-  usuario: string | null;
-  created_at: string;
-  payload: Record<string, unknown> | null;
-};
-
-type DocumentoRow = {
+type Doc = {
   id: string;
   nome_original: string | null;
   tipo: string | null;
   status_processamento: string;
-  enviado_em: string | null;
+  enviado_em: string;
+  cliente_id: string;
   clientes: { nome_fantasia: string | null; nome: string | null } | null;
 };
 
-/* -------------------------------------------------------------------------- */
-/*  Component                                                                 */
-/* -------------------------------------------------------------------------- */
+function diasAtras(n: number) {
+  const d = new Date();
+  d.setHours(0, 0, 0, 0);
+  d.setDate(d.getDate() - n);
+  return d;
+}
+
+function chaveDia(d: Date) {
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+}
 
 function EmpresaDashboard() {
   const { id: empresaId } = Route.useParams();
   const { data: perfil } = usePerfil();
+  const { data: empresa } = useEmpresa(empresaId);
+  const [periodo, setPeriodo] = useState<Periodo>("30");
 
   const { data, isLoading } = useQuery({
     queryKey: ["empresa-dashboard", empresaId],
     queryFn: async () => {
+      const desde = diasAtras(180).toISOString();
       const inicioMes = new Date();
       inicioMes.setDate(1);
       inicioMes.setHours(0, 0, 0, 0);
-
-      const [
-        clientes,
-        clientesInativos,
-        docsMes,
-        docsErro,
-        competencias,
-        ultimos,
-        auditoria,
-        regras,
-        relatoriosMes,
-      ] = await Promise.all([
-        supabase
-          .from("clientes")
-          .select("id", { count: "exact", head: true })
-          .eq("ativo", true)
-          .is("deleted_at", null),
-        supabase
-          .from("clientes")
-          .select("id", { count: "exact", head: true })
-          .eq("ativo", false)
-          .is("deleted_at", null),
-        supabase
-          .from("documentos")
-          .select("id", { count: "exact", head: true })
-          .gte("enviado_em", inicioMes.toISOString())
-          .is("deleted_at", null),
-        supabase
-          .from("documentos")
-          .select("id", { count: "exact", head: true })
-          .eq("status_processamento", "erro")
-          .is("deleted_at", null),
-        supabase
-          .from("competencias")
-          .select("id", { count: "exact", head: true })
-          .neq("status", "fechada")
-          .is("deleted_at", null),
-        supabase
-          .from("documentos")
-          .select(
-            "id, nome_original, tipo, status_processamento, enviado_em, clientes(nome_fantasia, nome)",
-          )
-          .is("deleted_at", null)
-          .order("enviado_em", { ascending: false })
-          .limit(10),
-        supabase
-          .from("auditoria")
-          .select("id, evento, usuario, created_at, payload")
-          .order("created_at", { ascending: false })
-          .limit(8),
-        supabase
-          .from("regras_aprendizado")
-          .select("id", { count: "exact", head: true })
-          .is("deleted_at", null),
-        supabase
-          .from("relatorios")
-          .select("id", { count: "exact", head: true })
-          .gte("created_at", inicioMes.toISOString())
-          .is("deleted_at", null),
-      ]);
-
+      const [docs, clientes, comps, auditoria, inativos, regras, relatoriosMes] = await Promise.all(
+        [
+          supabase
+            .from("documentos")
+            .select(
+              "id, nome_original, tipo, status_processamento, enviado_em, cliente_id, clientes(nome_fantasia, nome)",
+            )
+            .is("deleted_at", null)
+            .gte("enviado_em", desde)
+            .order("enviado_em", { ascending: false }),
+          supabase
+            .from("clientes")
+            .select("id, nome_fantasia, nome, telefone, upload_token, ativo")
+            .eq("ativo", true)
+            .is("deleted_at", null),
+          supabase
+            .from("competencias")
+            .select(
+              "id, status, mes_ano, taxa_conciliacao, cliente_id, clientes(nome_fantasia, nome)",
+            )
+            .is("deleted_at", null)
+            .order("mes_ano", { ascending: false }),
+          supabase
+            .from("auditoria")
+            .select("id, evento, usuario, created_at")
+            .order("created_at", { ascending: false })
+            .limit(8),
+          supabase
+            .from("clientes")
+            .select("id", { count: "exact", head: true })
+            .eq("ativo", false)
+            .is("deleted_at", null),
+          supabase
+            .from("regras_aprendizado")
+            .select("id", { count: "exact", head: true })
+            .is("deleted_at", null),
+          supabase
+            .from("relatorios")
+            .select("id", { count: "exact", head: true })
+            .gte("created_at", inicioMes.toISOString())
+            .is("deleted_at", null),
+        ],
+      );
       return {
-        clientesAtivos: clientes.count ?? 0,
-        clientesInativos: clientesInativos.count ?? 0,
-        documentosMes: docsMes.count ?? 0,
-        documentosErro: docsErro.count ?? 0,
-        competenciasAbertas: competencias.count ?? 0,
-        ultimos: (ultimos.data ?? []) as DocumentoRow[],
-        auditoria: (auditoria.data ?? []) as AuditoriaRow[],
-        regrasAprendizado: regras.count ?? 0,
+        docs: (docs.data ?? []) as Doc[],
+        auditoria: auditoria.data ?? [],
+        clientesInativos: inativos.count ?? 0,
+        regrasAprendidas: regras.count ?? 0,
         relatoriosMes: relatoriosMes.count ?? 0,
+        clientes: clientes.data ?? [],
+        comps: comps.data ?? [],
       };
     },
   });
 
+  const m = useMemo(() => {
+    const docs = data?.docs ?? [];
+    const clientes = data?.clientes ?? [];
+    const comps = data?.comps ?? [];
+    const dias = Number(periodo);
+    const inicio = diasAtras(dias - 1);
+    const inicioAnterior = diasAtras(dias * 2 - 1);
+
+    const noPeriodo = docs.filter((d) => new Date(d.enviado_em) >= inicio);
+    const anterior = docs.filter((d) => {
+      const t = new Date(d.enviado_em);
+      return t >= inicioAnterior && t < inicio;
+    });
+    const delta =
+      anterior.length === 0
+        ? noPeriodo.length > 0
+          ? 100
+          : 0
+        : ((noPeriodo.length - anterior.length) / anterior.length) * 100;
+
+    const porDia = new Map<string, { recebidos: number; processados: number; erros: number }>();
+    for (let i = dias - 1; i >= 0; i--)
+      porDia.set(chaveDia(diasAtras(i)), { recebidos: 0, processados: 0, erros: 0 });
+    noPeriodo.forEach((d) => {
+      const k = chaveDia(new Date(d.enviado_em));
+      const row = porDia.get(k);
+      if (!row) return;
+      row.recebidos++;
+      if (d.status_processamento === "processado") row.processados++;
+      if (d.status_processamento === "erro") row.erros++;
+    });
+    const trend = Array.from(porDia.entries()).map(([k, v]) => {
+      const [, mm, dd] = k.split("-");
+      return { dia: `${dd}/${mm}`, ...v };
+    });
+    const sparkline = trend.map((t) => t.recebidos);
+
+    const status = { recebido: 0, processando: 0, processado: 0, erro: 0 };
+    docs.forEach((d) => {
+      const s = d.status_processamento as keyof typeof status;
+      if (s in status) status[s]++;
+    });
+    const fila = status.recebido + status.processando;
+
+    const mesCorrente = `${mesAtual()}-01`;
+    const compsMes = comps.filter((c) => c.mes_ano === mesCorrente);
+    const abertas = comps.filter((c) => c.status === "aberta").length;
+    const emConc = comps.filter((c) => c.status === "em_conciliacao");
+    const fechadasMes = compsMes.filter((c) => c.status === "fechada").length;
+    const comTaxa = comps.filter((c) => c.taxa_conciliacao != null);
+    const taxaMedia = comTaxa.length
+      ? comTaxa.reduce((a, c) => a + (c.taxa_conciliacao ?? 0), 0) / comTaxa.length
+      : null;
+
+    const inicioMes = new Date();
+    inicioMes.setDate(1);
+    inicioMes.setHours(0, 0, 0, 0);
+    const clientesComDocMes = new Set(
+      docs.filter((d) => new Date(d.enviado_em) >= inicioMes).map((d) => d.cliente_id),
+    );
+    const pendentes = clientes.filter((c) => !clientesComDocMes.has(c.id));
+    const coberturaPct = clientes.length ? (clientesComDocMes.size / clientes.length) * 100 : 0;
+
+    const porCliente = new Map<string, number>();
+    noPeriodo.forEach((d) => {
+      const nome = d.clientes?.nome_fantasia ?? d.clientes?.nome ?? "—";
+      porCliente.set(nome, (porCliente.get(nome) ?? 0) + 1);
+    });
+    const topClientes = Array.from(porCliente.entries())
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 6)
+      .map(([cliente, total]) => ({ cliente, total }));
+
+    return {
+      noPeriodo: noPeriodo.length,
+      delta,
+      trend,
+      sparkline,
+      status,
+      fila,
+      abertas,
+      emConc,
+      fechadasMes,
+      compsMes,
+      taxaMedia,
+      pendentes,
+      coberturaPct,
+      clientesAtivos: clientes.length,
+      topClientes,
+      ultimos: docs.slice(0, 8),
+    };
+  }, [data, periodo]);
+
   const firstName = perfil?.nome?.split(" ")[0] ?? "equipe";
   const hora = new Date().getHours();
-  const saudacao =
-    hora < 12 ? "Bom dia" : hora < 18 ? "Boa tarde" : "Boa noite";
+  const saudacao = hora < 12 ? "Bom dia" : hora < 18 ? "Boa tarde" : "Boa noite";
 
-  /* ----- Stat cards -------------------------------------------------------- */
+  const donut = [
+    { name: "Processados", value: m.status.processado, color: CHART_COLORS.success },
+    { name: "Na fila", value: m.fila, color: CHART_COLORS.warning },
+    { name: "Com erro", value: m.status.erro, color: CHART_COLORS.danger },
+  ];
+  const totalDocs = donut.reduce((a, d) => a + d.value, 0);
 
-  const cards = [
+  const colunas: Column<Doc>[] = [
     {
-      label: "Clientes ativos",
-      valor: data?.clientesAtivos,
-      icone: Users,
-      cor: "bg-primary/10 text-primary",
-      gradiente: "from-primary/20 to-primary/5",
-      destaque: false,
+      key: "arquivo",
+      header: "Arquivo",
+      cell: (d) => (
+        <div className="flex items-center gap-2.5">
+          <span className="flex size-7 shrink-0 items-center justify-center rounded-md bg-primary/8 text-primary">
+            <FileText className="size-3.5" />
+          </span>
+          <div className="min-w-0">
+            <div className="truncate font-medium">{d.nome_original ?? "Arquivo"}</div>
+            <div className="truncate text-[0.6875rem] text-muted-foreground">
+              {rotuloTipo(d.tipo)}
+            </div>
+          </div>
+        </div>
+      ),
     },
     {
-      label: "Documentos no mes",
-      valor: data?.documentosMes,
-      icone: FileText,
-      cor: "bg-accent/10 text-accent",
-      gradiente: "from-accent/20 to-accent/5",
-      destaque: false,
+      key: "cliente",
+      header: "Cliente",
+      hideBelow: "md",
+      cell: (d) => (
+        <span className="text-muted-foreground">
+          {d.clientes?.nome_fantasia ?? d.clientes?.nome ?? "—"}
+        </span>
+      ),
     },
+    { key: "status", header: "Status", cell: (d) => pillDocumento(d.status_processamento, "xs") },
     {
-      label: "Documentos com erro",
-      valor: data?.documentosErro,
-      icone: AlertTriangle,
-      cor: "bg-destructive/10 text-destructive",
-      gradiente: "from-destructive/20 to-destructive/5",
-      destaque: (data?.documentosErro ?? 0) > 0,
-    },
-    {
-      label: "Competencias abertas",
-      valor: data?.competenciasAbertas,
-      icone: CalendarRange,
-      cor: "bg-warning/10 text-warning-foreground",
-      gradiente: "from-warning/20 to-warning/5",
-      destaque: false,
+      key: "quando",
+      header: "Recebido",
+      hideBelow: "lg",
+      align: "right",
+      cell: (d) => (
+        <span className="text-xs text-muted-foreground tabular-nums">
+          {formatarDataHora(d.enviado_em)}
+        </span>
+      ),
     },
   ];
-
-  /* ----- Quick actions ----------------------------------------------------- */
-
-  const acoes = [
-    {
-      label: "Novo cliente",
-      icone: Plus,
-      to: "/empresas/$id/clientes" as const,
-    },
-    {
-      label: "Upload documento",
-      icone: Upload,
-      to: "/empresas/$id/documentos" as const,
-    },
-    {
-      label: "Configurar empresa",
-      icone: Settings,
-      to: "/empresas/$id/configuracoes" as const,
-    },
-    {
-      label: "Ver competencias",
-      icone: CalendarRange,
-      to: "/empresas/$id/competencias" as const,
-    },
-  ];
-
-  /* ----- Render ------------------------------------------------------------ */
 
   return (
-    <div className="space-y-8">
-      {/* Header */}
-      <div>
-        <h1 className="page-title">
-          {saudacao}, {firstName}
-        </h1>
-        <p className="page-subtitle">
-          Painel administrativo da empresa — resumo geral e acoes rapidas.
-        </p>
-      </div>
+    <div className="space-y-5">
+      <PageHeader
+        eyebrow={empresa?.nome}
+        title={`${saudacao}, ${firstName}`}
+        description="Visão operacional da empresa: recebimento, processamento, conciliação e fechamento do mês."
+        actions={
+          <>
+            <Segmented
+              value={periodo}
+              onChange={setPeriodo}
+              items={[
+                { value: "7", label: "7 dias" },
+                { value: "30", label: "30 dias" },
+                { value: "90", label: "90 dias" },
+              ]}
+            />
+            <Button asChild size="sm" className="h-8 rounded-lg">
+              <Link to="/empresas/$id/documentos" params={{ id: empresaId }} search={{ novo: "1" }}>
+                <Upload className="size-3.5" /> Upload manual
+              </Link>
+            </Button>
+          </>
+        }
+      />
 
-      {/* Row 1: Stat cards */}
-      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        {cards.map(({ label, valor, icone: Icone, cor, gradiente, destaque }) => (
-          <div key={label} className="stat-card group">
-            {destaque && (
-              <div className="absolute inset-x-0 top-0 h-0.5 bg-gradient-to-r from-destructive to-destructive/50" />
-            )}
-            <div className="flex items-start justify-between">
-              <div className={`stat-card-icon bg-gradient-to-br ${gradiente}`}>
-                <Icone className={`size-[1.125rem] ${cor.split(" ").pop()}`} />
-              </div>
-              {!destaque && (
-                <TrendingUp className="size-4 text-success opacity-60 transition-opacity group-hover:opacity-100" />
-              )}
-              {destaque && (data?.documentosErro ?? 0) > 0 && (
-                <span className="text-xs font-semibold text-destructive">
-                  Atencao
-                </span>
-              )}
-            </div>
-            <div className="mt-4">
-              {isLoading ? (
-                <Skeleton className="h-9 w-16" />
-              ) : (
-                <div className="text-3xl font-bold tracking-tight">
-                  {valor ?? 0}
-                </div>
-              )}
-              <p className="mt-0.5 text-[0.8125rem] text-muted-foreground">
-                {label}
-              </p>
-            </div>
-          </div>
-        ))}
-      </div>
+      <KpiGrid cols={6}>
+        <KpiCard
+          label="Clientes ativos"
+          value={m.clientesAtivos}
+          icon={Users}
+          tone="primary"
+          loading={isLoading}
+          progress={m.coberturaPct}
+          footer={`${Math.round(m.coberturaPct)}% já enviaram este mês`}
+          hint="Clientes ativos e o percentual que já enviou ao menos um documento no mês corrente."
+        />
+        <KpiCard
+          label={`Documentos · ${periodo}d`}
+          value={m.noPeriodo}
+          icon={FileText}
+          tone="accent"
+          loading={isLoading}
+          delta={m.delta}
+          deltaLabel="vs. período anterior"
+          sparkline={m.sparkline}
+          hint="Documentos recebidos no período selecionado, comparados ao período imediatamente anterior."
+        />
+        <KpiCard
+          label="Na fila"
+          value={m.fila}
+          icon={Hourglass}
+          tone={m.fila > 0 ? "warning" : "neutral"}
+          loading={isLoading}
+          footer="recebidos + processando"
+          hint="Documentos aguardando leitura automática ou em processamento pela IA."
+        />
+        <KpiCard
+          label="Com erro"
+          value={m.status.erro}
+          icon={AlertTriangle}
+          tone={m.status.erro > 0 ? "danger" : "neutral"}
+          loading={isLoading}
+          footer={m.status.erro > 0 ? "precisam de atenção" : "nenhum erro"}
+          hint="Documentos que a leitura automática não conseguiu processar. Reprocesse ou substitua o arquivo."
+        />
+        <KpiCard
+          label="Competências abertas"
+          value={m.abertas}
+          icon={CalendarRange}
+          tone="primary"
+          loading={isLoading}
+          footer={`${m.emConc.length} em conciliação`}
+          hint="Períodos contábeis ainda não fechados em todos os clientes."
+        />
+        <KpiCard
+          label="Conciliação média"
+          value={m.taxaMedia == null ? "—" : `${Math.round(m.taxaMedia)}%`}
+          icon={Scale}
+          tone={m.taxaMedia != null && m.taxaMedia >= 80 ? "success" : "warning"}
+          loading={isLoading}
+          progress={m.taxaMedia ?? 0}
+          hint="Percentual médio de lançamentos conciliados automaticamente entre banco e contabilidade."
+        />
+      </KpiGrid>
 
-      {/* Row 2: Activity timeline + System health */}
-      <div className="grid gap-6 lg:grid-cols-2">
-        {/* Left: Atividade recente */}
-        <div className="card-section">
-          <div className="card-section-header">
-            <div>
-              <h2 className="text-base font-semibold">Atividade recente</h2>
-              <p className="mt-0.5 text-[0.8125rem] text-muted-foreground">
-                Ultimos eventos registrados na auditoria
-              </p>
-            </div>
-            <Activity className="size-4 text-muted-foreground" />
-          </div>
-          <div className="card-section-body">
-            {isLoading ? (
-              <div className="space-y-2 p-4">
-                {[1, 2, 3, 4].map((i) => (
-                  <Skeleton key={i} className="h-10 w-full rounded-xl" />
-                ))}
-              </div>
-            ) : data && data.auditoria.length > 0 ? (
-              <div className="divide-y divide-border/40">
-                {data.auditoria.map((evt) => (
-                  <div key={evt.id} className="list-row">
-                    <div className="list-row-icon bg-gradient-to-br from-accent/15 to-accent/5 text-accent">
-                      <ClipboardList className="size-4" />
-                    </div>
-                    <div className="min-w-0 flex-1">
-                      <span className="block truncate text-sm font-medium">
-                        {evt.evento}
-                      </span>
-                      <span className="text-xs text-muted-foreground">
-                        {evt.usuario ?? "Sistema"}
-                        {" · "}
-                        {formatarDataHora(evt.created_at)}
-                      </span>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <div className="empty-state">
-                <Activity className="empty-state-icon" />
-                <p className="empty-state-text">
-                  Nenhuma atividade registrada ainda.
-                </p>
-              </div>
-            )}
-          </div>
-        </div>
+      <div className="grid gap-4 lg:grid-cols-3">
+        <SectionCard
+          className="lg:col-span-2"
+          title="Recebimento de documentos"
+          description="Volume diário recebido no período. As faixas mostram quantos foram processados com sucesso e quantos deram erro."
+          icon={FileText}
+          actions={
+            <Link
+              to="/empresas/$id/documentos"
+              params={{ id: empresaId }}
+              className="flex items-center gap-1 text-xs font-medium text-primary hover:underline"
+            >
+              Ver documentos <ArrowUpRight className="size-3" />
+            </Link>
+          }
+        >
+          {m.noPeriodo === 0 && !isLoading ? (
+            <EmptyState
+              icon={FileText}
+              title="Nenhum documento no período"
+              hint="Quando os clientes enviarem arquivos, o gráfico aparece aqui."
+              compact
+            />
+          ) : (
+            <AreaTrend
+              data={m.trend}
+              xKey="dia"
+              height={230}
+              series={[
+                { key: "recebidos", label: "Recebidos", color: CHART_COLORS.primary },
+                { key: "processados", label: "Processados", color: CHART_COLORS.success },
+                { key: "erros", label: "Com erro", color: CHART_COLORS.danger },
+              ]}
+            />
+          )}
+        </SectionCard>
 
-        {/* Right: Saude do sistema */}
-        <div className="card-section">
-          <div className="card-section-header">
-            <div>
-              <h2 className="text-base font-semibold">Saude do sistema</h2>
-              <p className="mt-0.5 text-[0.8125rem] text-muted-foreground">
-                Indicadores rapidos sobre a operacao
-              </p>
-            </div>
-            <TrendingUp className="size-4 text-muted-foreground" />
-          </div>
-          <div className="card-section-body">
-            {isLoading ? (
-              <div className="space-y-2 p-4">
-                {[1, 2, 3, 4].map((i) => (
-                  <Skeleton key={i} className="h-10 w-full rounded-xl" />
-                ))}
-              </div>
-            ) : (
-              <div className="divide-y divide-border/40">
-                <HealthRow
-                  icone={UserMinus}
-                  label="Clientes inativos"
-                  valor={data?.clientesInativos ?? 0}
-                  cor="text-muted-foreground"
-                />
-                <HealthRow
-                  icone={BookOpen}
-                  label="Regras de aprendizado"
-                  valor={data?.regrasAprendizado ?? 0}
-                  cor="text-primary"
-                />
-                <HealthRow
-                  icone={FileText}
-                  label="Relatorios gerados este mes"
-                  valor={data?.relatoriosMes ?? 0}
-                  cor="text-accent"
-                />
-                <div className="list-row">
-                  <div className="list-row-icon bg-gradient-to-br from-primary/15 to-primary/5 text-primary">
-                    <Settings className="size-4" />
-                  </div>
-                  <div className="min-w-0 flex-1">
-                    <span className="block text-sm font-medium">
-                      Gerenciar modulos
-                    </span>
-                    <span className="text-xs text-muted-foreground">
-                      Ativar ou desativar funcionalidades
-                    </span>
-                  </div>
+        <SectionCard
+          title="Status do processamento"
+          description="Distribuição de todos os documentos dos últimos 6 meses por situação."
+          icon={Scale}
+        >
+          <div className="flex items-center gap-5">
+            <Donut
+              data={donut}
+              size={150}
+              center={{ value: String(totalDocs), label: "documentos" }}
+            />
+            <div className="flex-1">
+              <Legend
+                items={donut.map((d) => ({
+                  ...d,
+                  value: totalDocs
+                    ? `${d.value} · ${Math.round((d.value / totalDocs) * 100)}%`
+                    : "0",
+                }))}
+              />
+              <div className="mt-4 rounded-lg bg-muted/60 px-3 py-2 text-[0.6875rem] text-muted-foreground">
+                {m.status.erro > 0 ? (
                   <Link
-                    to="/empresas/$id/configuracoes"
+                    to="/empresas/$id/documentos"
                     params={{ id: empresaId }}
-                    className="flex items-center gap-1 text-sm font-medium text-primary hover:underline"
+                    search={{ aba: "erro" }}
+                    className="font-medium text-destructive hover:underline"
                   >
-                    Abrir
-                    <ArrowUpRight className="size-3.5" />
+                    Resolver {m.status.erro} com erro →
                   </Link>
-                </div>
+                ) : (
+                  "Sem documentos com erro."
+                )}
               </div>
-            )}
+            </div>
           </div>
-        </div>
+        </SectionCard>
       </div>
 
-      {/* Row 3: Ultimos documentos */}
-      <div className="card-section">
-        <div className="card-section-header">
-          <div>
-            <h2 className="text-base font-semibold">
-              Ultimos documentos recebidos
-            </h2>
-            <p className="mt-0.5 text-[0.8125rem] text-muted-foreground">
-              Documentos mais recentes enviados pelos clientes
-            </p>
+      <div className="grid gap-4 lg:grid-cols-3">
+        <SectionCard
+          title={`Fechamento · ${formatarCompetencia(`${mesAtual()}-01`)}`}
+          description="Andamento das competências do mês corrente. Cada cliente precisa chegar a 'fechada' para o pacote de relatórios sair."
+          icon={CalendarRange}
+          actions={
+            <Link
+              to="/empresas/$id/competencias"
+              params={{ id: empresaId }}
+              className="text-xs font-medium text-primary hover:underline"
+            >
+              Gerenciar
+            </Link>
+          }
+        >
+          <div className="grid grid-cols-3 gap-2">
+            {[
+              {
+                label: "Abertas",
+                v: m.compsMes.filter((c) => c.status === "aberta").length,
+                cls: "text-success",
+              },
+              {
+                label: "Conciliando",
+                v: m.compsMes.filter((c) => c.status === "em_conciliacao").length,
+                cls: "text-warning-foreground",
+              },
+              { label: "Fechadas", v: m.fechadasMes, cls: "text-muted-foreground" },
+            ].map((s) => (
+              <div key={s.label} className="rounded-lg bg-muted/50 px-3 py-2">
+                <div className={`text-lg font-bold tabular-nums ${s.cls}`}>{s.v}</div>
+                <div className="text-[0.6875rem] text-muted-foreground">{s.label}</div>
+              </div>
+            ))}
           </div>
-          <Link
-            to="/empresas/$id/documentos"
-            params={{ id: empresaId }}
-            className="flex items-center gap-1 rounded-lg px-2.5 py-1.5 text-sm font-medium text-primary transition-colors hover:bg-primary/5"
-          >
-            Ver todos
-            <ArrowUpRight className="size-3.5" />
-          </Link>
-        </div>
-        <div className="card-section-body">
-          {isLoading ? (
-            <div className="space-y-2 p-4">
-              {[1, 2, 3].map((i) => (
-                <Skeleton key={i} className="h-12 w-full rounded-xl" />
-              ))}
+          <div className="mt-3">
+            <ProgressBar
+              value={m.compsMes.length ? (m.fechadasMes / m.compsMes.length) * 100 : 0}
+              tone="success"
+            />
+            <div className="mt-1 text-[0.6875rem] text-muted-foreground">
+              {m.fechadasMes} de {m.compsMes.length} competências fechadas
             </div>
-          ) : data && data.ultimos.length > 0 ? (
+          </div>
+          <div className="mt-4 divide-y divide-border/40">
+            {m.emConc.slice(0, 4).map((c) => (
+              <Link
+                key={c.id}
+                to="/empresas/$id/conciliacao"
+                params={{ id: empresaId }}
+                search={{ cliente: c.cliente_id, competencia: c.id }}
+                className="flex items-center gap-3 py-2 hover:bg-muted/40"
+              >
+                <div className="min-w-0 flex-1">
+                  <div className="truncate text-xs font-medium">
+                    {c.clientes?.nome_fantasia ?? c.clientes?.nome}
+                  </div>
+                  <div className="text-[0.6875rem] text-muted-foreground">
+                    {formatarCompetencia(c.mes_ano)}
+                  </div>
+                </div>
+                <div className="w-20">
+                  <ProgressBar value={c.taxa_conciliacao ?? 0} tone="warning" />
+                </div>
+                <span className="w-9 text-right text-xs font-semibold tabular-nums">
+                  {Math.round(c.taxa_conciliacao ?? 0)}%
+                </span>
+              </Link>
+            ))}
+            {m.emConc.length === 0 && !isLoading && (
+              <p className="py-3 text-center text-xs text-muted-foreground">
+                Nenhuma competência em conciliação.
+              </p>
+            )}
+          </div>
+        </SectionCard>
+
+        <SectionCard
+          title="Pendências de envio"
+          description="Clientes ativos que ainda não enviaram nenhum documento no mês corrente. Use 'Cobrar' para abrir o WhatsApp com a mensagem pronta."
+          icon={MessageCircle}
+          actions={
+            <span
+              className={`text-xs font-semibold ${m.pendentes.length ? "text-warning-foreground" : "text-success"}`}
+            >
+              {m.pendentes.length} clientes
+            </span>
+          }
+        >
+          {m.pendentes.length === 0 && !isLoading ? (
+            <EmptyState
+              icon={CheckCircle2}
+              title="Todos enviaram"
+              hint="Cada cliente ativo já mandou ao menos um documento este mês."
+              compact
+            />
+          ) : (
             <div className="divide-y divide-border/40">
-              {data.ultimos.map((doc) => {
-                const clienteNome =
-                  doc.clientes?.nome_fantasia ?? doc.clientes?.nome ?? "—";
+              {m.pendentes.slice(0, 6).map((c) => {
+                const nome = c.nome_fantasia ?? c.nome ?? "Cliente";
+                const link =
+                  c.upload_token && typeof window !== "undefined"
+                    ? `${window.location.origin}/upload/${c.upload_token}`
+                    : null;
+                const msg = mensagemCobranca(nome, mesAtual(), empresa?.nome ?? "ConcilIA", link);
                 return (
-                  <div key={doc.id} className="list-row">
-                    <div className="list-row-icon bg-gradient-to-br from-primary/15 to-primary/5 text-primary">
-                      <FileText className="size-4" />
-                    </div>
-                    <div className="min-w-0 flex-1">
-                      <span className="block truncate text-sm font-medium">
-                        {doc.nome_original ?? "Arquivo"}
-                      </span>
-                      <span className="text-xs text-muted-foreground">
-                        {rotuloTipo(doc.tipo)}
-                      </span>
-                    </div>
-                    <div className="hidden items-center gap-2 sm:flex">
-                      <span className="max-w-[10rem] truncate text-xs font-medium text-foreground/80">
-                        {clienteNome}
-                      </span>
-                    </div>
-                    <div className="flex items-center gap-3">
-                      {badgeStatus(doc.status_processamento)}
-                      <span className="hidden text-xs text-muted-foreground md:block">
-                        {formatarDataHora(doc.enviado_em)}
-                      </span>
-                    </div>
+                  <div key={c.id} className="flex items-center gap-3 py-2">
+                    <span className="size-1.5 shrink-0 rounded-full bg-warning" />
+                    <Link
+                      to="/empresas/$id/clientes/$clienteId"
+                      params={{ id: empresaId, clienteId: c.id }}
+                      className="min-w-0 flex-1 truncate text-xs font-medium hover:underline"
+                    >
+                      {nome}
+                    </Link>
+                    <a
+                      href={linkWhatsApp(c.telefone, msg)}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="flex items-center gap-1 rounded-md bg-success/10 px-2 py-1 text-[0.6875rem] font-semibold text-success hover:bg-success/20"
+                    >
+                      <MessageCircle className="size-3" /> Cobrar
+                    </a>
                   </div>
                 );
               })}
-            </div>
-          ) : (
-            <div className="empty-state">
-              <FileText className="empty-state-icon" />
-              <p className="empty-state-text">
-                Nenhum documento recebido ainda.
-              </p>
-              <Link
-                to="/empresas/$id/clientes"
-                params={{ id: empresaId }}
-                className="mt-2 inline-block text-sm font-medium text-primary hover:underline"
-              >
-                Cadastre um cliente e compartilhe o link de upload.
-              </Link>
+              {m.pendentes.length > 6 && (
+                <Link
+                  to="/empresas/$id/clientes"
+                  params={{ id: empresaId }}
+                  search={{ filtro: "pendentes" }}
+                  className="block pt-2 text-center text-xs font-medium text-primary hover:underline"
+                >
+                  Ver todos os {m.pendentes.length} pendentes
+                </Link>
+              )}
             </div>
           )}
-        </div>
+        </SectionCard>
+
+        <SectionCard
+          title="Documentos por cliente"
+          description="Clientes que mais enviaram no período selecionado."
+          icon={Users}
+        >
+          {m.topClientes.length === 0 ? (
+            <EmptyState icon={Users} title="Sem envios no período" compact />
+          ) : (
+            <Bars
+              data={m.topClientes}
+              xKey="cliente"
+              horizontal
+              height={Math.max(160, m.topClientes.length * 34)}
+              series={[{ key: "total", label: "Documentos", color: CHART_COLORS.primary }]}
+            />
+          )}
+        </SectionCard>
       </div>
 
-      {/* Row 4: Acoes rapidas */}
-      <div className="card-section">
-        <div className="card-section-header">
-          <div>
-            <h2 className="text-base font-semibold">Acoes rapidas</h2>
-            <p className="mt-0.5 text-[0.8125rem] text-muted-foreground">
-              Atalhos para as areas mais usadas
-            </p>
-          </div>
-        </div>
-        <div className="card-section-body p-4">
-          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-            {acoes.map(({ label, icone: Icone, to }) => (
-              <Button key={label} variant="outline" className="h-auto justify-start gap-3 px-4 py-3" asChild>
-                <Link to={to} params={{ id: empresaId }}>
-                  <Icone className="size-4 shrink-0 text-primary" />
-                  <span className="text-sm font-medium">{label}</span>
-                </Link>
-              </Button>
+      <div className="grid gap-4 lg:grid-cols-3">
+        <SectionCard
+          className="lg:col-span-2"
+          title="Últimos documentos recebidos"
+          icon={FileText}
+          flush
+          actions={
+            <Link
+              to="/empresas/$id/documentos"
+              params={{ id: empresaId }}
+              className="flex items-center gap-1 text-xs font-medium text-primary hover:underline"
+            >
+              Ver todos <ArrowUpRight className="size-3" />
+            </Link>
+          }
+        >
+          <DataTable
+            rows={m.ultimos}
+            columns={colunas}
+            rowKey={(d) => d.id}
+            loading={isLoading}
+            dense
+            emptyTitle="Nenhum documento recebido ainda"
+            emptyHint="Cadastre um cliente e compartilhe o link de upload."
+          />
+        </SectionCard>
+
+        <SectionCard
+          title="Atividade recente"
+          description="Últimos eventos registrados na auditoria e indicadores rápidos da operação."
+          icon={Activity}
+        >
+          <div className="grid grid-cols-3 gap-2">
+            {[
+              {
+                icone: Brain,
+                v: data?.regrasAprendidas ?? 0,
+                l: "regras aprendidas",
+                cls: "text-primary",
+              },
+              {
+                icone: FileBarChart2,
+                v: data?.relatoriosMes ?? 0,
+                l: "relatórios no mês",
+                cls: "text-accent",
+              },
+              {
+                icone: UserMinus,
+                v: data?.clientesInativos ?? 0,
+                l: "clientes inativos",
+                cls: "text-muted-foreground",
+              },
+            ].map(({ icone: Icone, v, l, cls }) => (
+              <div key={l} className="rounded-lg bg-muted/50 px-2.5 py-2">
+                <Icone className={`size-3.5 ${cls}`} />
+                <div className={`mt-1 text-lg font-bold leading-none tabular-nums ${cls}`}>{v}</div>
+                <div className="mt-1 text-[0.625rem] leading-tight text-muted-foreground">{l}</div>
+              </div>
             ))}
           </div>
-        </div>
+          <div className="mt-4 divide-y divide-border/40">
+            {(data?.auditoria ?? []).length === 0 && !isLoading && (
+              <p className="py-3 text-center text-xs text-muted-foreground">
+                Nenhuma atividade registrada ainda.
+              </p>
+            )}
+            {(data?.auditoria ?? []).map((evt) => (
+              <div key={evt.id} className="flex items-start gap-2.5 py-2">
+                <span className="mt-1.5 size-1.5 shrink-0 rounded-full bg-accent" />
+                <div className="min-w-0 flex-1">
+                  <div className="truncate text-xs font-medium">{evt.evento}</div>
+                  <div className="text-[0.6875rem] text-muted-foreground">
+                    {evt.usuario ?? "Sistema"} · {formatarDataHora(evt.created_at)}
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </SectionCard>
       </div>
-    </div>
-  );
-}
-
-/* -------------------------------------------------------------------------- */
-/*  HealthRow helper                                                          */
-/* -------------------------------------------------------------------------- */
-
-function HealthRow({
-  icone: Icone,
-  label,
-  valor,
-  cor,
-}: {
-  icone: React.ComponentType<{ className?: string }>;
-  label: string;
-  valor: number;
-  cor: string;
-}) {
-  return (
-    <div className="list-row">
-      <div className={`list-row-icon bg-gradient-to-br from-secondary to-secondary/50 ${cor}`}>
-        <Icone className="size-4" />
-      </div>
-      <div className="min-w-0 flex-1">
-        <span className="block text-sm font-medium">{label}</span>
-      </div>
-      <span className="text-lg font-bold tabular-nums">{valor}</span>
     </div>
   );
 }

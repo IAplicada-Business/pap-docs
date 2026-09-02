@@ -31,8 +31,10 @@ import { Route as ApiPublicUploadRouteImport } from './routes/api/public/upload'
 import { Route as ApiPublicUploadInfoRouteImport } from './routes/api/public/upload-info'
 import { Route as AuthenticatedEmpresasIdIndexRouteImport } from './routes/_authenticated/empresas.$id/index'
 import { Route as AuthenticatedEmpresasIdCompetenciasRouteImport } from './routes/_authenticated/empresas.$id/competencias'
+import { Route as AuthenticatedEmpresasIdConciliacaoRouteImport } from './routes/_authenticated/empresas.$id/conciliacao'
 import { Route as AuthenticatedEmpresasIdConfiguracoesRouteImport } from './routes/_authenticated/empresas.$id/configuracoes'
 import { Route as AuthenticatedEmpresasIdDocumentosRouteImport } from './routes/_authenticated/empresas.$id/documentos'
+import { Route as AuthenticatedEmpresasIdRelatoriosRouteImport } from './routes/_authenticated/empresas.$id/relatorios'
 import { Route as AuthenticatedEmpresasIdClientesIndexRouteImport } from './routes/_authenticated/empresas.$id/clientes.index'
 import { Route as AuthenticatedEmpresasIdClientesClienteIdRouteImport } from './routes/_authenticated/empresas.$id/clientes.$clienteId'
 
@@ -153,6 +155,12 @@ const AuthenticatedEmpresasIdCompetenciasRoute =
     path: '/competencias',
     getParentRoute: () => AuthenticatedEmpresasIdRouteRoute,
   } as any)
+const AuthenticatedEmpresasIdConciliacaoRoute =
+  AuthenticatedEmpresasIdConciliacaoRouteImport.update({
+    id: '/conciliacao',
+    path: '/conciliacao',
+    getParentRoute: () => AuthenticatedEmpresasIdRouteRoute,
+  } as any)
 const AuthenticatedEmpresasIdConfiguracoesRoute =
   AuthenticatedEmpresasIdConfiguracoesRouteImport.update({
     id: '/configuracoes',
@@ -163,6 +171,12 @@ const AuthenticatedEmpresasIdDocumentosRoute =
   AuthenticatedEmpresasIdDocumentosRouteImport.update({
     id: '/documentos',
     path: '/documentos',
+    getParentRoute: () => AuthenticatedEmpresasIdRouteRoute,
+  } as any)
+const AuthenticatedEmpresasIdRelatoriosRoute =
+  AuthenticatedEmpresasIdRelatoriosRouteImport.update({
+    id: '/relatorios',
+    path: '/relatorios',
     getParentRoute: () => AuthenticatedEmpresasIdRouteRoute,
   } as any)
 const AuthenticatedEmpresasIdClientesIndexRoute =
@@ -199,8 +213,10 @@ export interface FileRoutesByFullPath {
   '/clientes/': typeof AuthenticatedClientesIndexRoute
   '/empresas/': typeof AuthenticatedEmpresasIndexRoute
   '/empresas/$id/competencias': typeof AuthenticatedEmpresasIdCompetenciasRoute
+  '/empresas/$id/conciliacao': typeof AuthenticatedEmpresasIdConciliacaoRoute
   '/empresas/$id/configuracoes': typeof AuthenticatedEmpresasIdConfiguracoesRoute
   '/empresas/$id/documentos': typeof AuthenticatedEmpresasIdDocumentosRoute
+  '/empresas/$id/relatorios': typeof AuthenticatedEmpresasIdRelatoriosRoute
   '/empresas/$id/': typeof AuthenticatedEmpresasIdIndexRoute
   '/empresas/$id/clientes/$clienteId': typeof AuthenticatedEmpresasIdClientesClienteIdRoute
   '/empresas/$id/clientes/': typeof AuthenticatedEmpresasIdClientesIndexRoute
@@ -225,8 +241,10 @@ export interface FileRoutesByTo {
   '/clientes': typeof AuthenticatedClientesIndexRoute
   '/empresas': typeof AuthenticatedEmpresasIndexRoute
   '/empresas/$id/competencias': typeof AuthenticatedEmpresasIdCompetenciasRoute
+  '/empresas/$id/conciliacao': typeof AuthenticatedEmpresasIdConciliacaoRoute
   '/empresas/$id/configuracoes': typeof AuthenticatedEmpresasIdConfiguracoesRoute
   '/empresas/$id/documentos': typeof AuthenticatedEmpresasIdDocumentosRoute
+  '/empresas/$id/relatorios': typeof AuthenticatedEmpresasIdRelatoriosRoute
   '/empresas/$id': typeof AuthenticatedEmpresasIdIndexRoute
   '/empresas/$id/clientes/$clienteId': typeof AuthenticatedEmpresasIdClientesClienteIdRoute
   '/empresas/$id/clientes': typeof AuthenticatedEmpresasIdClientesIndexRoute
@@ -254,8 +272,10 @@ export interface FileRoutesById {
   '/_authenticated/clientes/': typeof AuthenticatedClientesIndexRoute
   '/_authenticated/empresas/': typeof AuthenticatedEmpresasIndexRoute
   '/_authenticated/empresas/$id/competencias': typeof AuthenticatedEmpresasIdCompetenciasRoute
+  '/_authenticated/empresas/$id/conciliacao': typeof AuthenticatedEmpresasIdConciliacaoRoute
   '/_authenticated/empresas/$id/configuracoes': typeof AuthenticatedEmpresasIdConfiguracoesRoute
   '/_authenticated/empresas/$id/documentos': typeof AuthenticatedEmpresasIdDocumentosRoute
+  '/_authenticated/empresas/$id/relatorios': typeof AuthenticatedEmpresasIdRelatoriosRoute
   '/_authenticated/empresas/$id/': typeof AuthenticatedEmpresasIdIndexRoute
   '/_authenticated/empresas/$id/clientes/$clienteId': typeof AuthenticatedEmpresasIdClientesClienteIdRoute
   '/_authenticated/empresas/$id/clientes/': typeof AuthenticatedEmpresasIdClientesIndexRoute
@@ -283,8 +303,10 @@ export interface FileRouteTypes {
     | '/clientes/'
     | '/empresas/'
     | '/empresas/$id/competencias'
+    | '/empresas/$id/conciliacao'
     | '/empresas/$id/configuracoes'
     | '/empresas/$id/documentos'
+    | '/empresas/$id/relatorios'
     | '/empresas/$id/'
     | '/empresas/$id/clientes/$clienteId'
     | '/empresas/$id/clientes/'
@@ -309,8 +331,10 @@ export interface FileRouteTypes {
     | '/clientes'
     | '/empresas'
     | '/empresas/$id/competencias'
+    | '/empresas/$id/conciliacao'
     | '/empresas/$id/configuracoes'
     | '/empresas/$id/documentos'
+    | '/empresas/$id/relatorios'
     | '/empresas/$id'
     | '/empresas/$id/clientes/$clienteId'
     | '/empresas/$id/clientes'
@@ -337,8 +361,10 @@ export interface FileRouteTypes {
     | '/_authenticated/clientes/'
     | '/_authenticated/empresas/'
     | '/_authenticated/empresas/$id/competencias'
+    | '/_authenticated/empresas/$id/conciliacao'
     | '/_authenticated/empresas/$id/configuracoes'
     | '/_authenticated/empresas/$id/documentos'
+    | '/_authenticated/empresas/$id/relatorios'
     | '/_authenticated/empresas/$id/'
     | '/_authenticated/empresas/$id/clientes/$clienteId'
     | '/_authenticated/empresas/$id/clientes/'
@@ -513,6 +539,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedEmpresasIdCompetenciasRouteImport
       parentRoute: typeof AuthenticatedEmpresasIdRouteRoute
     }
+    '/_authenticated/empresas/$id/conciliacao': {
+      id: '/_authenticated/empresas/$id/conciliacao'
+      path: '/conciliacao'
+      fullPath: '/empresas/$id/conciliacao'
+      preLoaderRoute: typeof AuthenticatedEmpresasIdConciliacaoRouteImport
+      parentRoute: typeof AuthenticatedEmpresasIdRouteRoute
+    }
     '/_authenticated/empresas/$id/configuracoes': {
       id: '/_authenticated/empresas/$id/configuracoes'
       path: '/configuracoes'
@@ -525,6 +558,13 @@ declare module '@tanstack/react-router' {
       path: '/documentos'
       fullPath: '/empresas/$id/documentos'
       preLoaderRoute: typeof AuthenticatedEmpresasIdDocumentosRouteImport
+      parentRoute: typeof AuthenticatedEmpresasIdRouteRoute
+    }
+    '/_authenticated/empresas/$id/relatorios': {
+      id: '/_authenticated/empresas/$id/relatorios'
+      path: '/relatorios'
+      fullPath: '/empresas/$id/relatorios'
+      preLoaderRoute: typeof AuthenticatedEmpresasIdRelatoriosRouteImport
       parentRoute: typeof AuthenticatedEmpresasIdRouteRoute
     }
     '/_authenticated/empresas/$id/clientes/': {
@@ -546,8 +586,10 @@ declare module '@tanstack/react-router' {
 
 interface AuthenticatedEmpresasIdRouteRouteChildren {
   AuthenticatedEmpresasIdCompetenciasRoute: typeof AuthenticatedEmpresasIdCompetenciasRoute
+  AuthenticatedEmpresasIdConciliacaoRoute: typeof AuthenticatedEmpresasIdConciliacaoRoute
   AuthenticatedEmpresasIdConfiguracoesRoute: typeof AuthenticatedEmpresasIdConfiguracoesRoute
   AuthenticatedEmpresasIdDocumentosRoute: typeof AuthenticatedEmpresasIdDocumentosRoute
+  AuthenticatedEmpresasIdRelatoriosRoute: typeof AuthenticatedEmpresasIdRelatoriosRoute
   AuthenticatedEmpresasIdIndexRoute: typeof AuthenticatedEmpresasIdIndexRoute
   AuthenticatedEmpresasIdClientesClienteIdRoute: typeof AuthenticatedEmpresasIdClientesClienteIdRoute
   AuthenticatedEmpresasIdClientesIndexRoute: typeof AuthenticatedEmpresasIdClientesIndexRoute
@@ -557,10 +599,14 @@ const AuthenticatedEmpresasIdRouteRouteChildren: AuthenticatedEmpresasIdRouteRou
   {
     AuthenticatedEmpresasIdCompetenciasRoute:
       AuthenticatedEmpresasIdCompetenciasRoute,
+    AuthenticatedEmpresasIdConciliacaoRoute:
+      AuthenticatedEmpresasIdConciliacaoRoute,
     AuthenticatedEmpresasIdConfiguracoesRoute:
       AuthenticatedEmpresasIdConfiguracoesRoute,
     AuthenticatedEmpresasIdDocumentosRoute:
       AuthenticatedEmpresasIdDocumentosRoute,
+    AuthenticatedEmpresasIdRelatoriosRoute:
+      AuthenticatedEmpresasIdRelatoriosRoute,
     AuthenticatedEmpresasIdIndexRoute: AuthenticatedEmpresasIdIndexRoute,
     AuthenticatedEmpresasIdClientesClienteIdRoute:
       AuthenticatedEmpresasIdClientesClienteIdRoute,
@@ -618,3 +664,13 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
