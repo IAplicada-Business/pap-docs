@@ -318,30 +318,36 @@ export type Database = {
       }
       organizations: {
         Row: {
+          cor_acento: string | null
           cor_primaria: string
           created_at: string
           deleted_at: string | null
           id: string
           logo_url: string | null
           nome: string
+          status: string
           updated_at: string
         }
         Insert: {
+          cor_acento?: string | null
           cor_primaria?: string
           created_at?: string
           deleted_at?: string | null
           id?: string
           logo_url?: string | null
           nome: string
+          status?: string
           updated_at?: string
         }
         Update: {
+          cor_acento?: string | null
           cor_primaria?: string
           created_at?: string
           deleted_at?: string | null
           id?: string
           logo_url?: string | null
           nome?: string
+          status?: string
           updated_at?: string
         }
         Relationships: []

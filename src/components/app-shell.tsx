@@ -1,38 +1,51 @@
 import type { ReactNode } from "react";
 import { useEffect, useState } from "react";
-import { Link, useNavigate } from "@tanstack/react-router";
+import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
 import {
-  LayoutDashboard,
-  Users,
-  FileText,
+  ArrowLeft,
+  Building2,
   CalendarRange,
-  Settings,
-  LogOut,
-  UsersRound,
-  Menu,
-  X,
   ChevronRight,
+  FileText,
+  LayoutDashboard,
+  LogOut,
+  Menu,
   PanelLeftClose,
   PanelLeftOpen,
+  Settings,
   Sparkles,
+  Users,
+  X,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
-import { usePerfil, useEscritorio, temPermissao } from "@/hooks/use-perfil";
+import { usePerfil, useEmpresa, temPermissao } from "@/hooks/use-perfil";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 
-const NAV_ITEMS = [
-  { to: "/dashboard", label: "Dashboard", icon: LayoutDashboard, permissao: null },
-  { to: "/clientes", label: "Clientes", icon: Users, permissao: "clientes" as const },
-  { to: "/documentos", label: "Documentos", icon: FileText, permissao: "documentos" as const },
-  { to: "/competencias", label: "Competencias", icon: CalendarRange, permissao: "competencias" as const },
-  { to: "/equipe", label: "Equipe", icon: UsersRound, permissao: "configuracoes" as const },
-  { to: "/configuracoes", label: "Configuracoes", icon: Settings, permissao: "configuracoes" as const },
-] as const;
+type NavItem = {
+  to: string;
+  params?: Record<string, string>;
+  label: string;
+  icon: typeof LayoutDashboard;
+  permissao: "clientes" | "documentos" | "competencias" | "relatorios" | "configuracoes" | null;
+};
+
+function buildEmpresaNav(empresaId: string): NavItem[] {
+  return [
+    { to: "/empresas/$id", params: { id: empresaId }, label: "Dashboard", icon: LayoutDashboard, permissao: null },
+    { to: "/empresas/$id/clientes", params: { id: empresaId }, label: "Clientes", icon: Users, permissao: "clientes" },
+    { to: "/empresas/$id/documentos", params: { id: empresaId }, label: "Documentos", icon: FileText, permissao: "documentos" },
+    { to: "/empresas/$id/competencias", params: { id: empresaId }, label: "Competencias", icon: CalendarRange, permissao: "competencias" },
+    { to: "/empresas/$id/configuracoes", params: { id: empresaId }, label: "Configuracoes", icon: Settings, permissao: "configuracoes" },
+  ];
+}
+
+const ADMIN_NAV: NavItem[] = [
+  { to: "/empresas", label: "Empresas", icon: Building2, permissao: null },
+];
 
 export function AppShell({ children }: { children: ReactNode }) {
   const { data: perfil } = usePerfil();
-  const { data: escritorio } = useEscritorio();
   const navigate = useNavigate();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [collapsed, setCollapsed] = useState(() => {
@@ -40,12 +53,30 @@ export function AppShell({ children }: { children: ReactNode }) {
     return localStorage.getItem("sidebar-collapsed") === "true";
   });
 
+  const pathname = useRouterState({ select: (s) => s.location.pathname });
+  const empresaMatch = pathname.match(/^\/empresas\/([^/]+)/);
+  const empresaId = empresaMatch?.[1] ?? null;
+  const modoEmpresa = !!empresaId;
+
+  const { data: empresa } = useEmpresa(empresaId ?? undefined);
+
   useEffect(() => {
     localStorage.setItem("sidebar-collapsed", String(collapsed));
   }, [collapsed]);
 
   useEffect(() => {
-    if (!escritorio) return;
+    if (!modoEmpresa || !empresa) {
+      const root = document.documentElement;
+      root.style.removeProperty("--primary");
+      root.style.removeProperty("--ring");
+      root.style.removeProperty("--chart-1");
+      root.style.removeProperty("--sidebar");
+      root.style.removeProperty("--sidebar-accent");
+      root.style.removeProperty("--sidebar-border");
+      root.style.removeProperty("--sidebar-ring");
+      return;
+    }
+
     const root = document.documentElement;
     const props: string[] = [];
 
@@ -54,8 +85,8 @@ export function AppShell({ children }: { children: ReactNode }) {
       props.push(name);
     }
 
-    if (escritorio.cor_primaria) {
-      const p = escritorio.cor_primaria;
+    if (empresa.cor_primaria) {
+      const p = empresa.cor_primaria;
       set("--primary", p);
       set("--ring", p);
       set("--chart-1", p);
@@ -68,7 +99,7 @@ export function AppShell({ children }: { children: ReactNode }) {
     return () => {
       props.forEach((name) => root.style.removeProperty(name));
     };
-  }, [escritorio]);
+  }, [modoEmpresa, empresa]);
 
   async function sair() {
     await supabase.auth.signOut();
@@ -76,7 +107,11 @@ export function AppShell({ children }: { children: ReactNode }) {
     navigate({ to: "/auth" });
   }
 
-  const navFiltrada = NAV_ITEMS.filter(
+  const navItems = modoEmpresa && empresaId
+    ? buildEmpresaNav(empresaId)
+    : ADMIN_NAV;
+
+  const navFiltrada = navItems.filter(
     (item) => item.permissao === null || temPermissao(perfil, item.permissao),
   );
 
@@ -96,13 +131,36 @@ export function AppShell({ children }: { children: ReactNode }) {
         .join("")
     : "?";
 
+  const brandName = modoEmpresa ? (empresa?.nome ?? "Empresa") : "ConcilIA";
+  const brandLogo = modoEmpresa ? empresa?.logo_url : null;
+
   const sidebarContent = (mobile: boolean) => (
     <>
       <div className={`pb-2 pt-6 ${collapsed && !mobile ? "px-3 text-center" : "px-5"}`}>
-        {escritorio?.logo_url ? (
+        {modoEmpresa && (!collapsed || mobile) && (
+          <Link
+            to="/empresas"
+            className="mb-3 flex items-center gap-1.5 rounded-lg px-1 py-1 text-[0.6875rem] font-medium text-sidebar-foreground/40 transition-colors hover:text-sidebar-foreground/70"
+            onClick={() => setMobileOpen(false)}
+          >
+            <ArrowLeft className="size-3" />
+            Voltar a ConcilIA
+          </Link>
+        )}
+        {modoEmpresa && collapsed && !mobile && (
+          <Link
+            to="/empresas"
+            className="mx-auto mb-3 flex size-8 items-center justify-center rounded-lg text-sidebar-foreground/40 transition-colors hover:bg-sidebar-accent hover:text-sidebar-foreground/70"
+            title="Voltar a ConcilIA"
+            onClick={() => setMobileOpen(false)}
+          >
+            <ArrowLeft className="size-4" />
+          </Link>
+        )}
+        {brandLogo ? (
           <img
-            src={escritorio.logo_url}
-            alt={escritorio.nome}
+            src={brandLogo}
+            alt={brandName}
             className={`mb-1 w-auto object-contain ${collapsed && !mobile ? "mx-auto h-6" : "h-8"}`}
           />
         ) : (
@@ -112,18 +170,22 @@ export function AppShell({ children }: { children: ReactNode }) {
                 collapsed && !mobile ? "mx-auto size-9" : "size-8"
               }`}
             >
-              <Sparkles className="size-4 text-sidebar-primary" />
+              {modoEmpresa ? (
+                <Building2 className="size-4 text-sidebar-primary" />
+              ) : (
+                <Sparkles className="size-4 text-sidebar-primary" />
+              )}
             </div>
             {(!collapsed || mobile) && (
               <span className="text-base font-bold tracking-tight text-sidebar-accent-foreground">
-                {escritorio?.nome ?? "ConcilIA"}
+                {brandName}
               </span>
             )}
           </div>
         )}
         {(!collapsed || mobile) && (
           <p className="mt-1.5 text-[0.6875rem] font-medium text-sidebar-foreground/40">
-            {escritorio ? "Powered by ConcilIA" : "Contabilidade inteligente"}
+            {modoEmpresa ? "Powered by ConcilIA" : "Contabilidade inteligente"}
           </p>
         )}
       </div>
@@ -132,10 +194,11 @@ export function AppShell({ children }: { children: ReactNode }) {
         <p className={`mb-2 text-[0.625rem] font-semibold uppercase tracking-widest text-sidebar-foreground/30 ${collapsed && !mobile ? "text-center" : "px-3"}`}>
           {collapsed && !mobile ? "·" : "Menu"}
         </p>
-        {navFiltrada.map(({ to, label, icon: Icon }) => (
+        {navFiltrada.map(({ to, params, label, icon: Icon }) => (
           <Link
             key={to}
             to={to}
+            params={params ?? {}}
             onClick={() => setMobileOpen(false)}
             className={`group flex items-center rounded-xl text-[0.8125rem] font-medium text-sidebar-foreground/60 transition-all duration-150 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground ${
               collapsed && !mobile
@@ -149,6 +212,7 @@ export function AppShell({ children }: { children: ReactNode }) {
                   : "gap-3 px-3 py-2.5"
               }`,
             }}
+            activeOptions={{ exact: to === "/empresas/$id" || to === "/empresas" }}
             title={collapsed && !mobile ? label : undefined}
           >
             <span

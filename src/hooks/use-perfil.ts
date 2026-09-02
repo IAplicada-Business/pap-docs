@@ -23,6 +23,8 @@ export type Escritorio = {
   nome: string;
   logo_url: string | null;
   cor_primaria: string;
+  cor_acento: string | null;
+  status: string;
 };
 
 const DEFAULT_PERMISSOES: Permissoes = {
@@ -71,8 +73,26 @@ export function useEscritorio() {
       if (!perfil?.org_id) return null;
       const { data, error } = await supabase
         .from("organizations")
-        .select("id, nome, logo_url, cor_primaria")
+        .select("id, nome, logo_url, cor_primaria, cor_acento, status")
         .eq("id", perfil.org_id)
+        .maybeSingle();
+      if (error) throw error;
+      return data;
+    },
+  });
+}
+
+export function useEmpresa(empresaId: string | undefined) {
+  return useQuery({
+    queryKey: ["empresa", empresaId],
+    enabled: !!empresaId,
+    staleTime: 10 * 60 * 1000,
+    queryFn: async (): Promise<Escritorio | null> => {
+      if (!empresaId) return null;
+      const { data, error } = await supabase
+        .from("organizations")
+        .select("id, nome, logo_url, cor_primaria, cor_acento, status")
+        .eq("id", empresaId)
         .maybeSingle();
       if (error) throw error;
       return data;
