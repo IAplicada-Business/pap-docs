@@ -1,14 +1,13 @@
 import { useMemo, useState } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Plus, Search } from "lucide-react";
+import { Building2, Plus, Search } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { usePerfil } from "@/hooks/use-perfil";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
-import { Card, CardContent } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
@@ -26,14 +25,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
 import { toast } from "sonner";
 import { ORIGENS_DOCUMENTO, rotuloOrigemDocumento } from "@/lib/dominio";
 import { apenasDigitos, cnpjValido, formatarCnpj, formatarTelefone } from "@/lib/formatadores";
@@ -44,10 +35,10 @@ export const Route = createFileRoute("/_authenticated/clientes/")({
       { title: "Clientes — ConcilIA" },
       {
         name: "description",
-        content: "Cadastro e gestão dos clientes atendidos pela ConcilIA.",
+        content: "Cadastro e gestao dos clientes atendidos pela ConcilIA.",
       },
       { property: "og:title", content: "Clientes — ConcilIA" },
-      { property: "og:description", content: "Gerencie a carteira de clientes do escritório." },
+      { property: "og:description", content: "Gerencie a carteira de clientes do escritorio." },
     ],
   }),
   component: ClientesPage,
@@ -96,9 +87,9 @@ function ClientesPage() {
 
   const criar = useMutation({
     mutationFn: async () => {
-      if (!perfil) throw new Error("Perfil não carregado.");
-      if (!form.razao_social.trim()) throw new Error("Informe a razão social.");
-      if (!cnpjValido(form.cnpj)) throw new Error("CNPJ inválido.");
+      if (!perfil) throw new Error("Perfil nao carregado.");
+      if (!form.razao_social.trim()) throw new Error("Informe a razao social.");
+      if (!cnpjValido(form.cnpj)) throw new Error("CNPJ invalido.");
       const { error } = await supabase.from("clientes").insert({
         escritorio_id: perfil.escritorio_id,
         nome: form.nome_fantasia || form.razao_social,
@@ -125,35 +116,35 @@ function ClientesPage() {
       });
       queryClient.invalidateQueries({ queryKey: ["clientes"] });
     },
-    onError: (e: Error) => toast.error("Não foi possível cadastrar", { description: e.message }),
+    onError: (e: Error) => toast.error("Nao foi possivel cadastrar", { description: e.message }),
   });
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-wrap items-end justify-between gap-4">
+      <div className="page-header">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight">Clientes</h1>
-          <p className="text-sm text-muted-foreground">Carteira de clientes do escritório.</p>
+          <h1 className="page-title">Clientes</h1>
+          <p className="page-subtitle">Carteira de clientes do escritorio.</p>
         </div>
-        <Button onClick={() => setAberto(true)}>
+        <Button onClick={() => setAberto(true)} className="rounded-xl">
           <Plus className="size-4" /> Novo cliente
         </Button>
       </div>
 
-      <Card>
-        <CardContent className="space-y-4 pt-6">
+      <div className="rounded-2xl border border-border bg-card shadow-card">
+        <div className="border-b border-border/60 p-4">
           <div className="flex flex-wrap gap-3">
             <div className="relative min-w-56 flex-1">
               <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
               <Input
-                className="pl-9"
+                className="rounded-xl pl-9"
                 placeholder="Buscar por nome ou CNPJ"
                 value={busca}
                 onChange={(e) => setBusca(e.target.value)}
               />
             </div>
             <Select value={filtro} onValueChange={(v) => setFiltro(v as typeof filtro)}>
-              <SelectTrigger className="w-44">
+              <SelectTrigger className="w-44 rounded-xl">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -163,78 +154,84 @@ function ClientesPage() {
               </SelectContent>
             </Select>
           </div>
+        </div>
 
+        <div className="p-2">
           {isLoading ? (
-            <div className="space-y-2">
+            <div className="space-y-2 p-4">
               {[1, 2, 3].map((i) => (
-                <Skeleton key={i} className="h-12 w-full" />
+                <Skeleton key={i} className="h-14 w-full rounded-xl" />
               ))}
             </div>
           ) : filtrados.length === 0 ? (
-            <div className="py-12 text-center text-sm text-muted-foreground">
-              Nenhum cliente ainda — cadastre o primeiro.
+            <div className="py-16 text-center">
+              <Building2 className="mx-auto size-10 text-muted-foreground/30" />
+              <p className="mt-3 text-sm text-muted-foreground">
+                Nenhum cliente ainda — cadastre o primeiro.
+              </p>
             </div>
           ) : (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Cliente</TableHead>
-                  <TableHead>CNPJ</TableHead>
-                  <TableHead>Origens</TableHead>
-                  <TableHead>Situação</TableHead>
-                  <TableHead className="text-right">Ações</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {filtrados.map((c) => (
-                  <TableRow key={c.id}>
-                    <TableCell>
-                      <div className="font-medium">{c.nome_fantasia ?? c.nome}</div>
-                      <div className="text-xs text-muted-foreground">{c.razao_social}</div>
-                    </TableCell>
-                    <TableCell>{formatarCnpj(c.cnpj ?? "")}</TableCell>
-                    <TableCell className="space-x-1">
-                      {(c.origem_documentos ?? []).map((o) => (
-                        <Badge key={o} variant="secondary">
+            <div className="divide-y divide-border/50">
+              {filtrados.map((c) => (
+                <Link
+                  key={c.id}
+                  to="/clientes/$id"
+                  params={{ id: c.id }}
+                  className="flex flex-wrap items-center gap-3 rounded-xl px-4 py-3 transition-colors hover:bg-muted/50"
+                >
+                  <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-primary/8 text-primary">
+                    <Building2 className="size-4" />
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <span className="block truncate text-sm font-semibold">
+                      {c.nome_fantasia ?? c.nome}
+                    </span>
+                    <span className="text-xs text-muted-foreground">
+                      {c.razao_social}
+                      {c.cnpj ? ` · ${formatarCnpj(c.cnpj)}` : ""}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <div className="hidden flex-wrap gap-1 sm:flex">
+                      {(c.origem_documentos ?? []).slice(0, 2).map((o) => (
+                        <Badge key={o} variant="secondary" className="rounded-lg text-[0.6875rem]">
                           {rotuloOrigemDocumento(o)}
                         </Badge>
                       ))}
-                    </TableCell>
-                    <TableCell>
-                      <Badge
-                        variant="secondary"
-                        className={
-                          c.ativo ? "bg-success/15 text-success" : "bg-muted text-muted-foreground"
-                        }
-                      >
-                        {c.ativo ? "Ativo" : "Inativo"}
-                      </Badge>
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <Button asChild variant="outline" size="sm">
-                        <Link to="/clientes/$id" params={{ id: c.id }}>
-                          Abrir
-                        </Link>
-                      </Button>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+                    </div>
+                    <span
+                      className={`status-dot ${
+                        c.ativo
+                          ? "bg-success/10 text-success"
+                          : "bg-muted text-muted-foreground"
+                      }`}
+                    >
+                      <span
+                        className={`size-1.5 rounded-full ${
+                          c.ativo ? "bg-success" : "bg-muted-foreground/50"
+                        }`}
+                      />
+                      {c.ativo ? "Ativo" : "Inativo"}
+                    </span>
+                  </div>
+                </Link>
+              ))}
+            </div>
           )}
-        </CardContent>
-      </Card>
+        </div>
+      </div>
 
       <Dialog open={aberto} onOpenChange={setAberto}>
-        <DialogContent className="max-h-[90vh] overflow-y-auto">
+        <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-lg">
           <DialogHeader>
             <DialogTitle>Novo cliente</DialogTitle>
-            <DialogDescription>Cadastre uma nova organização atendida.</DialogDescription>
+            <DialogDescription>Cadastre uma nova organizacao atendida.</DialogDescription>
           </DialogHeader>
           <div className="space-y-4">
             <div className="space-y-2">
-              <Label>Razão social</Label>
+              <Label>Razao social</Label>
               <Input
+                className="rounded-xl"
                 value={form.razao_social}
                 onChange={(e) => setForm({ ...form, razao_social: e.target.value })}
               />
@@ -242,6 +239,7 @@ function ClientesPage() {
             <div className="space-y-2">
               <Label>Nome fantasia</Label>
               <Input
+                className="rounded-xl"
                 value={form.nome_fantasia}
                 onChange={(e) => setForm({ ...form, nome_fantasia: e.target.value })}
               />
@@ -249,18 +247,20 @@ function ClientesPage() {
             <div className="space-y-2">
               <Label>CNPJ</Label>
               <Input
+                className="rounded-xl"
                 value={form.cnpj}
                 placeholder="00.000.000/0000-00"
                 onChange={(e) => setForm({ ...form, cnpj: formatarCnpj(e.target.value) })}
               />
               {form.cnpj && !cnpjValido(form.cnpj) && (
-                <p className="text-xs text-destructive">CNPJ inválido</p>
+                <p className="text-xs text-destructive">CNPJ invalido</p>
               )}
             </div>
             <div className="grid gap-4 sm:grid-cols-2">
               <div className="space-y-2">
                 <Label>E-mail de contato</Label>
                 <Input
+                  className="rounded-xl"
                   type="email"
                   value={form.email_contato}
                   onChange={(e) => setForm({ ...form, email_contato: e.target.value })}
@@ -269,6 +269,7 @@ function ClientesPage() {
               <div className="space-y-2">
                 <Label>Telefone</Label>
                 <Input
+                  className="rounded-xl"
                   value={form.telefone}
                   onChange={(e) => setForm({ ...form, telefone: formatarTelefone(e.target.value) })}
                 />
@@ -297,10 +298,10 @@ function ClientesPage() {
             </div>
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setAberto(false)}>
+            <Button variant="outline" onClick={() => setAberto(false)} className="rounded-xl">
               Cancelar
             </Button>
-            <Button onClick={() => criar.mutate()} disabled={criar.isPending}>
+            <Button onClick={() => criar.mutate()} disabled={criar.isPending} className="rounded-xl">
               {criar.isPending ? "Salvando..." : "Cadastrar"}
             </Button>
           </DialogFooter>

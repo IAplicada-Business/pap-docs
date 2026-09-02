@@ -1,14 +1,13 @@
 import { useMemo, useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Copy, Pencil, Plus, Search, ShieldAlert, UserX } from "lucide-react";
+import { Copy, Pencil, Plus, Search, ShieldAlert, UserX, UsersRound } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { usePerfil, temPermissao, type Permissoes } from "@/hooks/use-perfil";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Switch } from "@/components/ui/switch";
 import {
@@ -36,14 +35,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/_authenticated/equipe")({
@@ -52,10 +43,10 @@ export const Route = createFileRoute("/_authenticated/equipe")({
       { title: "Equipe — ConcilIA" },
       {
         name: "description",
-        content: "Gerencie os membros da equipe, convites e permissões.",
+        content: "Gerencie os membros da equipe, convites e permissoes.",
       },
       { property: "og:title", content: "Equipe — ConcilIA" },
-      { property: "og:description", content: "Gerenciamento de equipe do escritório." },
+      { property: "og:description", content: "Gerenciamento de equipe do escritorio." },
     ],
   }),
   component: EquipePage,
@@ -64,9 +55,9 @@ export const Route = createFileRoute("/_authenticated/equipe")({
 const MODULOS: { chave: keyof Permissoes; rotulo: string }[] = [
   { chave: "clientes", rotulo: "Clientes" },
   { chave: "documentos", rotulo: "Documentos" },
-  { chave: "competencias", rotulo: "Competências" },
-  { chave: "relatorios", rotulo: "Relatórios" },
-  { chave: "configuracoes", rotulo: "Configurações" },
+  { chave: "competencias", rotulo: "Competencias" },
+  { chave: "relatorios", rotulo: "Relatorios" },
+  { chave: "configuracoes", rotulo: "Configuracoes" },
 ];
 
 function rotulopapel(papel: string) {
@@ -85,11 +76,11 @@ function rotulopapel(papel: string) {
 function corPapel(papel: string) {
   switch (papel) {
     case "super_admin":
-      return "bg-destructive/15 text-destructive";
+      return { dot: "bg-destructive", bg: "bg-destructive/10", text: "text-destructive" };
     case "admin_escritorio":
-      return "bg-primary/15 text-primary";
+      return { dot: "bg-primary", bg: "bg-primary/10", text: "text-primary" };
     default:
-      return "";
+      return { dot: "bg-muted-foreground/50", bg: "bg-secondary", text: "text-secondary-foreground" };
   }
 }
 
@@ -120,8 +111,6 @@ function EquipePage() {
   const { data: perfil } = usePerfil();
   const queryClient = useQueryClient();
   const [busca, setBusca] = useState("");
-
-  // Dialogs
   const [conviteAberto, setConviteAberto] = useState(false);
   const [editandoMembro, setEditandoMembro] = useState<{
     id: string;
@@ -131,44 +120,38 @@ function EquipePage() {
     permissoes: Permissoes;
   } | null>(null);
   const [desativandoId, setDesativandoId] = useState<string | null>(null);
-
-  // Invite form
   const [conviteForm, setConviteForm] = useState({
     email: "",
     papel: "operador" as "admin_escritorio" | "operador",
     permissoes: { ...PERMISSOES_PADRAO } as Permissoes,
   });
-
-  // Edit form
   const [editForm, setEditForm] = useState({
     papel: "" as string,
     permissoes: { ...PERMISSOES_PADRAO } as Permissoes,
   });
 
-  // Access check
   if (perfil && !temPermissao(perfil, "configuracoes")) {
     return (
       <div className="flex flex-col items-center justify-center gap-4 py-24">
-        <ShieldAlert className="size-12 text-muted-foreground" />
+        <ShieldAlert className="size-12 text-muted-foreground/30" />
         <h2 className="text-xl font-semibold">Acesso negado</h2>
         <p className="text-sm text-muted-foreground">
-          Você não tem permissão para acessar o gerenciamento de equipe.
+          Voce nao tem permissao para acessar o gerenciamento de equipe.
         </p>
       </div>
     );
   }
 
-  // Restrict page to admin_escritorio or super_admin
   const isAdmin =
     perfil?.papel === "admin_escritorio" || perfil?.papel === "super_admin";
 
   if (perfil && !isAdmin) {
     return (
       <div className="flex flex-col items-center justify-center gap-4 py-24">
-        <ShieldAlert className="size-12 text-muted-foreground" />
+        <ShieldAlert className="size-12 text-muted-foreground/30" />
         <h2 className="text-xl font-semibold">Acesso restrito</h2>
         <p className="text-sm text-muted-foreground">
-          Esta página é acessível apenas para administradores.
+          Esta pagina e acessivel apenas para administradores.
         </p>
       </div>
     );
@@ -194,7 +177,6 @@ function EquipePage() {
   ) : null;
 }
 
-// Extracted into its own component to allow hooks to be called unconditionally
 function EquipeContent({
   perfil,
   queryClient,
@@ -236,7 +218,6 @@ function EquipeContent({
   editForm: { papel: string; permissoes: Permissoes };
   setEditForm: (v: typeof editForm) => void;
 }) {
-  // Query team members
   const { data: membros, isLoading } = useQuery({
     queryKey: ["equipe", perfil.escritorio_id],
     queryFn: async () => {
@@ -254,7 +235,6 @@ function EquipeContent({
     },
   });
 
-  // Query pending invites
   const { data: convites } = useQuery({
     queryKey: ["convites", perfil.escritorio_id],
     queryFn: async () => {
@@ -278,7 +258,6 @@ function EquipeContent({
     });
   }, [membros, busca]);
 
-  // Invite mutation
   const enviarConvite = useMutation({
     mutationFn: async () => {
       if (!conviteForm.email.trim()) throw new Error("Informe o e-mail.");
@@ -300,22 +279,14 @@ function EquipeContent({
     },
     onSuccess: (token) => {
       const link = `${window.location.origin}/convite/${token}`;
-      toast.success("Convite enviado", {
-        description: link,
-        duration: 10000,
-      });
+      toast.success("Convite enviado", { description: link, duration: 10000 });
       setConviteAberto(false);
-      setConviteForm({
-        email: "",
-        papel: "operador",
-        permissoes: { ...PERMISSOES_PADRAO },
-      });
+      setConviteForm({ email: "", papel: "operador", permissoes: { ...PERMISSOES_PADRAO } });
       queryClient.invalidateQueries({ queryKey: ["convites", perfil.escritorio_id] });
     },
     onError: (e: Error) => toast.error("Erro ao enviar convite", { description: e.message }),
   });
 
-  // Edit mutation
   const editarMembro = useMutation({
     mutationFn: async () => {
       if (!editandoMembro) throw new Error("Nenhum membro selecionado.");
@@ -331,35 +302,33 @@ function EquipeContent({
       if (error) throw error;
     },
     onSuccess: () => {
-      toast.success("Permissões atualizadas");
+      toast.success("Permissoes atualizadas");
       setEditandoMembro(null);
       queryClient.invalidateQueries({ queryKey: ["equipe", perfil.escritorio_id] });
     },
     onError: (e: Error) => toast.error("Erro ao atualizar", { description: e.message }),
   });
 
-  // Deactivate mutation
   const desativarMembro = useMutation({
     mutationFn: async (id: string) => {
       const { error } = await supabase.from("profiles").update({ ativo: false }).eq("id", id);
       if (error) throw error;
     },
     onSuccess: () => {
-      toast.success("Usuário desativado");
+      toast.success("Usuario desativado");
       setDesativandoId(null);
       queryClient.invalidateQueries({ queryKey: ["equipe", perfil.escritorio_id] });
     },
     onError: (e: Error) => toast.error("Erro ao desativar", { description: e.message }),
   });
 
-  // Reactivate mutation
   const reativarMembro = useMutation({
     mutationFn: async (id: string) => {
       const { error } = await supabase.from("profiles").update({ ativo: true }).eq("id", id);
       if (error) throw error;
     },
     onSuccess: () => {
-      toast.success("Usuário reativado");
+      toast.success("Usuario reativado");
       queryClient.invalidateQueries({ queryKey: ["equipe", perfil.escritorio_id] });
     },
     onError: (e: Error) => toast.error("Erro ao reativar", { description: e.message }),
@@ -373,205 +342,211 @@ function EquipeContent({
       papel: membro.papel,
       permissoes: membro.permissoes,
     });
-    setEditForm({
-      papel: membro.papel,
-      permissoes: { ...membro.permissoes },
-    });
+    setEditForm({ papel: membro.papel, permissoes: { ...membro.permissoes } });
   }
 
   function copiarLink(token: string) {
     const link = `${window.location.origin}/convite/${token}`;
     navigator.clipboard.writeText(link).then(
       () => toast.success("Link copiado"),
-      () => toast.error("Não foi possível copiar"),
+      () => toast.error("Nao foi possivel copiar"),
     );
+  }
+
+  function iniciais(nome: string | null) {
+    if (!nome) return "?";
+    return nome
+      .split(" ")
+      .filter(Boolean)
+      .slice(0, 2)
+      .map((n) => n[0]?.toUpperCase())
+      .join("");
   }
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-wrap items-end justify-between gap-4">
+      <div className="page-header">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight">Equipe</h1>
-          <p className="text-sm text-muted-foreground">
-            Gerencie os membros do escritório, permissões e convites.
+          <h1 className="page-title">Equipe</h1>
+          <p className="page-subtitle">
+            Gerencie os membros do escritorio, permissoes e convites.
           </p>
         </div>
-        <Button onClick={() => setConviteAberto(true)}>
+        <Button onClick={() => setConviteAberto(true)} className="rounded-xl">
           <Plus className="size-4" /> Convidar membro
         </Button>
       </div>
 
-      {/* Team members */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Membros</CardTitle>
-          <CardDescription>Usuários com acesso ao escritório.</CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="relative max-w-sm">
+      <div className="rounded-2xl border border-border bg-card shadow-card">
+        <div className="flex items-center justify-between border-b border-border/60 px-6 py-4">
+          <div>
+            <h2 className="text-base font-semibold">Membros</h2>
+            <p className="text-[0.8125rem] text-muted-foreground">
+              Usuarios com acesso ao escritorio.
+            </p>
+          </div>
+          <div className="relative w-64">
             <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
             <Input
-              className="pl-9"
+              className="rounded-xl pl-9"
               placeholder="Buscar por nome ou e-mail"
               value={busca}
               onChange={(e) => setBusca(e.target.value)}
             />
           </div>
+        </div>
 
+        <div className="p-2">
           {isLoading ? (
-            <div className="space-y-2">
+            <div className="space-y-2 p-4">
               {[1, 2, 3].map((i) => (
-                <Skeleton key={i} className="h-12 w-full" />
+                <Skeleton key={i} className="h-14 w-full rounded-xl" />
               ))}
             </div>
           ) : filtrados.length === 0 ? (
-            <div className="py-12 text-center text-sm text-muted-foreground">
-              Nenhum membro encontrado.
+            <div className="py-16 text-center">
+              <UsersRound className="mx-auto size-10 text-muted-foreground/30" />
+              <p className="mt-3 text-sm text-muted-foreground">Nenhum membro encontrado.</p>
             </div>
           ) : (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Nome</TableHead>
-                  <TableHead>E-mail</TableHead>
-                  <TableHead>Papel</TableHead>
-                  <TableHead>Permissões</TableHead>
-                  <TableHead>Último acesso</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead className="text-right">Ações</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {filtrados.map((m) => (
-                  <TableRow key={m.id} className={!m.ativo ? "opacity-50" : undefined}>
-                    <TableCell className="font-medium">{m.nome ?? "—"}</TableCell>
-                    <TableCell className="text-sm">{m.email ?? "—"}</TableCell>
-                    <TableCell>
-                      <Badge variant="secondary" className={corPapel(m.papel)}>
-                        {rotulopapel(m.papel)}
-                      </Badge>
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex flex-wrap gap-1">
-                        {MODULOS.filter(
-                          (mod) =>
-                            m.papel === "super_admin" ||
-                            m.papel === "admin_escritorio" ||
-                            m.permissoes[mod.chave],
-                        ).map((mod) => (
-                          <Badge key={mod.chave} variant="outline" className="text-xs">
-                            {mod.rotulo}
-                          </Badge>
-                        ))}
-                      </div>
-                    </TableCell>
-                    <TableCell className="text-sm">
+            <div className="divide-y divide-border/50">
+              {filtrados.map((m) => {
+                const cp = corPapel(m.papel);
+                return (
+                  <div
+                    key={m.id}
+                    className={`flex flex-wrap items-center gap-3 rounded-xl px-4 py-3 transition-colors hover:bg-muted/50 ${!m.ativo ? "opacity-50" : ""}`}
+                  >
+                    <div className="flex size-10 shrink-0 items-center justify-center rounded-full bg-primary/10 text-xs font-bold text-primary">
+                      {iniciais(m.nome)}
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <span className="block truncate text-sm font-semibold">
+                        {m.nome ?? "—"}
+                      </span>
+                      <span className="text-xs text-muted-foreground">{m.email ?? "—"}</span>
+                    </div>
+                    <span className={`status-dot ${cp.bg} ${cp.text}`}>
+                      <span className={`size-1.5 rounded-full ${cp.dot}`} />
+                      {rotulopapel(m.papel)}
+                    </span>
+                    <div className="hidden flex-wrap gap-1 lg:flex">
+                      {MODULOS.filter(
+                        (mod) =>
+                          m.papel === "super_admin" ||
+                          m.papel === "admin_escritorio" ||
+                          m.permissoes[mod.chave],
+                      ).map((mod) => (
+                        <Badge key={mod.chave} variant="outline" className="rounded-md text-[0.625rem]">
+                          {mod.rotulo}
+                        </Badge>
+                      ))}
+                    </div>
+                    <span className="hidden text-xs text-muted-foreground xl:block">
                       {formatarData(m.ultimo_acesso_em)}
-                    </TableCell>
-                    <TableCell>
-                      <Badge
-                        variant="secondary"
-                        className={
-                          m.ativo
-                            ? "bg-success/15 text-success"
-                            : "bg-muted text-muted-foreground"
-                        }
-                      >
-                        {m.ativo ? "Ativo" : "Inativo"}
-                      </Badge>
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <div className="flex items-center justify-end gap-1">
-                        {m.id !== perfil.id && (
-                          <>
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              title="Editar permissões"
-                              onClick={() => abrirEdicao(m)}
-                            >
-                              <Pencil className="size-4" />
-                            </Button>
-                            {m.ativo ? (
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                title="Desativar usuário"
-                                onClick={() => setDesativandoId(m.id)}
-                              >
-                                <UserX className="size-4" />
-                              </Button>
-                            ) : (
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                title="Reativar usuário"
-                                onClick={() => reativarMembro.mutate(m.id)}
-                              >
-                                Reativar
-                              </Button>
-                            )}
-                          </>
+                    </span>
+                    <span
+                      className={`status-dot ${
+                        m.ativo
+                          ? "bg-success/10 text-success"
+                          : "bg-muted text-muted-foreground"
+                      }`}
+                    >
+                      <span
+                        className={`size-1.5 rounded-full ${
+                          m.ativo ? "bg-success" : "bg-muted-foreground/50"
+                        }`}
+                      />
+                      {m.ativo ? "Ativo" : "Inativo"}
+                    </span>
+                    {m.id !== perfil.id && (
+                      <div className="flex items-center gap-0.5">
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="size-8 rounded-lg"
+                          title="Editar permissoes"
+                          onClick={() => abrirEdicao(m)}
+                        >
+                          <Pencil className="size-3.5" />
+                        </Button>
+                        {m.ativo ? (
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="size-8 rounded-lg"
+                            title="Desativar usuario"
+                            onClick={() => setDesativandoId(m.id)}
+                          >
+                            <UserX className="size-3.5" />
+                          </Button>
+                        ) : (
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="rounded-lg text-xs"
+                            onClick={() => reativarMembro.mutate(m.id)}
+                          >
+                            Reativar
+                          </Button>
                         )}
                       </div>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
           )}
-        </CardContent>
-      </Card>
+        </div>
+      </div>
 
-      {/* Pending invites */}
       {(convites ?? []).length > 0 && (
-        <Card>
-          <CardHeader>
-            <CardTitle>Convites pendentes</CardTitle>
-            <CardDescription>Convites enviados que ainda não foram aceitos.</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>E-mail</TableHead>
-                  <TableHead>Papel</TableHead>
-                  <TableHead>Expira em</TableHead>
-                  <TableHead>Enviado em</TableHead>
-                  <TableHead className="text-right">Ações</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {(convites ?? []).map((c) => (
-                  <TableRow key={c.id}>
-                    <TableCell className="font-medium">{c.email}</TableCell>
-                    <TableCell>
-                      <Badge variant="secondary" className={corPapel(c.papel)}>
-                        {rotulopapel(c.papel)}
-                      </Badge>
-                    </TableCell>
-                    <TableCell className="text-sm">{formatarData(c.expira_em)}</TableCell>
-                    <TableCell className="text-sm">{formatarData(c.created_at)}</TableCell>
-                    <TableCell className="text-right">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => copiarLink(c.token)}
-                      >
-                        <Copy className="size-4" /> Copiar link
-                      </Button>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </CardContent>
-        </Card>
+        <div className="rounded-2xl border border-border bg-card shadow-card">
+          <div className="border-b border-border/60 px-6 py-4">
+            <h2 className="text-base font-semibold">Convites pendentes</h2>
+            <p className="text-[0.8125rem] text-muted-foreground">
+              Convites enviados que ainda nao foram aceitos.
+            </p>
+          </div>
+          <div className="divide-y divide-border/50 p-2">
+            {(convites ?? []).map((c) => {
+              const cp = corPapel(c.papel);
+              return (
+                <div
+                  key={c.id}
+                  className="flex flex-wrap items-center gap-3 rounded-xl px-4 py-3 transition-colors hover:bg-muted/50"
+                >
+                  <div className="flex size-10 shrink-0 items-center justify-center rounded-full bg-muted text-xs font-bold text-muted-foreground">
+                    ?
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <span className="block truncate text-sm font-medium">{c.email}</span>
+                    <span className="text-xs text-muted-foreground">
+                      Enviado em {formatarData(c.created_at)} · Expira em{" "}
+                      {formatarData(c.expira_em)}
+                    </span>
+                  </div>
+                  <span className={`status-dot ${cp.bg} ${cp.text}`}>
+                    <span className={`size-1.5 rounded-full ${cp.dot}`} />
+                    {rotulopapel(c.papel)}
+                  </span>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="rounded-lg"
+                    onClick={() => copiarLink(c.token)}
+                  >
+                    <Copy className="size-3.5" /> Copiar link
+                  </Button>
+                </div>
+              );
+            })}
+          </div>
+        </div>
       )}
 
-      {/* Invite dialog */}
       <Dialog open={conviteAberto} onOpenChange={setConviteAberto}>
-        <DialogContent className="max-h-[90vh] overflow-y-auto">
+        <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-md">
           <DialogHeader>
             <DialogTitle>Convidar membro</DialogTitle>
             <DialogDescription>
@@ -582,6 +557,7 @@ function EquipeContent({
             <div className="space-y-2">
               <Label>E-mail</Label>
               <Input
+                className="rounded-xl"
                 type="email"
                 placeholder="usuario@exemplo.com"
                 value={conviteForm.email}
@@ -601,7 +577,7 @@ function EquipeContent({
                   });
                 }}
               >
-                <SelectTrigger>
+                <SelectTrigger className="rounded-xl">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -611,9 +587,9 @@ function EquipeContent({
               </Select>
             </div>
             <div className="space-y-3">
-              <Label>Permissões por módulo</Label>
+              <Label>Permissoes por modulo</Label>
               {MODULOS.map((mod) => (
-                <div key={mod.chave} className="flex items-center justify-between">
+                <div key={mod.chave} className="flex items-center justify-between rounded-lg bg-muted/50 px-3 py-2">
                   <span className="text-sm">{mod.rotulo}</span>
                   <Switch
                     checked={
@@ -634,21 +610,20 @@ function EquipeContent({
             </div>
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setConviteAberto(false)}>
+            <Button variant="outline" onClick={() => setConviteAberto(false)} className="rounded-xl">
               Cancelar
             </Button>
-            <Button onClick={() => enviarConvite.mutate()} disabled={enviarConvite.isPending}>
+            <Button onClick={() => enviarConvite.mutate()} disabled={enviarConvite.isPending} className="rounded-xl">
               {enviarConvite.isPending ? "Enviando..." : "Enviar convite"}
             </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
 
-      {/* Edit permissions dialog */}
       <Dialog open={!!editandoMembro} onOpenChange={(open) => !open && setEditandoMembro(null)}>
-        <DialogContent className="max-h-[90vh] overflow-y-auto">
+        <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-md">
           <DialogHeader>
-            <DialogTitle>Editar permissões</DialogTitle>
+            <DialogTitle>Editar permissoes</DialogTitle>
             <DialogDescription>
               {editandoMembro?.nome ?? editandoMembro?.email ?? "Membro"}
             </DialogDescription>
@@ -666,7 +641,7 @@ function EquipeContent({
                   });
                 }}
               >
-                <SelectTrigger>
+                <SelectTrigger className="rounded-xl">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -676,9 +651,9 @@ function EquipeContent({
               </Select>
             </div>
             <div className="space-y-3">
-              <Label>Permissões por módulo</Label>
+              <Label>Permissoes por modulo</Label>
               {MODULOS.map((mod) => (
-                <div key={mod.chave} className="flex items-center justify-between">
+                <div key={mod.chave} className="flex items-center justify-between rounded-lg bg-muted/50 px-3 py-2">
                   <span className="text-sm">{mod.rotulo}</span>
                   <Switch
                     checked={
@@ -699,23 +674,22 @@ function EquipeContent({
             </div>
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setEditandoMembro(null)}>
+            <Button variant="outline" onClick={() => setEditandoMembro(null)} className="rounded-xl">
               Cancelar
             </Button>
-            <Button onClick={() => editarMembro.mutate()} disabled={editarMembro.isPending}>
+            <Button onClick={() => editarMembro.mutate()} disabled={editarMembro.isPending} className="rounded-xl">
               {editarMembro.isPending ? "Salvando..." : "Salvar"}
             </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
 
-      {/* Deactivation confirmation */}
       <AlertDialog open={!!desativandoId} onOpenChange={(open) => !open && setDesativandoId(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Desativar usuário</AlertDialogTitle>
+            <AlertDialogTitle>Desativar usuario</AlertDialogTitle>
             <AlertDialogDescription>
-              O usuário perderá o acesso ao sistema. Essa ação pode ser revertida posteriormente.
+              O usuario perdera o acesso ao sistema. Essa acao pode ser revertida posteriormente.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

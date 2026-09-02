@@ -5,7 +5,6 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/convite/$token")({
@@ -106,7 +105,7 @@ function ConvitePage() {
 
   if (carregando) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-secondary/60">
+      <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-background via-background to-primary/5">
         <Loader2 className="size-6 animate-spin text-primary" />
       </div>
     );
@@ -114,122 +113,122 @@ function ConvitePage() {
 
   if (invalido || !info) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-secondary/60 px-4">
-        <Card className="w-full max-w-md text-center">
-          <CardContent className="space-y-3 py-10">
-            <XCircle className="mx-auto size-10 text-destructive" />
-            <h1 className="text-lg font-semibold">
-              Convite invalido ou expirado
-            </h1>
-            <p className="text-sm text-muted-foreground">
-              Este link de convite nao e mais valido. Peca ao administrador do
-              escritorio para enviar um novo convite.
-            </p>
-          </CardContent>
-        </Card>
+      <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-background via-background to-primary/5 px-4">
+        <div className="w-full max-w-md rounded-2xl border border-border bg-card p-8 text-center shadow-card">
+          <XCircle className="mx-auto size-10 text-destructive" />
+          <h1 className="mt-4 text-lg font-semibold">
+            Convite invalido ou expirado
+          </h1>
+          <p className="mt-2 text-sm text-muted-foreground">
+            Este link de convite nao e mais valido. Peca ao administrador do
+            escritorio para enviar um novo convite.
+          </p>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-secondary/60 px-4 py-10">
+    <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-background via-background to-primary/5 px-4 py-10">
       <div className="w-full max-w-md">
-        <div className="mb-6 text-center">
+        <div className="mb-8 text-center">
           {info.escritorio_logo_url ? (
             <img
               src={info.escritorio_logo_url}
               alt={info.escritorio_nome}
-              className="mx-auto mb-3 h-12 w-auto"
+              className="mx-auto mb-4 h-12 w-auto"
             />
           ) : (
             <img
               src="/logo-concilia.svg"
               alt="ConcilIA"
-              className="mx-auto mb-3 h-10 w-auto"
+              className="mx-auto mb-4 h-10 w-auto"
             />
           )}
         </div>
 
-        <Card className="shadow-sm">
-          <CardHeader className="text-center">
-            <CardTitle className="flex items-center justify-center gap-2">
+        <div className="rounded-2xl border border-border bg-card p-6 shadow-card sm:p-8">
+          <div className="mb-6 text-center">
+            <div className="mx-auto mb-3 flex size-12 items-center justify-center rounded-xl bg-primary/8 text-primary">
               <UserPlus className="size-5" />
-              Criar sua conta
-            </CardTitle>
-            <CardDescription>
+            </div>
+            <h1 className="text-lg font-semibold">Criar sua conta</h1>
+            <p className="mt-1 text-sm text-muted-foreground">
               Voce foi convidado para o escritorio{" "}
               <strong>{info.escritorio_nome}</strong>. Preencha os dados abaixo
               para aceitar o convite e acessar o sistema.
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="escritorio">Escritorio</Label>
-                <Input
-                  id="escritorio"
-                  value={info.escritorio_nome}
-                  readOnly
-                  disabled
-                  className="bg-muted"
-                />
-              </div>
+            </p>
+          </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="nome">Nome completo</Label>
-                <Input
-                  id="nome"
-                  required
-                  value={nome}
-                  onChange={(e) => setNome(e.target.value)}
-                  placeholder="Seu nome completo"
-                />
-              </div>
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="escritorio">Escritorio</Label>
+              <Input
+                id="escritorio"
+                value={info.escritorio_nome}
+                readOnly
+                disabled
+                className="rounded-xl bg-muted"
+              />
+            </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="email">E-mail</Label>
-                <Input
-                  id="email"
-                  type="email"
-                  value={info.email}
-                  readOnly
-                  disabled
-                  className="bg-muted"
-                />
-              </div>
+            <div className="space-y-2">
+              <Label htmlFor="nome">Nome completo</Label>
+              <Input
+                id="nome"
+                required
+                className="rounded-xl"
+                value={nome}
+                onChange={(e) => setNome(e.target.value)}
+                placeholder="Seu nome completo"
+              />
+            </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="senha">Senha</Label>
-                <Input
-                  id="senha"
-                  type="password"
-                  required
-                  minLength={6}
-                  value={senha}
-                  onChange={(e) => setSenha(e.target.value)}
-                  placeholder="Minimo 6 caracteres"
-                />
-              </div>
+            <div className="space-y-2">
+              <Label htmlFor="email">E-mail</Label>
+              <Input
+                id="email"
+                type="email"
+                value={info.email}
+                readOnly
+                disabled
+                className="rounded-xl bg-muted"
+              />
+            </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="confirmar-senha">Confirmar senha</Label>
-                <Input
-                  id="confirmar-senha"
-                  type="password"
-                  required
-                  minLength={6}
-                  value={confirmarSenha}
-                  onChange={(e) => setConfirmarSenha(e.target.value)}
-                  placeholder="Repita a senha"
-                />
-              </div>
+            <div className="space-y-2">
+              <Label htmlFor="senha">Senha</Label>
+              <Input
+                id="senha"
+                type="password"
+                required
+                minLength={6}
+                className="rounded-xl"
+                value={senha}
+                onChange={(e) => setSenha(e.target.value)}
+                placeholder="Minimo 6 caracteres"
+              />
+            </div>
 
-              <Button type="submit" className="w-full" disabled={enviando}>
-                {enviando ? "Criando conta..." : "Criar conta e entrar"}
-              </Button>
-            </form>
-          </CardContent>
-        </Card>
+            <div className="space-y-2">
+              <Label htmlFor="confirmar-senha">Confirmar senha</Label>
+              <Input
+                id="confirmar-senha"
+                type="password"
+                required
+                minLength={6}
+                className="rounded-xl"
+                value={confirmarSenha}
+                onChange={(e) => setConfirmarSenha(e.target.value)}
+                placeholder="Repita a senha"
+              />
+            </div>
+
+            <Button type="submit" className="w-full rounded-xl" disabled={enviando}>
+              {enviando ? "Criando conta..." : "Criar conta e entrar"}
+            </Button>
+          </form>
+        </div>
 
         <p className="mt-4 text-center text-xs text-muted-foreground">
           Ja tem uma conta?{" "}

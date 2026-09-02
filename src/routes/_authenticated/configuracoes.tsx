@@ -1,14 +1,14 @@
 import { useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Plus, Trash2 } from "lucide-react";
+import { BookOpen, Building2, Palette, Plus, Settings, Trash2, User } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { usePerfil, useEscritorio, temPermissao } from "@/hooks/use-perfil";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Select,
@@ -17,14 +17,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/_authenticated/configuracoes")({
@@ -120,137 +112,195 @@ function ConfiguracoesPage() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold tracking-tight">Configurações</h1>
-        <p className="text-sm text-muted-foreground">Escritório, perfil e plano de contas.</p>
+      <div className="page-header">
+        <div>
+          <h1 className="page-title">Configurações</h1>
+          <p className="page-subtitle">Escritório, perfil e plano de contas.</p>
+        </div>
       </div>
 
       <Tabs defaultValue="escritorio">
-        <TabsList>
-          <TabsTrigger value="escritorio">Escritório</TabsTrigger>
-          <TabsTrigger value="perfil">Meu perfil</TabsTrigger>
-          <TabsTrigger value="plano">Plano de contas</TabsTrigger>
+        <TabsList className="rounded-xl">
+          <TabsTrigger value="escritorio" className="rounded-lg">
+            <Building2 className="mr-1.5 size-3.5" /> Escritório
+          </TabsTrigger>
+          <TabsTrigger value="perfil" className="rounded-lg">
+            <User className="mr-1.5 size-3.5" /> Meu perfil
+          </TabsTrigger>
+          <TabsTrigger value="plano" className="rounded-lg">
+            <BookOpen className="mr-1.5 size-3.5" /> Plano de contas
+          </TabsTrigger>
         </TabsList>
 
         <TabsContent value="escritorio">
-          <Card>
-            <CardHeader>
-              <CardTitle>Dados do escritório</CardTitle>
-              <CardDescription>
-                {podeEditar
-                  ? "Identidade visual e dados cadastrais do escritório."
-                  : "Somente administradores podem editar estas informações."}
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="grid gap-4 sm:grid-cols-2">
-              <div className="space-y-2">
-                <Label>Nome</Label>
-                <Input
-                  readOnly={!podeEditar}
-                  defaultValue={escritorio?.nome ?? ""}
-                  onBlur={(e) => {
-                    if (!podeEditar || !escritorio) return;
-                    supabase
-                      .from("escritorios")
-                      .update({ nome: e.target.value })
-                      .eq("id", escritorio.id)
-                      .then(({ error }) => {
-                        if (error) toast.error("Não foi possível salvar", { description: error.message });
-                        else {
-                          toast.success("Nome atualizado");
-                          queryClient.invalidateQueries({ queryKey: ["escritorio"] });
-                        }
-                      });
-                  }}
-                />
+          <div className="rounded-2xl border border-border bg-card shadow-card">
+            <div className="border-b border-border/60 p-5">
+              <div className="flex items-center gap-3">
+                <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-primary/8 text-primary">
+                  <Settings className="size-4" />
+                </div>
+                <div>
+                  <h2 className="text-sm font-semibold">Dados do escritório</h2>
+                  <p className="text-xs text-muted-foreground">
+                    {podeEditar
+                      ? "Identidade visual e dados cadastrais."
+                      : "Somente administradores podem editar."}
+                  </p>
+                </div>
               </div>
-              <div className="space-y-2">
-                <Label>CNPJ</Label>
-                <Input readOnly value={escritorio?.cnpj ?? ""} />
+            </div>
+            <div className="p-5">
+              <div className="grid gap-4 sm:grid-cols-2">
+                <div className="space-y-2">
+                  <Label>Nome</Label>
+                  <Input
+                    className="rounded-xl"
+                    readOnly={!podeEditar}
+                    defaultValue={escritorio?.nome ?? ""}
+                    onBlur={(e) => {
+                      if (!podeEditar || !escritorio) return;
+                      supabase
+                        .from("escritorios")
+                        .update({ nome: e.target.value })
+                        .eq("id", escritorio.id)
+                        .then(({ error }) => {
+                          if (error) toast.error("Não foi possível salvar", { description: error.message });
+                          else {
+                            toast.success("Nome atualizado");
+                            queryClient.invalidateQueries({ queryKey: ["escritorio"] });
+                          }
+                        });
+                    }}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label>CNPJ</Label>
+                  <Input className="rounded-xl" readOnly value={escritorio?.cnpj ?? ""} />
+                </div>
+                <div className="space-y-2">
+                  <Label className="flex items-center gap-1.5">
+                    <Palette className="size-3.5" /> Cor primária
+                  </Label>
+                  <div className="flex items-center gap-2">
+                    <Input
+                      className="flex-1 rounded-xl"
+                      readOnly={!podeEditar}
+                      defaultValue={escritorio?.cor_primaria ?? ""}
+                      onBlur={(e) => {
+                        if (!podeEditar || !escritorio) return;
+                        supabase
+                          .from("escritorios")
+                          .update({ cor_primaria: e.target.value })
+                          .eq("id", escritorio.id)
+                          .then(({ error }) => {
+                            if (error) toast.error("Não foi possível salvar", { description: error.message });
+                            else {
+                              toast.success("Cor atualizada");
+                              queryClient.invalidateQueries({ queryKey: ["escritorio"] });
+                            }
+                          });
+                      }}
+                    />
+                    {escritorio?.cor_primaria && (
+                      <span
+                        className="size-8 shrink-0 rounded-lg border border-border"
+                        style={{ backgroundColor: escritorio.cor_primaria }}
+                      />
+                    )}
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <Label className="flex items-center gap-1.5">
+                    <Palette className="size-3.5" /> Cor de acento
+                  </Label>
+                  <div className="flex items-center gap-2">
+                    <Input
+                      className="flex-1 rounded-xl"
+                      readOnly={!podeEditar}
+                      defaultValue={escritorio?.cor_acento ?? ""}
+                      onBlur={(e) => {
+                        if (!podeEditar || !escritorio) return;
+                        supabase
+                          .from("escritorios")
+                          .update({ cor_acento: e.target.value })
+                          .eq("id", escritorio.id)
+                          .then(({ error }) => {
+                            if (error) toast.error("Não foi possível salvar", { description: error.message });
+                            else {
+                              toast.success("Cor de acento atualizada");
+                              queryClient.invalidateQueries({ queryKey: ["escritorio"] });
+                            }
+                          });
+                      }}
+                    />
+                    {escritorio?.cor_acento && (
+                      <span
+                        className="size-8 shrink-0 rounded-lg border border-border"
+                        style={{ backgroundColor: escritorio.cor_acento }}
+                      />
+                    )}
+                  </div>
+                </div>
               </div>
-              <div className="space-y-2">
-                <Label>Cor primária</Label>
-                <Input
-                  readOnly={!podeEditar}
-                  defaultValue={escritorio?.cor_primaria ?? ""}
-                  onBlur={(e) => {
-                    if (!podeEditar || !escritorio) return;
-                    supabase
-                      .from("escritorios")
-                      .update({ cor_primaria: e.target.value })
-                      .eq("id", escritorio.id)
-                      .then(({ error }) => {
-                        if (error) toast.error("Não foi possível salvar", { description: error.message });
-                        else {
-                          toast.success("Cor atualizada");
-                          queryClient.invalidateQueries({ queryKey: ["escritorio"] });
-                        }
-                      });
-                  }}
-                />
-              </div>
-              <div className="space-y-2">
-                <Label>Cor de acento</Label>
-                <Input
-                  readOnly={!podeEditar}
-                  defaultValue={escritorio?.cor_acento ?? ""}
-                  onBlur={(e) => {
-                    if (!podeEditar || !escritorio) return;
-                    supabase
-                      .from("escritorios")
-                      .update({ cor_acento: e.target.value })
-                      .eq("id", escritorio.id)
-                      .then(({ error }) => {
-                        if (error) toast.error("Não foi possível salvar", { description: error.message });
-                        else {
-                          toast.success("Cor de acento atualizada");
-                          queryClient.invalidateQueries({ queryKey: ["escritorio"] });
-                        }
-                      });
-                  }}
-                />
-              </div>
-            </CardContent>
-          </Card>
+            </div>
+          </div>
         </TabsContent>
 
         <TabsContent value="perfil">
-          <Card>
-            <CardHeader>
-              <CardTitle>Meu perfil</CardTitle>
-            </CardHeader>
-            <CardContent className="grid gap-4 sm:grid-cols-2">
-              <div className="space-y-2">
-                <Label>Nome</Label>
-                <Input readOnly value={perfil?.nome ?? ""} />
-              </div>
-              <div className="space-y-2">
-                <Label>E-mail</Label>
-                <Input readOnly value={perfil?.email ?? ""} />
-              </div>
-              <div className="space-y-2">
-                <Label>Papel</Label>
+          <div className="rounded-2xl border border-border bg-card shadow-card">
+            <div className="border-b border-border/60 p-5">
+              <div className="flex items-center gap-3">
+                <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-primary/8 text-primary">
+                  <User className="size-4" />
+                </div>
                 <div>
-                  <Badge variant="secondary" className="capitalize">
-                    {perfil?.papel ?? "—"}
-                  </Badge>
+                  <h2 className="text-sm font-semibold">Meu perfil</h2>
+                  <p className="text-xs text-muted-foreground">Dados da sua conta no sistema.</p>
                 </div>
               </div>
-            </CardContent>
-          </Card>
+            </div>
+            <div className="p-5">
+              <div className="grid gap-4 sm:grid-cols-2">
+                <div className="space-y-2">
+                  <Label>Nome</Label>
+                  <Input className="rounded-xl" readOnly value={perfil?.nome ?? ""} />
+                </div>
+                <div className="space-y-2">
+                  <Label>E-mail</Label>
+                  <Input className="rounded-xl" readOnly value={perfil?.email ?? ""} />
+                </div>
+                <div className="space-y-2">
+                  <Label>Papel</Label>
+                  <div>
+                    <span className="status-dot bg-primary/10 text-primary">
+                      <span className="size-1.5 rounded-full bg-primary" />
+                      {perfil?.papel ?? "—"}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
         </TabsContent>
 
         <TabsContent value="plano">
-          <Card>
-            <CardHeader>
-              <CardTitle>Plano de contas</CardTitle>
-              <CardDescription>
-                Cadastro simples por cliente. A importação do layout IOB virá em uma próxima etapa.
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
+          <div className="rounded-2xl border border-border bg-card shadow-card">
+            <div className="border-b border-border/60 p-5">
+              <div className="flex items-center gap-3">
+                <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-primary/8 text-primary">
+                  <BookOpen className="size-4" />
+                </div>
+                <div>
+                  <h2 className="text-sm font-semibold">Plano de contas</h2>
+                  <p className="text-xs text-muted-foreground">
+                    Cadastro simples por cliente. A importação do layout IOB virá em uma próxima etapa.
+                  </p>
+                </div>
+              </div>
+            </div>
+            <div className="p-5 space-y-4">
               <Select value={clienteSel} onValueChange={setClienteSel}>
-                <SelectTrigger className="w-full sm:w-72">
+                <SelectTrigger className="w-full rounded-xl sm:w-72">
                   <SelectValue placeholder="Selecione o cliente" />
                 </SelectTrigger>
                 <SelectContent>
@@ -266,66 +316,69 @@ function ConfiguracoesPage() {
                 <>
                   <div className="grid gap-3 sm:grid-cols-4">
                     <Input
+                      className="rounded-xl"
                       placeholder="Código"
                       value={conta.codigo}
                       onChange={(e) => setConta({ ...conta, codigo: e.target.value })}
                     />
                     <Input
-                      className="sm:col-span-2"
+                      className="sm:col-span-2 rounded-xl"
                       placeholder="Descrição"
                       value={conta.descricao}
                       onChange={(e) => setConta({ ...conta, descricao: e.target.value })}
                     />
                     <div className="flex gap-2">
                       <Input
+                        className="rounded-xl"
                         placeholder="Tipo"
                         value={conta.tipo}
                         onChange={(e) => setConta({ ...conta, tipo: e.target.value })}
                       />
-                      <Button onClick={() => criarConta.mutate()} disabled={criarConta.isPending}>
+                      <Button
+                        onClick={() => criarConta.mutate()}
+                        disabled={criarConta.isPending}
+                        className="rounded-xl"
+                      >
                         <Plus className="size-4" />
                       </Button>
                     </div>
                   </div>
 
                   {!contas || contas.length === 0 ? (
-                    <p className="py-8 text-center text-sm text-muted-foreground">
-                      Nenhuma conta cadastrada — adicione a primeira acima.
-                    </p>
+                    <div className="py-12 text-center">
+                      <BookOpen className="mx-auto size-10 text-muted-foreground/30" />
+                      <p className="mt-3 text-sm text-muted-foreground">
+                        Nenhuma conta cadastrada — adicione a primeira acima.
+                      </p>
+                    </div>
                   ) : (
-                    <Table>
-                      <TableHeader>
-                        <TableRow>
-                          <TableHead>Código</TableHead>
-                          <TableHead>Descrição</TableHead>
-                          <TableHead>Tipo</TableHead>
-                          <TableHead className="text-right">Ações</TableHead>
-                        </TableRow>
-                      </TableHeader>
-                      <TableBody>
-                        {contas.map((c) => (
-                          <TableRow key={c.id}>
-                            <TableCell className="font-mono text-xs">{c.codigo}</TableCell>
-                            <TableCell>{c.descricao}</TableCell>
-                            <TableCell>{c.tipo ?? "—"}</TableCell>
-                            <TableCell className="text-right">
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                onClick={() => removerConta.mutate(c.id)}
-                              >
-                                <Trash2 className="size-4" />
-                              </Button>
-                            </TableCell>
-                          </TableRow>
-                        ))}
-                      </TableBody>
-                    </Table>
+                    <div className="divide-y divide-border/50">
+                      {contas.map((c) => (
+                        <div
+                          key={c.id}
+                          className="flex items-center gap-3 rounded-xl px-4 py-3 transition-colors hover:bg-muted/50"
+                        >
+                          <span className="min-w-16 font-mono text-xs font-semibold text-primary">
+                            {c.codigo}
+                          </span>
+                          <span className="min-w-0 flex-1 text-sm">{c.descricao}</span>
+                          <span className="text-xs text-muted-foreground">{c.tipo ?? "—"}</span>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="size-8 rounded-lg"
+                            onClick={() => removerConta.mutate(c.id)}
+                          >
+                            <Trash2 className="size-3.5" />
+                          </Button>
+                        </div>
+                      ))}
+                    </div>
                   )}
                 </>
               )}
-            </CardContent>
-          </Card>
+            </div>
+          </div>
         </TabsContent>
       </Tabs>
     </div>

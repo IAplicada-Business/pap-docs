@@ -1,18 +1,34 @@
-import { Badge } from "@/components/ui/badge";
 import { STATUS_PROCESSAMENTO } from "@/lib/dominio";
 
 export function badgeStatus(status: string) {
-  const cor =
-    status === "processado"
-      ? "bg-success/15 text-success"
-      : status === "erro"
-        ? "bg-destructive/15 text-destructive"
-        : status === "processando"
-          ? "bg-warning/20 text-warning-foreground"
-          : "bg-secondary text-secondary-foreground";
+  const config: Record<string, { dot: string; bg: string; text: string }> = {
+    processado: {
+      dot: "bg-success",
+      bg: "bg-success/10",
+      text: "text-success",
+    },
+    erro: {
+      dot: "bg-destructive",
+      bg: "bg-destructive/10",
+      text: "text-destructive",
+    },
+    processando: {
+      dot: "bg-warning animate-pulse",
+      bg: "bg-warning/10",
+      text: "text-warning-foreground",
+    },
+  };
+
+  const c = config[status] ?? {
+    dot: "bg-muted-foreground/50",
+    bg: "bg-secondary",
+    text: "text-secondary-foreground",
+  };
+
   return (
-    <Badge variant="secondary" className={cor}>
+    <span className={`status-dot ${c.bg} ${c.text}`}>
+      <span className={`size-1.5 rounded-full ${c.dot}`} />
       {STATUS_PROCESSAMENTO[status] ?? status}
-    </Badge>
+    </span>
   );
 }
