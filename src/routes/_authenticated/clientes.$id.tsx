@@ -99,7 +99,7 @@ function ClienteDetalhe() {
   });
 
   const salvar = useMutation({
-    mutationFn: async (valores: Record<string, unknown>) => {
+    mutationFn: async (valores: Parameters<ReturnType<typeof supabase.from<"clientes">>["update"]>[0]) => {
       const { error } = await supabase.from("clientes").update(valores).eq("id", id);
       if (error) throw error;
     },

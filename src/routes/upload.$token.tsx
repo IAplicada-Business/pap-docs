@@ -132,8 +132,8 @@ function UploadPublico() {
               ? {
                   ...it,
                   progresso: 100,
-                  status: ok ? "sucesso" : "erro",
-                  mensagem: ok ? undefined : mensagem,
+                  status: (ok ? "sucesso" : "erro") as ItemEnvio["status"],
+                  mensagem: ok ? "" : mensagem,
                 }
               : it,
           ),
@@ -157,7 +157,7 @@ function UploadPublico() {
   async function enviarTodos() {
     for (let i = 0; i < itens.length; i++) {
       const item = itens[i];
-      if (item.status !== "pendente") continue;
+      if (!item || item.status !== "pendente") continue;
       await enviarUm(item, i);
     }
   }

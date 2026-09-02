@@ -38,7 +38,10 @@ function AuthPage() {
     setCarregando(true);
     const { error } = await supabase.auth.signInWithPassword({ email, password: senha });
     setCarregando(false);
-    if (error) return toast.error("Não foi possível entrar", { description: error.message });
+    if (error) {
+      toast.error("Não foi possível entrar", { description: error.message });
+      return;
+    }
     toast.success("Bem-vindo de volta!");
     navigate({ to: "/dashboard" });
   }
@@ -55,7 +58,10 @@ function AuthPage() {
       },
     });
     setCarregando(false);
-    if (error) return toast.error("Não foi possível criar a conta", { description: error.message });
+    if (error) {
+      toast.error("Não foi possível criar a conta", { description: error.message });
+      return;
+    }
     toast.success("Conta criada", { description: "Você já pode acessar o sistema." });
     navigate({ to: "/dashboard" });
   }
