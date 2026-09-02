@@ -2,15 +2,19 @@ import { useMemo, useState } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import {
+  Activity,
   AlertTriangle,
   ArrowUpRight,
+  Brain,
   CalendarRange,
   CheckCircle2,
+  FileBarChart2,
   FileText,
   Hourglass,
   MessageCircle,
   Scale,
   Upload,
+  UserMinus,
   Users,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
@@ -83,30 +87,58 @@ function EmpresaDashboard() {
     queryKey: ["empresa-dashboard", empresaId],
     queryFn: async () => {
       const desde = diasAtras(180).toISOString();
-      const [docs, clientes, comps] = await Promise.all([
-        supabase
-          .from("documentos")
-          .select(
-            "id, nome_original, tipo, status_processamento, enviado_em, cliente_id, clientes(nome_fantasia, nome)",
-          )
-          .is("deleted_at", null)
-          .gte("enviado_em", desde)
-          .order("enviado_em", { ascending: false }),
-        supabase
-          .from("clientes")
-          .select("id, nome_fantasia, nome, telefone, upload_token, ativo")
-          .eq("ativo", true)
-          .is("deleted_at", null),
-        supabase
-          .from("competencias")
-          .select(
-            "id, status, mes_ano, taxa_conciliacao, cliente_id, clientes(nome_fantasia, nome)",
-          )
-          .is("deleted_at", null)
-          .order("mes_ano", { ascending: false }),
-      ]);
+      const inicioMes = new Date();
+      inicioMes.setDate(1);
+      inicioMes.setHours(0, 0, 0, 0);
+      const [docs, clientes, comps, auditoria, inativos, regras, relatoriosMes] = await Promise.all(
+        [
+          supabase
+            .from("documentos")
+            .select(
+              "id, nome_original, tipo, status_processamento, enviado_em, cliente_id, clientes(nome_fantasia, nome)",
+            )
+            .is("deleted_at", null)
+            .gte("enviado_em", desde)
+            .order("enviado_em", { ascending: false }),
+          supabase
+            .from("clientes")
+            .select("id, nome_fantasia, nome, telefone, upload_token, ativo")
+            .eq("ativo", true)
+            .is("deleted_at", null),
+          supabase
+            .from("competencias")
+            .select(
+              "id, status, mes_ano, taxa_conciliacao, cliente_id, clientes(nome_fantasia, nome)",
+            )
+            .is("deleted_at", null)
+            .order("mes_ano", { ascending: false }),
+          supabase
+            .from("auditoria")
+            .select("id, evento, usuario, created_at")
+            .order("created_at", { ascending: false })
+            .limit(8),
+          supabase
+            .from("clientes")
+            .select("id", { count: "exact", head: true })
+            .eq("ativo", false)
+            .is("deleted_at", null),
+          supabase
+            .from("regras_aprendizado")
+            .select("id", { count: "exact", head: true })
+            .is("deleted_at", null),
+          supabase
+            .from("relatorios")
+            .select("id", { count: "exact", head: true })
+            .gte("created_at", inicioMes.toISOString())
+            .is("deleted_at", null),
+        ],
+      );
       return {
         docs: (docs.data ?? []) as Doc[],
+        auditoria: auditoria.data ?? [],
+        clientesInativos: inativos.count ?? 0,
+        regrasAprendidas: regras.count ?? 0,
+        relatoriosMes: relatoriosMes.count ?? 0,
         clientes: clientes.data ?? [],
         comps: comps.data ?? [],
       };
@@ -580,30 +612,86 @@ function EmpresaDashboard() {
         </SectionCard>
       </div>
 
-      <SectionCard
-        title="Últimos documentos recebidos"
-        icon={FileText}
-        flush
-        actions={
-          <Link
-            to="/empresas/$id/documentos"
-            params={{ id: empresaId }}
-            className="flex items-center gap-1 text-xs font-medium text-primary hover:underline"
-          >
-            Ver todos <ArrowUpRight className="size-3" />
-          </Link>
-        }
-      >
-        <DataTable
-          rows={m.ultimos}
-          columns={colunas}
-          rowKey={(d) => d.id}
-          loading={isLoading}
-          dense
-          emptyTitle="Nenhum documento recebido ainda"
-          emptyHint="Cadastre um cliente e compartilhe o link de upload."
-        />
-      </SectionCard>
+      <div className="grid gap-4 lg:grid-cols-3">
+        <SectionCard
+          className="lg:col-span-2"
+          title="Últimos documentos recebidos"
+          icon={FileText}
+          flush
+          actions={
+            <Link
+              to="/empresas/$id/documentos"
+              params={{ id: empresaId }}
+              className="flex items-center gap-1 text-xs font-medium text-primary hover:underline"
+            >
+              Ver todos <ArrowUpRight className="size-3" />
+            </Link>
+          }
+        >
+          <DataTable
+            rows={m.ultimos}
+            columns={colunas}
+            rowKey={(d) => d.id}
+            loading={isLoading}
+            dense
+            emptyTitle="Nenhum documento recebido ainda"
+            emptyHint="Cadastre um cliente e compartilhe o link de upload."
+          />
+        </SectionCard>
+
+        <SectionCard
+          title="Atividade recente"
+          description="Últimos eventos registrados na auditoria e indicadores rápidos da operação."
+          icon={Activity}
+        >
+          <div className="grid grid-cols-3 gap-2">
+            {[
+              {
+                icone: Brain,
+                v: data?.regrasAprendidas ?? 0,
+                l: "regras aprendidas",
+                cls: "text-primary",
+              },
+              {
+                icone: FileBarChart2,
+                v: data?.relatoriosMes ?? 0,
+                l: "relatórios no mês",
+                cls: "text-accent",
+              },
+              {
+                icone: UserMinus,
+                v: data?.clientesInativos ?? 0,
+                l: "clientes inativos",
+                cls: "text-muted-foreground",
+              },
+            ].map(({ icone: Icone, v, l, cls }) => (
+              <div key={l} className="rounded-lg bg-muted/50 px-2.5 py-2">
+                <Icone className={`size-3.5 ${cls}`} />
+                <div className={`mt-1 text-lg font-bold leading-none tabular-nums ${cls}`}>{v}</div>
+                <div className="mt-1 text-[0.625rem] leading-tight text-muted-foreground">{l}</div>
+              </div>
+            ))}
+          </div>
+          <div className="mt-4 divide-y divide-border/40">
+            {(data?.auditoria ?? []).length === 0 && !isLoading && (
+              <p className="py-3 text-center text-xs text-muted-foreground">
+                Nenhuma atividade registrada ainda.
+              </p>
+            )}
+            {(data?.auditoria ?? []).map((evt) => (
+              <div key={evt.id} className="flex items-start gap-2.5 py-2">
+                <span className="mt-1.5 size-1.5 shrink-0 rounded-full bg-accent" />
+                <div className="min-w-0 flex-1">
+                  <div className="truncate text-xs font-medium">{evt.evento}</div>
+                  <div className="text-[0.6875rem] text-muted-foreground">
+                    {evt.usuario ?? "Sistema"} · {formatarDataHora(evt.created_at)}
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </SectionCard>
+      </div>
     </div>
   );
 }
