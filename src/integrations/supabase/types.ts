@@ -51,44 +51,59 @@ export type Database = {
       }
       clientes: {
         Row: {
+          ativo: boolean
           cnpj: string
           created_at: string
           deleted_at: string | null
+          email_contato: string | null
           id: string
-          nome: string
+          nome: string | null
+          nome_fantasia: string | null
           org_id: string
           origem_documentos: string[]
           painel_token: string | null
+          razao_social: string | null
           segmento: string | null
           status: string
+          telefone: string | null
           updated_at: string
           upload_token: string | null
         }
         Insert: {
+          ativo?: boolean
           cnpj: string
           created_at?: string
           deleted_at?: string | null
+          email_contato?: string | null
           id?: string
-          nome: string
+          nome?: string | null
+          nome_fantasia?: string | null
           org_id: string
           origem_documentos?: string[]
           painel_token?: string | null
+          razao_social?: string | null
           segmento?: string | null
           status?: string
+          telefone?: string | null
           updated_at?: string
           upload_token?: string | null
         }
         Update: {
+          ativo?: boolean
           cnpj?: string
           created_at?: string
           deleted_at?: string | null
+          email_contato?: string | null
           id?: string
-          nome?: string
+          nome?: string | null
+          nome_fantasia?: string | null
           org_id?: string
           origem_documentos?: string[]
           painel_token?: string | null
+          razao_social?: string | null
           segmento?: string | null
           status?: string
+          telefone?: string | null
           updated_at?: string
           upload_token?: string | null
         }
@@ -107,6 +122,8 @@ export type Database = {
           cliente_id: string
           created_at: string
           deleted_at: string | null
+          fechada_em: string | null
+          fechada_por: string | null
           id: string
           mes_ano: string
           org_id: string
@@ -118,6 +135,8 @@ export type Database = {
           cliente_id: string
           created_at?: string
           deleted_at?: string | null
+          fechada_em?: string | null
+          fechada_por?: string | null
           id?: string
           mes_ano: string
           org_id: string
@@ -129,6 +148,8 @@ export type Database = {
           cliente_id?: string
           created_at?: string
           deleted_at?: string | null
+          fechada_em?: string | null
+          fechada_por?: string | null
           id?: string
           mes_ano?: string
           org_id?: string
@@ -160,12 +181,17 @@ export type Database = {
           competencia_id: string | null
           created_at: string
           deleted_at: string | null
+          enviado_em: string
+          erro_motivo: string | null
           hash: string | null
+          hash_sha256: string | null
           id: string
+          nome_original: string | null
           org_id: string
           origem: string | null
           publicado_painel: boolean
           status_processamento: string
+          tamanho_bytes: number | null
           tipo: string | null
           updated_at: string
         }
@@ -175,12 +201,17 @@ export type Database = {
           competencia_id?: string | null
           created_at?: string
           deleted_at?: string | null
+          enviado_em?: string
+          erro_motivo?: string | null
           hash?: string | null
+          hash_sha256?: string | null
           id?: string
+          nome_original?: string | null
           org_id: string
           origem?: string | null
           publicado_painel?: boolean
           status_processamento?: string
+          tamanho_bytes?: number | null
           tipo?: string | null
           updated_at?: string
         }
@@ -190,12 +221,17 @@ export type Database = {
           competencia_id?: string | null
           created_at?: string
           deleted_at?: string | null
+          enviado_em?: string
+          erro_motivo?: string | null
           hash?: string | null
+          hash_sha256?: string | null
           id?: string
+          nome_original?: string | null
           org_id?: string
           origem?: string | null
           publicado_painel?: boolean
           status_processamento?: string
+          tamanho_bytes?: number | null
           tipo?: string | null
           updated_at?: string
         }
@@ -322,23 +358,29 @@ export type Database = {
       }
       organizations: {
         Row: {
+          cor_primaria: string
           created_at: string
           deleted_at: string | null
           id: string
+          logo_url: string | null
           nome: string
           updated_at: string
         }
         Insert: {
+          cor_primaria?: string
           created_at?: string
           deleted_at?: string | null
           id?: string
+          logo_url?: string | null
           nome: string
           updated_at?: string
         }
         Update: {
+          cor_primaria?: string
           created_at?: string
           deleted_at?: string | null
           id?: string
+          logo_url?: string | null
           nome?: string
           updated_at?: string
         }
@@ -346,6 +388,7 @@ export type Database = {
       }
       plano_contas: {
         Row: {
+          ativo: boolean
           codigo: string
           created_at: string
           deleted_at: string | null
@@ -356,6 +399,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          ativo?: boolean
           codigo: string
           created_at?: string
           deleted_at?: string | null
@@ -366,6 +410,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          ativo?: boolean
           codigo?: string
           created_at?: string
           deleted_at?: string | null
@@ -388,21 +433,33 @@ export type Database = {
       profiles: {
         Row: {
           created_at: string
+          deleted_at: string | null
+          email: string | null
           id: string
           nome: string | null
           org_id: string
+          papel: string
+          updated_at: string
         }
         Insert: {
           created_at?: string
+          deleted_at?: string | null
+          email?: string | null
           id: string
           nome?: string | null
           org_id: string
+          papel?: string
+          updated_at?: string
         }
         Update: {
           created_at?: string
+          deleted_at?: string | null
+          email?: string | null
           id?: string
           nome?: string | null
           org_id?: string
+          papel?: string
+          updated_at?: string
         }
         Relationships: [
           {
