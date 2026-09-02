@@ -1,60 +1,177 @@
-import type { ReactNode } from "react";
-import { useEffect, useState } from "react";
+import type { ComponentType, ReactNode } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
+import { useQuery } from "@tanstack/react-query";
 import {
+  AlertTriangle,
   ArrowLeft,
+  Bell,
   Building2,
   CalendarRange,
+  ChevronDown,
   ChevronRight,
+  FileBarChart2,
   FileText,
   LayoutDashboard,
   LogOut,
   Menu,
   PanelLeftClose,
   PanelLeftOpen,
+  Scale,
+  Search,
   Settings,
   Sparkles,
+  UserCog,
   Users,
   X,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
-import { usePerfil, useEmpresa, temPermissao, moduloHabilitado } from "@/hooks/use-perfil";
-import { Button } from "@/components/ui/button";
+import {
+  usePerfil,
+  useEmpresa,
+  temPermissao,
+  moduloHabilitado,
+  type Permissoes,
+} from "@/hooks/use-perfil";
+import {
+  CommandDialog,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from "@/components/ui/command";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { toast } from "sonner";
+import { formatarCompetencia } from "@/lib/formatadores";
+
+type Icon = ComponentType<{ className?: string }>;
+
+type NavChild = { to: string; label: string; search?: Record<string, string> };
 
 type NavItem = {
   to: string;
-  params?: Record<string, string>;
   label: string;
-  icon: typeof LayoutDashboard;
-  permissao: "clientes" | "documentos" | "competencias" | "relatorios" | "configuracoes" | null;
+  icon: Icon;
+  permissao: keyof Permissoes | null;
   modulo?: string;
+  exact?: boolean;
+  children?: NavChild[];
 };
 
-function buildEmpresaNav(empresaId: string): NavItem[] {
+type NavGroup = { label: string; items: NavItem[] };
+
+function buildEmpresaNav(id: string): NavGroup[] {
+  const base = `/empresas/${id}`;
   return [
-    { to: "/empresas/$id", params: { id: empresaId }, label: "Dashboard", icon: LayoutDashboard, permissao: null },
-    { to: "/empresas/$id/clientes", params: { id: empresaId }, label: "Clientes", icon: Users, permissao: "clientes", modulo: "clientes" },
-    { to: "/empresas/$id/documentos", params: { id: empresaId }, label: "Documentos", icon: FileText, permissao: "documentos", modulo: "documentos" },
-    { to: "/empresas/$id/competencias", params: { id: empresaId }, label: "Competencias", icon: CalendarRange, permissao: "competencias", modulo: "competencias" },
-    { to: "/empresas/$id/configuracoes", params: { id: empresaId }, label: "Configuracoes", icon: Settings, permissao: "configuracoes", modulo: "configuracoes" },
+    {
+      label: "Visão geral",
+      items: [
+        { to: base, label: "Dashboard", icon: LayoutDashboard, permissao: null, exact: true },
+      ],
+    },
+    {
+      label: "Operação",
+      items: [
+        {
+          to: `${base}/documentos`,
+          label: "Documentos",
+          icon: FileText,
+          permissao: "documentos",
+          modulo: "documentos",
+          children: [
+            { to: `${base}/documentos`, label: "Todos" },
+            { to: `${base}/documentos`, label: "Fila de processamento", search: { aba: "fila" } },
+            { to: `${base}/documentos`, label: "Com erro", search: { aba: "erro" } },
+          ],
+        },
+        { to: `${base}/conciliacao`, label: "Conciliação", icon: Scale, permissao: "competencias" },
+        {
+          to: `${base}/competencias`,
+          label: "Competências",
+          icon: CalendarRange,
+          permissao: "competencias",
+          modulo: "competencias",
+        },
+        {
+          to: `${base}/relatorios`,
+          label: "Relatórios",
+          icon: FileBarChart2,
+          permissao: "relatorios",
+        },
+      ],
+    },
+    {
+      label: "Cadastros",
+      items: [
+        {
+          to: `${base}/clientes`,
+          label: "Clientes",
+          icon: Users,
+          permissao: "clientes",
+          modulo: "clientes",
+        },
+      ],
+    },
+    {
+      label: "Sistema",
+      items: [
+        {
+          to: `${base}/configuracoes`,
+          label: "Configurações",
+          icon: Settings,
+          permissao: "configuracoes",
+          modulo: "configuracoes",
+        },
+        { to: "/equipe", label: "Equipe", icon: UserCog, permissao: "configuracoes" },
+      ],
+    },
   ];
 }
 
-const ADMIN_NAV: NavItem[] = [
-  { to: "/empresas", label: "Empresas", icon: Building2, permissao: null },
+const ADMIN_NAV: NavGroup[] = [
+  {
+    label: "Administração",
+    items: [
+      { to: "/empresas", label: "Empresas", icon: Building2, permissao: null, exact: true },
+      { to: "/equipe", label: "Equipe", icon: UserCog, permissao: "configuracoes" },
+    ],
+  },
 ];
+
+const PAGE_LABELS: Record<string, string> = {
+  documentos: "Documentos",
+  conciliacao: "Conciliação",
+  competencias: "Competências",
+  relatorios: "Relatórios",
+  clientes: "Clientes",
+  configuracoes: "Configurações",
+  equipe: "Equipe",
+  empresas: "Empresas",
+  nova: "Nova empresa",
+};
 
 export function AppShell({ children }: { children: ReactNode }) {
   const { data: perfil } = usePerfil();
   const navigate = useNavigate();
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [paletteOpen, setPaletteOpen] = useState(false);
   const [collapsed, setCollapsed] = useState(() => {
     if (typeof window === "undefined") return false;
     return localStorage.getItem("sidebar-collapsed") === "true";
   });
+  const [openGroups, setOpenGroups] = useState<Record<string, boolean>>({});
 
   const pathname = useRouterState({ select: (s) => s.location.pathname });
+  const searchStr = useRouterState({ select: (s) => s.location.searchStr });
   const empresaMatch = pathname.match(/^\/empresas\/([^/]+)/);
   const empresaId = empresaMatch?.[1] ?? null;
   const modoEmpresa = !!empresaId && empresaId !== "nova";
@@ -66,57 +183,61 @@ export function AppShell({ children }: { children: ReactNode }) {
   }, [collapsed]);
 
   useEffect(() => {
-    if (!modoEmpresa || !empresa) {
-      const root = document.documentElement;
-      root.style.removeProperty("--primary");
-      root.style.removeProperty("--ring");
-      root.style.removeProperty("--chart-1");
-      root.style.removeProperty("--sidebar");
-      root.style.removeProperty("--sidebar-accent");
-      root.style.removeProperty("--sidebar-border");
-      root.style.removeProperty("--sidebar-ring");
+    function onKey(e: KeyboardEvent) {
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k") {
+        e.preventDefault();
+        setPaletteOpen((o) => !o);
+      }
+    }
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, []);
+
+  useEffect(() => {
+    const root = document.documentElement;
+    const names = [
+      "--primary",
+      "--ring",
+      "--chart-1",
+      "--sidebar",
+      "--sidebar-accent",
+      "--sidebar-border",
+      "--sidebar-ring",
+    ];
+    if (!modoEmpresa || !empresa?.cor_primaria) {
+      names.forEach((n) => root.style.removeProperty(n));
       return;
     }
-
-    const root = document.documentElement;
-    const props: string[] = [];
-
-    function set(name: string, value: string) {
-      root.style.setProperty(name, value);
-      props.push(name);
-    }
-
-    if (empresa.cor_primaria) {
-      const p = empresa.cor_primaria;
-      set("--primary", p);
-      set("--ring", p);
-      set("--chart-1", p);
-      set("--sidebar", `color-mix(in srgb, ${p}, #080e14 65%)`);
-      set("--sidebar-accent", `color-mix(in srgb, ${p}, #080e14 48%)`);
-      set("--sidebar-border", `color-mix(in srgb, ${p}, #080e14 38%)`);
-      set("--sidebar-ring", `color-mix(in srgb, ${p}, #fff 20%)`);
-    }
-
-    return () => {
-      props.forEach((name) => root.style.removeProperty(name));
-    };
+    const p = empresa.cor_primaria;
+    root.style.setProperty("--primary", p);
+    root.style.setProperty("--ring", p);
+    root.style.setProperty("--chart-1", p);
+    root.style.setProperty("--sidebar", `color-mix(in srgb, ${p}, #080e14 65%)`);
+    root.style.setProperty("--sidebar-accent", `color-mix(in srgb, ${p}, #080e14 48%)`);
+    root.style.setProperty("--sidebar-border", `color-mix(in srgb, ${p}, #080e14 38%)`);
+    root.style.setProperty("--sidebar-ring", `color-mix(in srgb, ${p}, #fff 20%)`);
+    return () => names.forEach((n) => root.style.removeProperty(n));
   }, [modoEmpresa, empresa]);
 
   async function sair() {
     await supabase.auth.signOut();
-    toast.success("Sessao encerrada");
+    toast.success("Sessão encerrada");
     navigate({ to: "/auth" });
   }
 
-  const navItems = modoEmpresa && empresaId
-    ? buildEmpresaNav(empresaId)
-    : ADMIN_NAV;
-
-  const navFiltrada = navItems.filter((item) => {
-    if (item.permissao !== null && !temPermissao(perfil, item.permissao)) return false;
-    if (modoEmpresa && item.modulo && !moduloHabilitado(empresa, item.modulo)) return false;
-    return true;
-  });
+  const groups = useMemo(() => {
+    const src = modoEmpresa && empresaId ? buildEmpresaNav(empresaId) : ADMIN_NAV;
+    return src
+      .map((g) => ({
+        ...g,
+        items: g.items.filter((item) => {
+          if (item.permissao !== null && !temPermissao(perfil, item.permissao)) return false;
+          if (modoEmpresa && item.modulo && !moduloHabilitado(empresa, item.modulo)) return false;
+          return true;
+        }),
+      }))
+      .filter((g) => g.items.length > 0);
+  }, [modoEmpresa, empresaId, perfil, empresa]);
 
   const papelLabel =
     perfil?.papel === "admin"
@@ -124,7 +245,6 @@ export function AppShell({ children }: { children: ReactNode }) {
       : perfil?.papel === "super_admin"
         ? "Super Admin"
         : "Operador";
-
   const iniciais = perfil?.nome
     ? perfil.nome
         .split(" ")
@@ -137,148 +257,195 @@ export function AppShell({ children }: { children: ReactNode }) {
   const brandName = modoEmpresa ? (empresa?.nome ?? "Empresa") : "ConcilIA";
   const brandLogo = modoEmpresa ? empresa?.logo_url : null;
 
-  const sidebarContent = (mobile: boolean) => (
-    <>
-      <div className={`pb-2 pt-6 ${collapsed && !mobile ? "px-3 text-center" : "px-5"}`}>
-        {modoEmpresa && (!collapsed || mobile) && (
+  const isActive = (item: NavItem) =>
+    item.exact ? pathname === item.to : pathname.startsWith(item.to);
+  const childActive = (c: NavChild) => {
+    if (pathname !== c.to) return false;
+    const want = c.search?.["aba"];
+    const has = new URLSearchParams(searchStr).get("aba");
+    return (want ?? null) === has;
+  };
+
+  const crumbs = useMemo(() => {
+    const parts = pathname.split("/").filter(Boolean);
+    const out: { label: string; to?: string }[] = [];
+    if (modoEmpresa && empresaId) {
+      out.push({ label: "Empresas", to: "/empresas" });
+      out.push({ label: empresa?.nome ?? "Empresa", to: `/empresas/${empresaId}` });
+      const rest = parts.slice(2);
+      if (rest.length === 0) out.push({ label: "Dashboard" });
+      else {
+        const seg = rest[0] ?? "";
+        out.push({
+          label: PAGE_LABELS[seg] ?? seg,
+          ...(rest.length > 1 ? { to: `/empresas/${empresaId}/${seg}` } : {}),
+        });
+        if (rest.length > 1) out.push({ label: "Detalhe" });
+      }
+    } else {
+      out.push({ label: "ConcilIA", to: "/empresas" });
+      parts.forEach((seg, i) => {
+        if (i === 0 && seg === "empresas" && parts.length === 1) return;
+        out.push({ label: PAGE_LABELS[seg] ?? seg });
+      });
+      if (out.length === 1) out.push({ label: "Empresas" });
+    }
+    return out;
+  }, [pathname, modoEmpresa, empresaId, empresa]);
+
+  const sidebarContent = (mobile: boolean) => {
+    const mini = collapsed && !mobile;
+    return (
+      <>
+        <div
+          className={`flex items-center gap-2.5 ${mini ? "justify-center px-2 pt-5" : "px-4 pt-5"}`}
+        >
+          {brandLogo ? (
+            <img
+              src={brandLogo}
+              alt={brandName}
+              className={`object-contain ${mini ? "size-8 rounded-lg bg-white/95 p-0.5" : "h-8 max-w-[160px]"}`}
+            />
+          ) : (
+            <>
+              <span className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-sidebar-primary/20 text-sidebar-primary">
+                {modoEmpresa ? <Building2 className="size-4" /> : <Sparkles className="size-4" />}
+              </span>
+              {!mini && (
+                <span className="truncate text-[0.9375rem] font-bold tracking-tight text-sidebar-accent-foreground">
+                  {brandName}
+                </span>
+              )}
+            </>
+          )}
+        </div>
+
+        {modoEmpresa && (
           <Link
             to="/empresas"
-            className="mb-3 flex items-center gap-1.5 rounded-lg px-1 py-1 text-[0.6875rem] font-medium text-sidebar-foreground/40 transition-colors hover:text-sidebar-foreground/70"
             onClick={() => setMobileOpen(false)}
+            title="Trocar de empresa"
+            className={`mx-3 mt-3 flex items-center gap-1.5 rounded-md text-[0.6875rem] font-medium text-sidebar-foreground/45 transition-colors hover:bg-sidebar-accent hover:text-sidebar-foreground/80 ${mini ? "justify-center py-1.5" : "px-2 py-1.5"}`}
           >
             <ArrowLeft className="size-3" />
-            Voltar a ConcilIA
+            {!mini && "Trocar de empresa"}
           </Link>
         )}
-        {modoEmpresa && collapsed && !mobile && (
-          <Link
-            to="/empresas"
-            className="mx-auto mb-3 flex size-8 items-center justify-center rounded-lg text-sidebar-foreground/40 transition-colors hover:bg-sidebar-accent hover:text-sidebar-foreground/70"
-            title="Voltar a ConcilIA"
-            onClick={() => setMobileOpen(false)}
-          >
-            <ArrowLeft className="size-4" />
-          </Link>
-        )}
-        {brandLogo ? (
-          <img
-            src={brandLogo}
-            alt={brandName}
-            className={`mb-1 w-auto object-contain ${collapsed && !mobile ? "mx-auto h-6" : "h-8"}`}
-          />
-        ) : (
-          <div className="flex items-center gap-2">
-            <div
-              className={`flex items-center justify-center rounded-xl bg-sidebar-primary/20 ${
-                collapsed && !mobile ? "mx-auto size-9" : "size-8"
-              }`}
-            >
-              {modoEmpresa ? (
-                <Building2 className="size-4 text-sidebar-primary" />
-              ) : (
-                <Sparkles className="size-4 text-sidebar-primary" />
+
+        <nav
+          className={`mt-4 flex flex-1 flex-col gap-4 overflow-y-auto ${mini ? "px-2" : "px-3"}`}
+        >
+          {groups.map((g) => (
+            <div key={g.label}>
+              {!mini && (
+                <p className="mb-1 px-2 text-[0.625rem] font-semibold uppercase tracking-[0.14em] text-sidebar-foreground/35">
+                  {g.label}
+                </p>
               )}
+              {mini && <div className="mx-auto mb-2 h-px w-6 bg-sidebar-border" />}
+              <div className="flex flex-col gap-0.5">
+                {g.items.map((item) => {
+                  const active = isActive(item);
+                  const hasChildren = !!item.children?.length && !mini;
+                  const open = openGroups[item.to] ?? active;
+                  return (
+                    <div key={item.to}>
+                      <div className="flex items-center">
+                        <Link
+                          to={item.to}
+                          onClick={() => setMobileOpen(false)}
+                          title={mini ? item.label : undefined}
+                          className={`flex flex-1 items-center gap-2.5 rounded-lg text-[0.8125rem] transition-colors ${
+                            mini ? "justify-center px-0 py-2" : "px-2.5 py-2"
+                          } ${
+                            active
+                              ? "bg-sidebar-accent font-semibold text-sidebar-accent-foreground"
+                              : "font-medium text-sidebar-foreground/65 hover:bg-sidebar-accent/60 hover:text-sidebar-accent-foreground"
+                          }`}
+                        >
+                          <item.icon
+                            className={`size-4 shrink-0 ${active ? "text-sidebar-primary" : ""}`}
+                          />
+                          {!mini && <span className="truncate">{item.label}</span>}
+                        </Link>
+                        {hasChildren && (
+                          <button
+                            type="button"
+                            onClick={() => setOpenGroups((o) => ({ ...o, [item.to]: !open }))}
+                            className="mr-1 flex size-7 items-center justify-center rounded-md text-sidebar-foreground/45 hover:bg-sidebar-accent/60 hover:text-sidebar-foreground"
+                            aria-label={open ? "Recolher" : "Expandir"}
+                          >
+                            <ChevronDown
+                              className={`size-3.5 transition-transform ${open ? "" : "-rotate-90"}`}
+                            />
+                          </button>
+                        )}
+                      </div>
+                      {hasChildren && open && (
+                        <div className="ml-4 mt-0.5 flex flex-col gap-0.5 border-l border-sidebar-border pl-3">
+                          {item.children!.map((c) => {
+                            const ca = childActive(c);
+                            return (
+                              <Link
+                                key={c.label}
+                                to={c.to}
+                                search={c.search ?? {}}
+                                onClick={() => setMobileOpen(false)}
+                                className={`rounded-md px-2 py-1.5 text-[0.75rem] transition-colors ${
+                                  ca
+                                    ? "font-semibold text-sidebar-accent-foreground"
+                                    : "text-sidebar-foreground/55 hover:text-sidebar-accent-foreground"
+                                }`}
+                              >
+                                {c.label}
+                              </Link>
+                            );
+                          })}
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
             </div>
-            {(!collapsed || mobile) && (
-              <span className="text-base font-bold tracking-tight text-sidebar-accent-foreground">
-                {brandName}
-              </span>
-            )}
-          </div>
-        )}
-      </div>
+          ))}
+        </nav>
 
-      <nav className={`mt-6 flex flex-1 flex-col gap-1 ${collapsed && !mobile ? "px-2" : "px-3"}`}>
-        <p className={`mb-2 text-[0.625rem] font-semibold uppercase tracking-widest text-sidebar-foreground/30 ${collapsed && !mobile ? "text-center" : "px-3"}`}>
-          {collapsed && !mobile ? "·" : "Menu"}
-        </p>
-        {navFiltrada.map(({ to, params, label, icon: Icon }) => (
-          <Link
-            key={to}
-            to={to}
-            params={params ?? {}}
-            onClick={() => setMobileOpen(false)}
-            className={`group flex items-center rounded-xl text-[0.8125rem] font-medium text-sidebar-foreground/60 transition-all duration-150 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground ${
-              collapsed && !mobile
-                ? "justify-center px-2 py-2.5"
-                : "gap-3 px-3 py-2.5"
-            }`}
-            activeProps={{
-              className: `group flex items-center rounded-xl text-[0.8125rem] font-semibold bg-sidebar-accent text-sidebar-accent-foreground ${
-                collapsed && !mobile
-                  ? "justify-center px-2 py-2.5"
-                  : "gap-3 px-3 py-2.5"
-              }`,
-            }}
-            activeOptions={{ exact: to === "/empresas/$id" || to === "/empresas" }}
-            title={collapsed && !mobile ? label : undefined}
+        <div className={`mt-auto border-t border-sidebar-border py-3 ${mini ? "px-2" : "px-3"}`}>
+          <div
+            className={`flex items-center gap-2.5 rounded-lg ${mini ? "flex-col" : "px-2 py-1.5"}`}
           >
-            <span
-              className={`flex shrink-0 items-center justify-center rounded-xl transition-colors ${
-                collapsed && !mobile ? "size-9" : "size-8"
-              }`}
-            >
-              <Icon className="size-[1.125rem]" />
+            <span className="flex size-8 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-sidebar-primary to-sidebar-primary/70 text-[0.6875rem] font-bold text-sidebar-primary-foreground">
+              {iniciais}
             </span>
-            {(!collapsed || mobile) && (
-              <>
-                {label}
-                <ChevronRight className="ml-auto size-3.5 opacity-0 transition-opacity group-hover:opacity-40" />
-              </>
+            {!mini && (
+              <div className="min-w-0 flex-1">
+                <div className="truncate text-[0.8125rem] font-semibold text-sidebar-foreground">
+                  {perfil?.nome ?? "Equipe"}
+                </div>
+                <div className="truncate text-[0.6875rem] text-sidebar-foreground/45">
+                  {papelLabel}
+                </div>
+              </div>
             )}
-          </Link>
-        ))}
-      </nav>
-
-      <div className={`mt-auto border-t border-sidebar-border py-4 ${collapsed && !mobile ? "px-2" : "px-3"}`}>
-        {collapsed && !mobile ? (
-          <div className="flex flex-col items-center gap-2">
-            <div className="flex size-9 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-sidebar-primary to-sidebar-primary/70 text-xs font-bold text-sidebar-primary-foreground">
-              {iniciais}
-            </div>
-            <Button
-              variant="ghost"
-              size="icon"
-              className="size-8 text-sidebar-foreground/40 hover:bg-sidebar-accent hover:text-sidebar-foreground"
+            <button
               onClick={sair}
               title="Sair"
+              className="flex size-7 shrink-0 items-center justify-center rounded-md text-sidebar-foreground/45 transition-colors hover:bg-sidebar-accent hover:text-sidebar-foreground"
             >
-              <LogOut className="size-4" />
-            </Button>
+              <LogOut className="size-3.5" />
+            </button>
           </div>
-        ) : (
-          <div className="flex items-center gap-3 rounded-xl px-3 py-2.5">
-            <div className="flex size-9 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-sidebar-primary to-sidebar-primary/70 text-xs font-bold text-sidebar-primary-foreground">
-              {iniciais}
-            </div>
-            <div className="min-w-0 flex-1">
-              <div className="truncate text-sm font-semibold text-sidebar-foreground">
-                {perfil?.nome ?? "Equipe"}
-              </div>
-              <div className="truncate text-[0.6875rem] text-sidebar-foreground/40">
-                {papelLabel}
-              </div>
-            </div>
-            <Button
-              variant="ghost"
-              size="icon"
-              className="size-8 shrink-0 text-sidebar-foreground/40 hover:bg-sidebar-accent hover:text-sidebar-foreground"
-              onClick={sair}
-              title="Sair"
-            >
-              <LogOut className="size-4" />
-            </Button>
-          </div>
-        )}
-      </div>
-    </>
-  );
+        </div>
+      </>
+    );
+  };
 
   return (
     <div className="flex min-h-screen bg-background">
       <aside
-        className={`hidden shrink-0 flex-col bg-sidebar text-sidebar-foreground transition-[width] duration-200 ease-in-out md:flex ${
-          collapsed ? "w-[72px]" : "w-[260px]"
+        className={`sticky top-0 hidden h-screen shrink-0 flex-col bg-sidebar text-sidebar-foreground transition-[width] duration-200 ease-in-out md:flex ${
+          collapsed ? "w-[64px]" : "w-[240px]"
         }`}
       >
         {sidebarContent(false)}
@@ -290,7 +457,7 @@ export function AppShell({ children }: { children: ReactNode }) {
             className="absolute inset-0 bg-black/50 backdrop-blur-sm"
             onClick={() => setMobileOpen(false)}
           />
-          <aside className="relative flex h-full w-[280px] flex-col bg-sidebar text-sidebar-foreground shadow-elevated animate-in slide-in-from-left duration-200">
+          <aside className="relative flex h-full w-[270px] flex-col bg-sidebar text-sidebar-foreground shadow-elevated animate-in slide-in-from-left duration-200">
             <button
               onClick={() => setMobileOpen(false)}
               className="absolute right-3 top-4 flex size-8 items-center justify-center rounded-lg text-sidebar-foreground/50 hover:bg-sidebar-accent"
@@ -303,33 +470,283 @@ export function AppShell({ children }: { children: ReactNode }) {
       )}
 
       <div className="flex min-w-0 flex-1 flex-col">
-        <header className="sticky top-0 z-30 flex h-14 items-center gap-3 border-b border-border/50 bg-background/80 px-4 backdrop-blur-xl md:px-6">
+        <header className="sticky top-0 z-30 flex h-13 items-center gap-2 border-b border-border/60 bg-background/85 px-3 backdrop-blur-xl md:px-5">
           <button
             onClick={() => setMobileOpen(true)}
-            className="flex size-9 items-center justify-center rounded-xl border border-border text-muted-foreground hover:bg-muted md:hidden"
+            className="flex size-8 items-center justify-center rounded-lg text-muted-foreground hover:bg-muted md:hidden"
+            aria-label="Abrir menu"
           >
-            <Menu className="size-5" />
+            <Menu className="size-4.5" />
           </button>
           <button
             onClick={() => setCollapsed((c) => !c)}
-            className="hidden size-9 items-center justify-center rounded-xl border border-border text-muted-foreground transition-colors hover:bg-muted md:flex"
+            className="hidden size-8 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-muted md:flex"
             title={collapsed ? "Expandir menu" : "Recolher menu"}
           >
-            {collapsed ? <PanelLeftOpen className="size-4" /> : <PanelLeftClose className="size-4" />}
+            {collapsed ? (
+              <PanelLeftOpen className="size-4" />
+            ) : (
+              <PanelLeftClose className="size-4" />
+            )}
           </button>
-          <div className="hidden flex-1 md:block" />
-          <div className="flex flex-1 items-center justify-end gap-3 md:flex-none">
-            <div className="text-right leading-tight">
-              <div className="text-sm font-semibold">{perfil?.nome ?? "Equipe"}</div>
-              <div className="text-[0.6875rem] capitalize text-muted-foreground">{papelLabel}</div>
-            </div>
-            <div className="flex size-8 items-center justify-center rounded-full bg-gradient-to-br from-primary to-primary/70 text-xs font-bold text-primary-foreground">
-              {iniciais}
-            </div>
-          </div>
+
+          <nav
+            className="hidden min-w-0 items-center gap-1 text-[0.8125rem] sm:flex"
+            aria-label="Breadcrumb"
+          >
+            {crumbs.map((c, i) => {
+              const last = i === crumbs.length - 1;
+              return (
+                <span key={`${c.label}-${i}`} className="flex min-w-0 items-center gap-1">
+                  {i > 0 && <ChevronRight className="size-3 shrink-0 text-muted-foreground/50" />}
+                  {c.to && !last ? (
+                    <Link
+                      to={c.to}
+                      className="truncate text-muted-foreground transition-colors hover:text-foreground"
+                    >
+                      {c.label}
+                    </Link>
+                  ) : (
+                    <span
+                      className={`truncate ${last ? "font-semibold text-foreground" : "text-muted-foreground"}`}
+                    >
+                      {c.label}
+                    </span>
+                  )}
+                </span>
+              );
+            })}
+          </nav>
+
+          <div className="flex-1" />
+
+          <button
+            type="button"
+            onClick={() => setPaletteOpen(true)}
+            className="flex h-8 items-center gap-2 rounded-lg border border-border/70 bg-card px-2.5 text-xs text-muted-foreground transition-colors hover:border-border hover:text-foreground sm:w-56"
+          >
+            <Search className="size-3.5" />
+            <span className="hidden flex-1 text-left sm:block">Buscar…</span>
+            <kbd className="hidden rounded border border-border bg-muted px-1 font-mono text-[0.625rem] sm:block">
+              ⌘K
+            </kbd>
+          </button>
+
+          {modoEmpresa && empresaId && <AlertsBell empresaId={empresaId} />}
+
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <button className="flex items-center gap-2 rounded-lg p-1 pr-2 transition-colors hover:bg-muted">
+                <span className="flex size-7 items-center justify-center rounded-full bg-gradient-to-br from-primary to-primary/70 text-[0.6875rem] font-bold text-primary-foreground">
+                  {iniciais}
+                </span>
+                <ChevronDown className="hidden size-3.5 text-muted-foreground sm:block" />
+              </button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-56">
+              <DropdownMenuLabel>
+                <div className="text-sm font-semibold">{perfil?.nome ?? "Equipe"}</div>
+                <div className="text-xs font-normal text-muted-foreground">{perfil?.email}</div>
+                <div className="mt-1 text-[0.6875rem] font-medium text-primary">{papelLabel}</div>
+              </DropdownMenuLabel>
+              <DropdownMenuSeparator />
+              {modoEmpresa && empresaId && (
+                <DropdownMenuItem asChild>
+                  <Link to="/empresas/$id/configuracoes" params={{ id: empresaId }}>
+                    <Settings className="size-4" /> Configurações
+                  </Link>
+                </DropdownMenuItem>
+              )}
+              <DropdownMenuItem asChild>
+                <Link to="/empresas">
+                  <Building2 className="size-4" /> Trocar de empresa
+                </Link>
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem onClick={sair} className="text-destructive focus:text-destructive">
+                <LogOut className="size-4" /> Sair
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </header>
         <main className="flex-1 overflow-x-hidden p-4 md:p-6">{children}</main>
       </div>
+
+      <CommandPalette
+        open={paletteOpen}
+        onOpenChange={setPaletteOpen}
+        groups={groups}
+        empresaId={modoEmpresa ? empresaId : null}
+      />
     </div>
+  );
+}
+
+function AlertsBell({ empresaId }: { empresaId: string }) {
+  const { data } = useQuery({
+    queryKey: ["alertas", empresaId],
+    refetchInterval: 60_000,
+    queryFn: async () => {
+      const [erros, conc] = await Promise.all([
+        supabase
+          .from("documentos")
+          .select("id, nome_original, erro_motivo, clientes(nome_fantasia, nome)")
+          .eq("status_processamento", "erro")
+          .is("deleted_at", null)
+          .order("enviado_em", { ascending: false })
+          .limit(5),
+        supabase
+          .from("competencias")
+          .select("id, mes_ano, clientes(nome_fantasia, nome)")
+          .eq("status", "em_conciliacao")
+          .is("deleted_at", null)
+          .order("mes_ano", { ascending: false })
+          .limit(5),
+      ]);
+      return { erros: erros.data ?? [], conc: conc.data ?? [] };
+    },
+  });
+  const total = (data?.erros.length ?? 0) + (data?.conc.length ?? 0);
+
+  return (
+    <Popover>
+      <PopoverTrigger asChild>
+        <button
+          className="relative flex size-8 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+          aria-label="Alertas"
+        >
+          <Bell className="size-4" />
+          {total > 0 && (
+            <span className="absolute -right-0.5 -top-0.5 flex size-4 items-center justify-center rounded-full bg-destructive text-[0.625rem] font-bold text-white">
+              {total > 9 ? "9+" : total}
+            </span>
+          )}
+        </button>
+      </PopoverTrigger>
+      <PopoverContent align="end" className="w-80 p-0">
+        <div className="flex items-center justify-between border-b border-border/60 px-3 py-2">
+          <span className="text-sm font-semibold">Pendências</span>
+          <span className="text-xs text-muted-foreground">{total} itens</span>
+        </div>
+        <div className="max-h-80 overflow-y-auto p-1.5">
+          {total === 0 && (
+            <p className="px-3 py-6 text-center text-xs text-muted-foreground">
+              Tudo em dia por aqui.
+            </p>
+          )}
+          {data?.erros.map((d) => (
+            <Link
+              key={d.id}
+              to="/empresas/$id/documentos"
+              params={{ id: empresaId }}
+              search={{ aba: "erro" }}
+              className="flex items-start gap-2.5 rounded-lg px-2.5 py-2 hover:bg-muted"
+            >
+              <span className="mt-0.5 flex size-6 shrink-0 items-center justify-center rounded-md bg-destructive/10 text-destructive">
+                <AlertTriangle className="size-3.5" />
+              </span>
+              <div className="min-w-0">
+                <div className="truncate text-xs font-medium">{d.nome_original ?? "Documento"}</div>
+                <div className="truncate text-[0.6875rem] text-muted-foreground">
+                  {d.clientes?.nome_fantasia ?? d.clientes?.nome} ·{" "}
+                  {d.erro_motivo ?? "Erro no processamento"}
+                </div>
+              </div>
+            </Link>
+          ))}
+          {data?.conc.map((c) => (
+            <Link
+              key={c.id}
+              to="/empresas/$id/conciliacao"
+              params={{ id: empresaId }}
+              className="flex items-start gap-2.5 rounded-lg px-2.5 py-2 hover:bg-muted"
+            >
+              <span className="mt-0.5 flex size-6 shrink-0 items-center justify-center rounded-md bg-warning/15 text-warning-foreground">
+                <Scale className="size-3.5" />
+              </span>
+              <div className="min-w-0">
+                <div className="truncate text-xs font-medium">
+                  {c.clientes?.nome_fantasia ?? c.clientes?.nome}
+                </div>
+                <div className="truncate text-[0.6875rem] text-muted-foreground">
+                  Conciliação em andamento · {formatarCompetencia(c.mes_ano)}
+                </div>
+              </div>
+            </Link>
+          ))}
+        </div>
+      </PopoverContent>
+    </Popover>
+  );
+}
+
+function CommandPalette({
+  open,
+  onOpenChange,
+  groups,
+  empresaId,
+}: {
+  open: boolean;
+  onOpenChange: (o: boolean) => void;
+  groups: NavGroup[];
+  empresaId: string | null;
+}) {
+  const navigate = useNavigate();
+  const { data: clientes } = useQuery({
+    queryKey: ["clientes-select"],
+    enabled: open && !!empresaId,
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("clientes")
+        .select("id, nome_fantasia, nome, cnpj")
+        .is("deleted_at", null)
+        .order("nome_fantasia");
+      return data ?? [];
+    },
+  });
+
+  function go(to: string, search?: Record<string, string>) {
+    onOpenChange(false);
+    navigate({ to, search: search ?? {} } as never);
+  }
+
+  return (
+    <CommandDialog open={open} onOpenChange={onOpenChange}>
+      <CommandInput placeholder="Ir para página ou buscar cliente…" />
+      <CommandList>
+        <CommandEmpty>Nada encontrado.</CommandEmpty>
+        {groups.map((g) => (
+          <CommandGroup key={g.label} heading={g.label}>
+            {g.items.map((item) => (
+              <CommandItem
+                key={item.to}
+                value={`${g.label} ${item.label}`}
+                onSelect={() => go(item.to)}
+              >
+                <item.icon className="size-4 text-muted-foreground" />
+                {item.label}
+              </CommandItem>
+            ))}
+          </CommandGroup>
+        ))}
+        {empresaId && clientes && clientes.length > 0 && (
+          <CommandGroup heading="Clientes">
+            {clientes.map((c) => (
+              <CommandItem
+                key={c.id}
+                value={`cliente ${c.nome_fantasia ?? c.nome ?? ""} ${c.cnpj}`}
+                onSelect={() => go(`/empresas/${empresaId}/clientes/${c.id}`)}
+              >
+                <Users className="size-4 text-muted-foreground" />
+                <span className="truncate">{c.nome_fantasia ?? c.nome}</span>
+                <span className="ml-auto font-mono text-[0.6875rem] text-muted-foreground">
+                  {c.cnpj}
+                </span>
+              </CommandItem>
+            ))}
+          </CommandGroup>
+        )}
+      </CommandList>
+    </CommandDialog>
   );
 }

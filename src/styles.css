@@ -62,7 +62,9 @@
   --shadow-card: 0 1px 2px oklch(0 0 0 / 0.02), 0 1px 6px oklch(0.32 0.03 220 / 0.03);
   --shadow-card-hover: 0 2px 8px oklch(0 0 0 / 0.04), 0 8px 24px oklch(0.32 0.03 220 / 0.06);
   --shadow-elevated: 0 4px 16px oklch(0 0 0 / 0.05), 0 16px 40px oklch(0.32 0.03 220 / 0.07);
-  --shadow-glow: 0 0 0 1px color-mix(in srgb, var(--color-primary) 6%, transparent), 0 1px 2px oklch(0 0 0 / 0.02);
+  --shadow-glow:
+    0 0 0 1px color-mix(in srgb, var(--color-primary) 6%, transparent),
+    0 1px 2px oklch(0 0 0 / 0.02);
 }
 
 :root {
@@ -78,7 +80,7 @@
   --secondary: oklch(0.97 0.005 225);
   --secondary-foreground: oklch(0.34 0.045 210);
   --muted: oklch(0.965 0.003 225);
-  --muted-foreground: oklch(0.50 0.015 225);
+  --muted-foreground: oklch(0.5 0.015 225);
   --accent: oklch(0.58 0.1 175);
   --accent-foreground: oklch(0.98 0.003 175);
   --destructive: oklch(0.577 0.245 27.325);
@@ -95,13 +97,13 @@
   --chart-3: oklch(0.62 0.13 162);
   --chart-4: oklch(0.56 0.09 250);
   --chart-5: oklch(0.65 0.16 30);
-  --sidebar: oklch(0.20 0.03 215);
+  --sidebar: oklch(0.2 0.03 215);
   --sidebar-foreground: oklch(0.92 0.008 200);
   --sidebar-primary: oklch(0.57 0.1 175);
-  --sidebar-primary-foreground: oklch(0.20 0.025 210);
+  --sidebar-primary-foreground: oklch(0.2 0.025 210);
   --sidebar-accent: oklch(0.28 0.035 215);
   --sidebar-accent-foreground: oklch(0.98 0.004 200);
-  --sidebar-border: oklch(0.30 0.025 215);
+  --sidebar-border: oklch(0.3 0.025 215);
   --sidebar-ring: oklch(0.57 0.1 175);
 }
 
@@ -159,7 +161,12 @@
     text-rendering: optimizeLegibility;
   }
 
-  h1, h2, h3, h4, h5, h6 {
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
     font-family: var(--font-display);
   }
 
@@ -183,6 +190,41 @@
 }
 
 @layer components {
+  /* ── Compact KPI tile ────────────────────────────────────── */
+  .kpi-card {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    border-radius: var(--radius-lg);
+    border: 1px solid color-mix(in srgb, var(--color-border), transparent 20%);
+    background: var(--color-card);
+    padding: 0.875rem 1rem;
+    box-shadow: var(--shadow-card);
+    transition:
+      box-shadow 0.25s cubic-bezier(0.22, 1, 0.36, 1),
+      border-color 0.25s cubic-bezier(0.22, 1, 0.36, 1),
+      transform 0.25s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  .kpi-card:hover {
+    box-shadow: var(--shadow-card-hover);
+    border-color: color-mix(in srgb, var(--color-border), var(--color-primary) 20%);
+    transform: translateY(-1px);
+  }
+
+  /* ── Section card (compact) ──────────────────────────────── */
+  .section-card {
+    border-radius: var(--radius-lg);
+    border: 1px solid color-mix(in srgb, var(--color-border), transparent 20%);
+    background: var(--color-card);
+    box-shadow: var(--shadow-card);
+    overflow: hidden;
+  }
+
+  .shadow-elevated {
+    box-shadow: var(--shadow-elevated);
+  }
+
   /* ── Page header ─────────────────────────────────────────── */
   .page-header {
     display: flex;
