@@ -389,6 +389,7 @@ export type Database = {
       plano_contas: {
         Row: {
           ativo: boolean
+          cliente_id: string | null
           codigo: string
           created_at: string
           deleted_at: string | null
@@ -400,6 +401,7 @@ export type Database = {
         }
         Insert: {
           ativo?: boolean
+          cliente_id?: string | null
           codigo: string
           created_at?: string
           deleted_at?: string | null
@@ -411,6 +413,7 @@ export type Database = {
         }
         Update: {
           ativo?: boolean
+          cliente_id?: string | null
           codigo?: string
           created_at?: string
           deleted_at?: string | null
@@ -421,6 +424,13 @@ export type Database = {
           updated_at?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "plano_contas_cliente_id_fkey"
+            columns: ["cliente_id"]
+            isOneToOne: false
+            referencedRelation: "clientes"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "plano_contas_org_id_fkey"
             columns: ["org_id"]
