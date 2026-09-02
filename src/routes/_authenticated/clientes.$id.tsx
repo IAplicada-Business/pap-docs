@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
@@ -12,7 +12,9 @@ import {
   ExternalLink,
   FileBarChart,
   FileText,
+  ImagePlus,
   LinkIcon,
+  Palette,
   RefreshCw,
   RotateCcw,
   Scale,
@@ -103,6 +105,23 @@ function ClienteDetalhe() {
       return data;
     },
   });
+
+  // Apply client branding
+  useEffect(() => {
+    if (!cliente) return;
+    const root = document.documentElement;
+    const props: string[] = [];
+    function set(name: string, value: string) {
+      root.style.setProperty(name, value);
+      props.push(name);
+    }
+    if (cliente.cor_primaria) {
+      set("--client-primary", cliente.cor_primaria);
+    }
+    return () => {
+      props.forEach((name) => root.style.removeProperty(name));
+    };
+  }, [cliente]);
 
   const { data: documentos } = useQuery({
     queryKey: ["cliente-documentos", id],
@@ -212,11 +231,13 @@ function ClienteDetalhe() {
     return (
       <div className="space-y-4 p-4">
         <Skeleton className="h-10 w-48 rounded-xl" />
+        <Skeleton className="h-48 w-full rounded-2xl" />
         <Skeleton className="h-64 w-full rounded-2xl" />
       </div>
     );
   }
 
+  const corCliente = cliente.cor_primaria || "#123B47";
   const linkUpload =
     typeof window !== "undefined" ? `${window.location.origin}/upload/${cliente.upload_token}` : "";
   const linkPainel =
@@ -227,133 +248,169 @@ function ClienteDetalhe() {
   const totalLancamentos = lancamentos?.length ?? 0;
   const lancPendentes = lancamentos?.filter((l) => l.status === "pendente").length ?? 0;
   const compAbertas = competencias?.filter((c) => c.status !== "fechada").length ?? 0;
+  const taxaMedia = competencias?.length
+    ? competencias.reduce((acc, c) => acc + (c.taxa_conciliacao ?? 0), 0) / competencias.length
+    : null;
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <div>
-          <Button asChild variant="ghost" size="sm" className="-ml-2 mb-1 rounded-lg">
-            <Link to="/clientes">
-              <ArrowLeft className="size-4" /> Voltar
-            </Link>
-          </Button>
-          <h1 className="page-title">{cliente.nome_fantasia ?? cliente.nome}</h1>
-          <p className="page-subtitle">
-            {cliente.razao_social} · {formatarCnpj(cliente.cnpj ?? "")}
-          </p>
-        </div>
-        <span
-          className={`status-dot ${
-            cliente.ativo ? "bg-success/10 text-success" : "bg-muted text-muted-foreground"
-          }`}
-        >
-          <span
-            className={`size-1.5 rounded-full ${
-              cliente.ativo ? "bg-success" : "bg-muted-foreground/50"
-            }`}
-          />
-          {cliente.ativo ? "Ativo" : "Inativo"}
-        </span>
-      </div>
+      {/* Back navigation */}
+      <Button asChild variant="ghost" size="sm" className="-ml-2 rounded-lg">
+        <Link to="/clientes">
+          <ArrowLeft className="size-4" /> Voltar aos clientes
+        </Link>
+      </Button>
 
-      {/* Stats */}
-      <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-        <div className="stat-card">
-          <div className="flex items-start justify-between">
-            <div className="stat-card-icon bg-primary/10 text-primary">
-              <FileText className="size-[1.125rem]" />
+      {/* Client branded header */}
+      <div
+        className="relative overflow-hidden rounded-2xl border border-border shadow-card"
+        style={{
+          background: `linear-gradient(135deg, ${corCliente}18 0%, ${corCliente}08 50%, transparent 100%)`,
+        }}
+      >
+        <div
+          className="absolute inset-x-0 top-0 h-1"
+          style={{ backgroundColor: corCliente }}
+        />
+        <div className="flex flex-wrap items-center gap-5 p-6">
+          {/* Client logo or initials */}
+          {cliente.logo_url ? (
+            <img
+              src={cliente.logo_url}
+              alt={cliente.nome_fantasia ?? cliente.nome ?? ""}
+              className="size-16 shrink-0 rounded-2xl border border-border bg-white object-contain p-1.5 shadow-sm"
+            />
+          ) : (
+            <div
+              className="flex size-16 shrink-0 items-center justify-center rounded-2xl text-xl font-bold text-white shadow-sm"
+              style={{ backgroundColor: corCliente }}
+            >
+              {(cliente.nome_fantasia ?? cliente.nome ?? "?")
+                .split(" ")
+                .slice(0, 2)
+                .map((w) => w[0]?.toUpperCase())
+                .join("")}
             </div>
-          </div>
-          <div className="mt-4">
-            <div className="text-3xl font-bold tracking-tight">{totalDocs}</div>
-            <p className="mt-0.5 text-[0.8125rem] text-muted-foreground">
-              Documentos recebidos
-              {docsErro > 0 && (
-                <span className="ml-1 text-destructive">({docsErro} com erro)</span>
-              )}
+          )}
+          <div className="min-w-0 flex-1">
+            <div className="flex flex-wrap items-center gap-3">
+              <h1 className="text-xl font-bold tracking-tight sm:text-2xl">
+                {cliente.nome_fantasia ?? cliente.nome}
+              </h1>
+              <span
+                className={`status-dot ${
+                  cliente.ativo ? "bg-success/10 text-success" : "bg-muted text-muted-foreground"
+                }`}
+              >
+                <span
+                  className={`size-1.5 rounded-full ${
+                    cliente.ativo ? "bg-success" : "bg-muted-foreground/50"
+                  }`}
+                />
+                {cliente.ativo ? "Ativo" : "Inativo"}
+              </span>
+            </div>
+            <p className="mt-0.5 text-sm text-muted-foreground">
+              {cliente.razao_social}
+              {cliente.cnpj ? ` · ${formatarCnpj(cliente.cnpj)}` : ""}
             </p>
           </div>
-        </div>
-        <div className="stat-card">
-          <div className="flex items-start justify-between">
-            <div className="stat-card-icon bg-accent/10 text-accent">
-              <BookOpen className="size-[1.125rem]" />
-            </div>
-          </div>
-          <div className="mt-4">
-            <div className="text-3xl font-bold tracking-tight">{totalLancamentos}</div>
-            <p className="mt-0.5 text-[0.8125rem] text-muted-foreground">
-              Lancamentos
-              {lancPendentes > 0 && (
-                <span className="ml-1 text-warning-foreground">({lancPendentes} pendentes)</span>
-              )}
-            </p>
+          {/* Quick links */}
+          <div className="flex gap-2">
+            {cliente.painel_token && (
+              <Button
+                variant="outline"
+                size="sm"
+                className="rounded-xl text-xs"
+                onClick={() => window.open(linkPainel, "_blank")}
+              >
+                <ExternalLink className="size-3.5" /> Ver como cliente
+              </Button>
+            )}
           </div>
         </div>
-        <div className="stat-card">
-          <div className="flex items-start justify-between">
-            <div className="stat-card-icon bg-warning/10 text-warning-foreground">
-              <CalendarRange className="size-[1.125rem]" />
+
+        {/* Stats row inside header */}
+        <div className="grid grid-cols-2 gap-px border-t border-border/60 bg-border/30 sm:grid-cols-4">
+          {[
+            {
+              icone: FileText,
+              valor: totalDocs,
+              label: "Documentos",
+              extra: docsErro > 0 ? `${docsErro} com erro` : null,
+              extraCor: "text-destructive",
+            },
+            {
+              icone: BookOpen,
+              valor: totalLancamentos,
+              label: "Lancamentos",
+              extra: lancPendentes > 0 ? `${lancPendentes} pendentes` : null,
+              extraCor: "text-warning-foreground",
+            },
+            {
+              icone: CalendarRange,
+              valor: compAbertas,
+              label: "Comp. abertas",
+              extra: null,
+              extraCor: "",
+            },
+            {
+              icone: Scale,
+              valor: formatarPorcentagem(taxaMedia),
+              label: "Conciliacao",
+              extra: null,
+              extraCor: "",
+            },
+          ].map(({ icone: Icone, valor, label, extra, extraCor }) => (
+            <div key={label} className="flex items-center gap-3 bg-card/80 px-4 py-3 backdrop-blur-sm">
+              <Icone className="size-4 shrink-0 text-muted-foreground/60" />
+              <div className="min-w-0">
+                <div className="text-lg font-bold tabular-nums leading-tight">{valor}</div>
+                <div className="text-[0.6875rem] text-muted-foreground">
+                  {label}
+                  {extra && <span className={`ml-1 ${extraCor}`}>({extra})</span>}
+                </div>
+              </div>
             </div>
-          </div>
-          <div className="mt-4">
-            <div className="text-3xl font-bold tracking-tight">{compAbertas}</div>
-            <p className="mt-0.5 text-[0.8125rem] text-muted-foreground">Competencias abertas</p>
-          </div>
-        </div>
-        <div className="stat-card">
-          <div className="flex items-start justify-between">
-            <div className="stat-card-icon bg-success/10 text-success">
-              <Scale className="size-[1.125rem]" />
-            </div>
-          </div>
-          <div className="mt-4">
-            <div className="text-3xl font-bold tracking-tight">
-              {formatarPorcentagem(
-                competencias?.length
-                  ? competencias.reduce((acc, c) => acc + (c.taxa_conciliacao ?? 0), 0) / competencias.length
-                  : null
-              )}
-            </div>
-            <p className="mt-0.5 text-[0.8125rem] text-muted-foreground">Taxa de conciliacao</p>
-          </div>
+          ))}
         </div>
       </div>
 
+      {/* Tabs */}
       <Tabs defaultValue="documentos">
-        <div className="overflow-x-auto">
-          <TabsList className="rounded-xl">
-            <TabsTrigger value="documentos" className="rounded-lg">
-              <FileText className="mr-1.5 size-3.5" /> Documentos
+        <div className="overflow-x-auto -mx-4 px-4 md:-mx-6 md:px-6">
+          <TabsList className="inline-flex w-auto rounded-xl">
+            <TabsTrigger value="documentos" className="rounded-lg text-xs sm:text-sm">
+              <FileText className="mr-1.5 size-3.5 hidden sm:block" /> Documentos
             </TabsTrigger>
-            <TabsTrigger value="lancamentos" className="rounded-lg">
-              <BookOpen className="mr-1.5 size-3.5" /> Lancamentos
+            <TabsTrigger value="lancamentos" className="rounded-lg text-xs sm:text-sm">
+              <BookOpen className="mr-1.5 size-3.5 hidden sm:block" /> Lancamentos
             </TabsTrigger>
-            <TabsTrigger value="conciliacao" className="rounded-lg">
-              <Scale className="mr-1.5 size-3.5" /> Conciliacao
+            <TabsTrigger value="conciliacao" className="rounded-lg text-xs sm:text-sm">
+              <Scale className="mr-1.5 size-3.5 hidden sm:block" /> Conciliacao
             </TabsTrigger>
-            <TabsTrigger value="relatorios" className="rounded-lg">
-              <FileBarChart className="mr-1.5 size-3.5" /> Relatorios
+            <TabsTrigger value="relatorios" className="rounded-lg text-xs sm:text-sm">
+              <FileBarChart className="mr-1.5 size-3.5 hidden sm:block" /> Relatorios
             </TabsTrigger>
-            <TabsTrigger value="competencias" className="rounded-lg">
-              <CalendarRange className="mr-1.5 size-3.5" /> Competencias
+            <TabsTrigger value="competencias" className="rounded-lg text-xs sm:text-sm">
+              <CalendarRange className="mr-1.5 size-3.5 hidden sm:block" /> Competencias
             </TabsTrigger>
-            <TabsTrigger value="dados" className="rounded-lg">
-              <ClipboardList className="mr-1.5 size-3.5" /> Dados
+            <TabsTrigger value="dados" className="rounded-lg text-xs sm:text-sm">
+              <ClipboardList className="mr-1.5 size-3.5 hidden sm:block" /> Dados
             </TabsTrigger>
-            <TabsTrigger value="links" className="rounded-lg">
-              <LinkIcon className="mr-1.5 size-3.5" /> Links
+            <TabsTrigger value="links" className="rounded-lg text-xs sm:text-sm">
+              <LinkIcon className="mr-1.5 size-3.5 hidden sm:block" /> Links
             </TabsTrigger>
           </TabsList>
         </div>
 
-        {/* Tab: Documentos (Module 1) */}
+        {/* Tab: Documentos */}
         <TabsContent value="documentos">
           <div className="rounded-2xl border border-border bg-card shadow-card">
             <div className="border-b border-border/60 p-5">
               <h2 className="text-sm font-semibold">Documentos recebidos</h2>
               <p className="text-xs text-muted-foreground">
-                Arquivos enviados pelo cliente via link de upload ou manualmente pela equipe.
+                Arquivos enviados pelo cliente via link de upload ou manualmente.
               </p>
             </div>
             <div className="p-2">
@@ -425,7 +482,7 @@ function ClienteDetalhe() {
           </div>
         </TabsContent>
 
-        {/* Tab: Lancamentos (Module 2) */}
+        {/* Tab: Lancamentos */}
         <TabsContent value="lancamentos">
           <div className="rounded-2xl border border-border bg-card shadow-card">
             <div className="border-b border-border/60 p-5">
@@ -438,9 +495,7 @@ function ClienteDetalhe() {
               {!lancamentos || lancamentos.length === 0 ? (
                 <div className="py-16 text-center">
                   <BookOpen className="mx-auto size-10 text-muted-foreground/30" />
-                  <p className="mt-3 text-sm text-muted-foreground">
-                    Nenhum lancamento ainda.
-                  </p>
+                  <p className="mt-3 text-sm text-muted-foreground">Nenhum lancamento ainda.</p>
                   <p className="mt-1 text-xs text-muted-foreground">
                     Os lancamentos serao criados automaticamente ao processar os documentos.
                   </p>
@@ -488,7 +543,7 @@ function ClienteDetalhe() {
           </div>
         </TabsContent>
 
-        {/* Tab: Conciliacao (Module 3) */}
+        {/* Tab: Conciliacao */}
         <TabsContent value="conciliacao">
           <div className="rounded-2xl border border-border bg-card shadow-card">
             <div className="border-b border-border/60 p-5">
@@ -512,10 +567,7 @@ function ClienteDetalhe() {
                     .map((c) => {
                       const taxa = c.taxa_conciliacao ?? 0;
                       return (
-                        <div
-                          key={c.id}
-                          className="rounded-xl px-4 py-4 transition-colors hover:bg-muted/50"
-                        >
+                        <div key={c.id} className="rounded-xl px-4 py-4 transition-colors hover:bg-muted/50">
                           <div className="flex items-center justify-between gap-3">
                             <div className="flex items-center gap-3">
                               <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-primary/8 text-primary">
@@ -531,7 +583,7 @@ function ClienteDetalhe() {
                               </div>
                             </div>
                             <div className="text-right">
-                              <span className="text-2xl font-bold tracking-tight">
+                              <span className="text-2xl font-bold tracking-tight tabular-nums">
                                 {formatarPorcentagem(taxa)}
                               </span>
                               <p className="text-xs text-muted-foreground">conciliado</p>
@@ -560,7 +612,7 @@ function ClienteDetalhe() {
           </div>
         </TabsContent>
 
-        {/* Tab: Relatorios (Module 4) */}
+        {/* Tab: Relatorios */}
         <TabsContent value="relatorios">
           <div className="rounded-2xl border border-border bg-card shadow-card">
             <div className="border-b border-border/60 p-5">
@@ -573,9 +625,7 @@ function ClienteDetalhe() {
               {!relatorios || relatorios.length === 0 ? (
                 <div className="py-16 text-center">
                   <FileBarChart className="mx-auto size-10 text-muted-foreground/30" />
-                  <p className="mt-3 text-sm text-muted-foreground">
-                    Nenhum relatorio gerado ainda.
-                  </p>
+                  <p className="mt-3 text-sm text-muted-foreground">Nenhum relatorio gerado ainda.</p>
                   <p className="mt-1 text-xs text-muted-foreground">
                     Os relatorios serao gerados apos o fechamento da competencia.
                   </p>
@@ -595,9 +645,7 @@ function ClienteDetalhe() {
                           {TIPOS_RELATORIO[r.tipo] ?? r.tipo}
                         </span>
                         <span className="text-xs text-muted-foreground">
-                          {r.competencias
-                            ? formatarCompetencia(r.competencias.mes_ano)
-                            : "—"}
+                          {r.competencias ? formatarCompetencia(r.competencias.mes_ano) : "—"}
                           {" · "}
                           {formatarDataHora(r.created_at)}
                         </span>
@@ -644,10 +692,7 @@ function ClienteDetalhe() {
           <div className="rounded-2xl border border-border bg-card shadow-card">
             <div className="flex items-center justify-between border-b border-border/60 p-5">
               <h2 className="text-sm font-semibold">Competencias</h2>
-              <Link
-                to="/competencias"
-                className="text-xs font-medium text-primary hover:underline"
-              >
+              <Link to="/competencias" className="text-xs font-medium text-primary hover:underline">
                 Gerenciar competencias
               </Link>
             </div>
@@ -675,8 +720,8 @@ function ClienteDetalhe() {
                           {formatarCompetencia(c.mes_ano)}
                         </span>
                         {c.taxa_conciliacao != null && (
-                          <span className="hidden text-xs text-muted-foreground lg:block">
-                            {formatarPorcentagem(c.taxa_conciliacao)}% conciliado
+                          <span className="hidden text-xs tabular-nums text-muted-foreground lg:block">
+                            {formatarPorcentagem(c.taxa_conciliacao)} conciliado
                           </span>
                         )}
                         {c.fechada_em && (
@@ -697,83 +742,185 @@ function ClienteDetalhe() {
           </div>
         </TabsContent>
 
-        {/* Tab: Dados cadastrais */}
+        {/* Tab: Dados cadastrais + Branding */}
         <TabsContent value="dados">
-          <div className="rounded-2xl border border-border bg-card shadow-card">
-            <div className="border-b border-border/60 p-5">
-              <h2 className="text-sm font-semibold">Dados cadastrais</h2>
+          <div className="grid gap-4 lg:grid-cols-2">
+            {/* Dados cadastrais */}
+            <div className="rounded-2xl border border-border bg-card shadow-card">
+              <div className="border-b border-border/60 p-5">
+                <h2 className="text-sm font-semibold">Dados cadastrais</h2>
+              </div>
+              <div className="space-y-4 p-5">
+                <div className="grid gap-4 sm:grid-cols-2">
+                  <div className="space-y-1.5">
+                    <Label className="text-xs">Razao social</Label>
+                    <Input
+                      className="rounded-xl"
+                      defaultValue={cliente.razao_social ?? ""}
+                      onBlur={(e) => salvar.mutate({ razao_social: e.target.value })}
+                    />
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label className="text-xs">Nome fantasia</Label>
+                    <Input
+                      className="rounded-xl"
+                      defaultValue={cliente.nome_fantasia ?? ""}
+                      onBlur={(e) =>
+                        salvar.mutate({ nome_fantasia: e.target.value, nome: e.target.value })
+                      }
+                    />
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label className="text-xs">E-mail de contato</Label>
+                    <Input
+                      className="rounded-xl"
+                      defaultValue={cliente.email_contato ?? ""}
+                      onBlur={(e) => salvar.mutate({ email_contato: e.target.value })}
+                    />
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label className="text-xs">Telefone</Label>
+                    <Input
+                      className="rounded-xl"
+                      defaultValue={formatarTelefone(cliente.telefone ?? "")}
+                      onBlur={(e) => salvar.mutate({ telefone: e.target.value })}
+                    />
+                  </div>
+                </div>
+                <div className="space-y-1.5">
+                  <Label className="text-xs">Origens de documentos</Label>
+                  <div className="grid gap-2 sm:grid-cols-3">
+                    {ORIGENS_DOCUMENTO.map((o) => {
+                      const atuais = cliente.origem_documentos ?? [];
+                      return (
+                        <label
+                          key={o.value}
+                          className="flex items-center gap-2 rounded-lg bg-muted/50 px-3 py-2 text-sm"
+                        >
+                          <Checkbox
+                            checked={atuais.includes(o.value)}
+                            onCheckedChange={(marcado) =>
+                              salvar.mutate({
+                                origem_documentos: marcado
+                                  ? [...atuais, o.value]
+                                  : atuais.filter((v: string) => v !== o.value),
+                              })
+                            }
+                          />
+                          {o.label}
+                        </label>
+                      );
+                    })}
+                  </div>
+                </div>
+                <div className="flex items-center gap-3 rounded-xl border border-border/60 px-4 py-3">
+                  <Switch
+                    checked={cliente.ativo}
+                    onCheckedChange={(v) => salvar.mutate({ ativo: v })}
+                  />
+                  <span className="text-sm font-medium">Cliente ativo</span>
+                </div>
+              </div>
             </div>
-            <div className="space-y-5 p-5">
-              <div className="grid gap-4 sm:grid-cols-2">
-                <div className="space-y-2">
-                  <Label>Razao social</Label>
-                  <Input
-                    className="rounded-xl"
-                    defaultValue={cliente.razao_social ?? ""}
-                    onBlur={(e) => salvar.mutate({ razao_social: e.target.value })}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label>Nome fantasia</Label>
-                  <Input
-                    className="rounded-xl"
-                    defaultValue={cliente.nome_fantasia ?? ""}
-                    onBlur={(e) =>
-                      salvar.mutate({ nome_fantasia: e.target.value, nome: e.target.value })
-                    }
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label>E-mail de contato</Label>
-                  <Input
-                    className="rounded-xl"
-                    defaultValue={cliente.email_contato ?? ""}
-                    onBlur={(e) => salvar.mutate({ email_contato: e.target.value })}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label>Telefone</Label>
-                  <Input
-                    className="rounded-xl"
-                    defaultValue={formatarTelefone(cliente.telefone ?? "")}
-                    onBlur={(e) => salvar.mutate({ telefone: e.target.value })}
-                  />
-                </div>
-              </div>
 
-              <div className="space-y-2">
-                <Label>Origens de documentos</Label>
-                <div className="grid gap-2 sm:grid-cols-3">
-                  {ORIGENS_DOCUMENTO.map((o) => {
-                    const atuais = cliente.origem_documentos ?? [];
-                    return (
-                      <label
-                        key={o.value}
-                        className="flex items-center gap-2 rounded-lg bg-muted/50 px-3 py-2 text-sm"
+            {/* Branding */}
+            <div className="rounded-2xl border border-border bg-card shadow-card">
+              <div className="border-b border-border/60 p-5">
+                <h2 className="text-sm font-semibold">Identidade visual</h2>
+                <p className="text-xs text-muted-foreground">
+                  Logo e cor que aparecem no ambiente do cliente.
+                </p>
+              </div>
+              <div className="space-y-5 p-5">
+                {/* Logo preview */}
+                <div className="space-y-2">
+                  <Label className="text-xs">Logo do cliente</Label>
+                  <div className="flex items-center gap-4">
+                    {cliente.logo_url ? (
+                      <img
+                        src={cliente.logo_url}
+                        alt="Logo"
+                        className="size-16 rounded-xl border border-border bg-white object-contain p-1.5"
+                      />
+                    ) : (
+                      <div className="flex size-16 items-center justify-center rounded-xl border-2 border-dashed border-border text-muted-foreground">
+                        <ImagePlus className="size-6" />
+                      </div>
+                    )}
+                    <div className="space-y-1.5 flex-1">
+                      <Input
+                        className="rounded-xl text-xs"
+                        placeholder="URL da logo (ex: https://...)"
+                        defaultValue={cliente.logo_url ?? ""}
+                        onBlur={(e) => salvar.mutate({ logo_url: e.target.value || null })}
+                      />
+                      <p className="text-[0.6875rem] text-muted-foreground">
+                        Cole a URL de uma imagem PNG ou SVG.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Color */}
+                <div className="space-y-2">
+                  <Label className="text-xs">Cor primaria</Label>
+                  <div className="flex items-center gap-3">
+                    <div className="relative">
+                      <input
+                        type="color"
+                        value={corCliente}
+                        onChange={(e) => salvar.mutate({ cor_primaria: e.target.value })}
+                        className="absolute inset-0 cursor-pointer opacity-0"
+                      />
+                      <div
+                        className="flex size-10 items-center justify-center rounded-xl border border-border shadow-sm"
+                        style={{ backgroundColor: corCliente }}
                       >
-                        <Checkbox
-                          checked={atuais.includes(o.value)}
-                          onCheckedChange={(marcado) =>
-                            salvar.mutate({
-                              origem_documentos: marcado
-                                ? [...atuais, o.value]
-                                : atuais.filter((v: string) => v !== o.value),
-                            })
-                          }
-                        />
-                        {o.label}
-                      </label>
-                    );
-                  })}
+                        <Palette className="size-4 text-white/80" />
+                      </div>
+                    </div>
+                    <Input
+                      className="w-28 rounded-xl font-mono text-xs uppercase"
+                      value={corCliente}
+                      onChange={(e) => {
+                        const v = e.target.value;
+                        if (/^#[0-9a-fA-F]{6}$/.test(v)) salvar.mutate({ cor_primaria: v });
+                      }}
+                    />
+                    <p className="text-xs text-muted-foreground">
+                      Usada no cabecalho e destaques.
+                    </p>
+                  </div>
                 </div>
-              </div>
 
-              <div className="flex items-center gap-3 rounded-xl border border-border/60 px-4 py-3">
-                <Switch
-                  checked={cliente.ativo}
-                  onCheckedChange={(v) => salvar.mutate({ ativo: v })}
-                />
-                <span className="text-sm font-medium">Cliente ativo</span>
+                {/* Preview */}
+                <div className="rounded-xl border border-border/60 p-4">
+                  <p className="mb-2 text-[0.6875rem] font-medium uppercase tracking-wider text-muted-foreground">
+                    Pre-visualizacao
+                  </p>
+                  <div
+                    className="flex items-center gap-3 rounded-lg p-3"
+                    style={{
+                      background: `linear-gradient(135deg, ${corCliente}20, ${corCliente}08)`,
+                    }}
+                  >
+                    {cliente.logo_url ? (
+                      <img
+                        src={cliente.logo_url}
+                        alt=""
+                        className="size-8 rounded-lg bg-white object-contain p-0.5"
+                      />
+                    ) : (
+                      <div
+                        className="flex size-8 items-center justify-center rounded-lg text-xs font-bold text-white"
+                        style={{ backgroundColor: corCliente }}
+                      >
+                        {(cliente.nome_fantasia ?? "?").slice(0, 2).toUpperCase()}
+                      </div>
+                    )}
+                    <span className="text-sm font-semibold">{cliente.nome_fantasia ?? cliente.nome}</span>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
@@ -781,7 +928,7 @@ function ClienteDetalhe() {
 
         {/* Tab: Links */}
         <TabsContent value="links">
-          <div className="space-y-4">
+          <div className="grid gap-4 lg:grid-cols-2">
             {/* Upload link */}
             <div className="rounded-2xl border border-border bg-card shadow-card">
               <div className="border-b border-border/60 p-5">
@@ -792,34 +939,36 @@ function ClienteDetalhe() {
                   <div>
                     <h2 className="text-sm font-semibold">Link de upload</h2>
                     <p className="text-xs text-muted-foreground">
-                      O cliente usa este link para enviar documentos. Nao precisa de senha.
+                      O cliente usa este link para enviar documentos.
                     </p>
                   </div>
                 </div>
               </div>
               <div className="space-y-3 p-5">
+                <Input
+                  readOnly
+                  value={linkUpload}
+                  className="rounded-xl font-mono text-xs"
+                />
                 <div className="flex flex-wrap gap-2">
-                  <Input
-                    readOnly
-                    value={linkUpload}
-                    className="min-w-64 flex-1 rounded-xl font-mono text-xs"
-                  />
                   <Button
                     variant="outline"
+                    size="sm"
                     className="rounded-xl"
                     onClick={() => {
                       navigator.clipboard.writeText(linkUpload);
                       toast.success("Link copiado");
                     }}
                   >
-                    <Copy className="size-4" /> Copiar
+                    <Copy className="size-3.5" /> Copiar
                   </Button>
                   <Button
                     variant="secondary"
+                    size="sm"
                     className="rounded-xl"
                     onClick={() => setConfirmarToken(true)}
                   >
-                    <RefreshCw className="size-4" /> Gerar novo
+                    <RefreshCw className="size-3.5" /> Gerar novo
                   </Button>
                 </div>
               </div>
@@ -835,34 +984,36 @@ function ClienteDetalhe() {
                   <div>
                     <h2 className="text-sm font-semibold">Painel do cliente</h2>
                     <p className="text-xs text-muted-foreground">
-                      Link onde o cliente consulta relatorios e status das competencias.
+                      Link para consultar relatorios e status.
                     </p>
                   </div>
                 </div>
               </div>
               <div className="space-y-3 p-5">
+                <Input
+                  readOnly
+                  value={linkPainel}
+                  className="rounded-xl font-mono text-xs"
+                />
                 <div className="flex flex-wrap gap-2">
-                  <Input
-                    readOnly
-                    value={linkPainel}
-                    className="min-w-64 flex-1 rounded-xl font-mono text-xs"
-                  />
                   <Button
                     variant="outline"
+                    size="sm"
                     className="rounded-xl"
                     onClick={() => {
                       navigator.clipboard.writeText(linkPainel);
                       toast.success("Link copiado");
                     }}
                   >
-                    <Copy className="size-4" /> Copiar
+                    <Copy className="size-3.5" /> Copiar
                   </Button>
                   <Button
                     variant="secondary"
+                    size="sm"
                     className="rounded-xl"
                     onClick={() => setConfirmarPainelToken(true)}
                   >
-                    <RefreshCw className="size-4" /> Gerar novo
+                    <RefreshCw className="size-3.5" /> Gerar novo
                   </Button>
                 </div>
               </div>

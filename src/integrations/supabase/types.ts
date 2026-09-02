@@ -51,10 +51,12 @@ export type Database = {
         Row: {
           ativo: boolean
           cnpj: string
+          cor_primaria: string
           created_at: string
           deleted_at: string | null
           email_contato: string | null
           id: string
+          logo_url: string | null
           nome: string | null
           nome_fantasia: string | null
           org_id: string
@@ -70,10 +72,12 @@ export type Database = {
         Insert: {
           ativo?: boolean
           cnpj: string
+          cor_primaria?: string
           created_at?: string
           deleted_at?: string | null
           email_contato?: string | null
           id?: string
+          logo_url?: string | null
           nome?: string | null
           nome_fantasia?: string | null
           org_id: string
@@ -89,10 +93,12 @@ export type Database = {
         Update: {
           ativo?: boolean
           cnpj?: string
+          cor_primaria?: string
           created_at?: string
           deleted_at?: string | null
           email_contato?: string | null
           id?: string
+          logo_url?: string | null
           nome?: string | null
           nome_fantasia?: string | null
           org_id?: string

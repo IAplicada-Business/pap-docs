@@ -75,9 +75,19 @@ function UploadPublico() {
     fetch(`/api/public/upload-info?token=${encodeURIComponent(token)}`)
       .then(async (r) => {
         if (!r.ok) throw new Error("invalido");
-        const json = (await r.json()) as { nome_fantasia: string; escritorio?: { nome: string; logo_url: string | null; cor_primaria: string | null } };
+        const json = (await r.json()) as {
+          nome_fantasia: string;
+          cliente_branding?: { logo_url: string | null; cor_primaria: string };
+          escritorio?: { nome: string; logo_url: string | null; cor_primaria: string | null };
+        };
         setNomeFantasia(json.nome_fantasia);
-        if (json.escritorio) setEscritorio(json.escritorio);
+        const cb = json.cliente_branding;
+        const esc = json.escritorio;
+        setEscritorio({
+          nome: esc?.nome ?? "ConcilIA",
+          logo_url: cb?.logo_url ?? esc?.logo_url ?? null,
+          cor_primaria: cb?.cor_primaria ?? esc?.cor_primaria ?? null,
+        });
       })
       .catch(() => setLinkInvalido(true))
       .finally(() => setCarregando(false));
