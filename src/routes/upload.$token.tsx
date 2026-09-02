@@ -62,7 +62,7 @@ function UploadPublico() {
   const { token } = Route.useParams();
   const [carregando, setCarregando] = useState(true);
   const [nomeFantasia, setNomeFantasia] = useState<string | null>(null);
-  const [escritorio, setEscritorio] = useState<{ nome: string; logo_url: string | null; cor_primaria: string | null; cor_acento: string | null } | null>(null);
+  const [escritorio, setEscritorio] = useState<{ nome: string; logo_url: string | null; cor_primaria: string | null } | null>(null);
   const [linkInvalido, setLinkInvalido] = useState(false);
   const [tipo, setTipo] = useState<string>("extrato");
   const [mes, setMes] = useState<string>(mesAnterior());
@@ -75,7 +75,7 @@ function UploadPublico() {
     fetch(`/api/public/upload-info?token=${encodeURIComponent(token)}`)
       .then(async (r) => {
         if (!r.ok) throw new Error("invalido");
-        const json = (await r.json()) as { nome_fantasia: string; escritorio?: { nome: string; logo_url: string | null; cor_primaria: string | null; cor_acento: string | null } };
+        const json = (await r.json()) as { nome_fantasia: string; escritorio?: { nome: string; logo_url: string | null; cor_primaria: string | null } };
         setNomeFantasia(json.nome_fantasia);
         if (json.escritorio) setEscritorio(json.escritorio);
       })
@@ -87,10 +87,8 @@ function UploadPublico() {
     if (!escritorio?.cor_primaria) return;
     const root = document.documentElement;
     root.style.setProperty("--primary", escritorio.cor_primaria);
-    if (escritorio.cor_acento) root.style.setProperty("--accent", escritorio.cor_acento);
     return () => {
       root.style.removeProperty("--primary");
-      root.style.removeProperty("--accent");
     };
   }, [escritorio]);
 

@@ -7,7 +7,7 @@ import { usePerfil, useEscritorio, temPermissao } from "@/hooks/use-perfil";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Badge } from "@/components/ui/badge";
+
 import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
@@ -78,7 +78,7 @@ function ConfiguracoesPage() {
       if (!conta.codigo.trim() || !conta.descricao.trim())
         throw new Error("Informe código e descrição.");
       const { error } = await supabase.from("plano_contas").insert({
-        escritorio_id: perfil.escritorio_id,
+        org_id: perfil.org_id,
         cliente_id: clienteSel,
         codigo: conta.codigo.trim(),
         descricao: conta.descricao.trim(),
@@ -160,7 +160,7 @@ function ConfiguracoesPage() {
                     onBlur={(e) => {
                       if (!podeEditar || !escritorio) return;
                       supabase
-                        .from("escritorios")
+                        .from("organizations")
                         .update({ nome: e.target.value })
                         .eq("id", escritorio.id)
                         .then(({ error }) => {
@@ -173,10 +173,8 @@ function ConfiguracoesPage() {
                     }}
                   />
                 </div>
-                <div className="space-y-2">
-                  <Label>CNPJ</Label>
-                  <Input className="rounded-xl" readOnly value={escritorio?.cnpj ?? ""} />
-                </div>
+
+
                 <div className="space-y-2">
                   <Label className="flex items-center gap-1.5">
                     <Palette className="size-3.5" /> Cor primária
@@ -189,7 +187,7 @@ function ConfiguracoesPage() {
                       onBlur={(e) => {
                         if (!podeEditar || !escritorio) return;
                         supabase
-                          .from("escritorios")
+                          .from("organizations")
                           .update({ cor_primaria: e.target.value })
                           .eq("id", escritorio.id)
                           .then(({ error }) => {
@@ -209,38 +207,8 @@ function ConfiguracoesPage() {
                     )}
                   </div>
                 </div>
-                <div className="space-y-2">
-                  <Label className="flex items-center gap-1.5">
-                    <Palette className="size-3.5" /> Cor de acento
-                  </Label>
-                  <div className="flex items-center gap-2">
-                    <Input
-                      className="flex-1 rounded-xl"
-                      readOnly={!podeEditar}
-                      defaultValue={escritorio?.cor_acento ?? ""}
-                      onBlur={(e) => {
-                        if (!podeEditar || !escritorio) return;
-                        supabase
-                          .from("escritorios")
-                          .update({ cor_acento: e.target.value })
-                          .eq("id", escritorio.id)
-                          .then(({ error }) => {
-                            if (error) toast.error("Não foi possível salvar", { description: error.message });
-                            else {
-                              toast.success("Cor de acento atualizada");
-                              queryClient.invalidateQueries({ queryKey: ["escritorio"] });
-                            }
-                          });
-                      }}
-                    />
-                    {escritorio?.cor_acento && (
-                      <span
-                        className="size-8 shrink-0 rounded-lg border border-border"
-                        style={{ backgroundColor: escritorio.cor_acento }}
-                      />
-                    )}
-                  </div>
-                </div>
+
+
               </div>
             </div>
           </div>

@@ -64,7 +64,7 @@ function rotulopapel(papel: string) {
   switch (papel) {
     case "super_admin":
       return "Super Admin";
-    case "admin_escritorio":
+    case "admin":
       return "Admin";
     case "operador":
       return "Operador";
@@ -77,7 +77,7 @@ function corPapel(papel: string) {
   switch (papel) {
     case "super_admin":
       return { dot: "bg-destructive", bg: "bg-destructive/10", text: "text-destructive" };
-    case "admin_escritorio":
+    case "admin":
       return { dot: "bg-primary", bg: "bg-primary/10", text: "text-primary" };
     default:
       return { dot: "bg-muted-foreground/50", bg: "bg-secondary", text: "text-secondary-foreground" };
@@ -122,7 +122,7 @@ function EquipePage() {
   const [desativandoId, setDesativandoId] = useState<string | null>(null);
   const [conviteForm, setConviteForm] = useState({
     email: "",
-    papel: "operador" as "admin_escritorio" | "operador",
+    papel: "operador" as "admin" | "operador",
     permissoes: { ...PERMISSOES_PADRAO } as Permissoes,
   });
   const [editForm, setEditForm] = useState({
@@ -143,7 +143,7 @@ function EquipePage() {
   }
 
   const isAdmin =
-    perfil?.papel === "admin_escritorio" || perfil?.papel === "super_admin";
+    perfil?.papel === "admin" || perfil?.papel === "super_admin";
 
   if (perfil && !isAdmin) {
     return (
@@ -211,7 +211,7 @@ function EquipeContent({
   setDesativandoId: (v: string | null) => void;
   conviteForm: {
     email: string;
-    papel: "admin_escritorio" | "operador";
+    papel: "admin" | "operador";
     permissoes: Permissoes;
   };
   setConviteForm: (v: typeof conviteForm) => void;
@@ -219,34 +219,42 @@ function EquipeContent({
   setEditForm: (v: typeof editForm) => void;
 }) {
   const { data: membros, isLoading } = useQuery({
-    queryKey: ["equipe", perfil.escritorio_id],
+    queryKey: ["equipe", perfil.org_id],
     queryFn: async () => {
       const { data, error } = await supabase
         .from("profiles")
-        .select("id, nome, email, papel, permissoes, ativo, ultimo_acesso_em, created_at")
-        .eq("escritorio_id", perfil.escritorio_id)
+        .select("id, nome, email, papel, created_at")
+        .eq("org_id", perfil.org_id)
         .is("deleted_at", null)
         .order("created_at", { ascending: true });
       if (error) throw error;
       return (data ?? []).map((m) => ({
         ...m,
-        permissoes: { ...PERMISSOES_PADRAO, ...(m.permissoes as Partial<Permissoes>) },
+        ativo: true,
+        permissoes:
+          m.papel === "super_admin" || m.papel === "admin"
+            ? { ...PERMISSOES_ADMIN }
+            : { ...PERMISSOES_PADRAO },
       }));
     },
   });
 
   const { data: convites } = useQuery({
-    queryKey: ["convites", perfil.escritorio_id],
+    queryKey: ["convites", perfil.org_id],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from("convites")
-        .select("id, email, papel, permissoes, token, expira_em, created_at")
-        .eq("escritorio_id", perfil.escritorio_id)
-        .is("aceito_em", null)
-        .is("deleted_at", null)
-        .order("created_at", { ascending: false });
-      if (error) throw error;
-      return data;
+      try {
+        const { data, error } = await supabase
+          .from("convites")
+          .select("id, email, papel, permissoes, token, expira_em, created_at")
+          .eq("org_id", perfil.org_id)
+          .is("aceito_em", null)
+          .is("deleted_at", null)
+          .order("created_at", { ascending: false });
+        if (error) return [];
+        return data;
+      } catch {
+        return [];
+      }
     },
   });
 
@@ -262,11 +270,11 @@ function EquipeContent({
     mutationFn: async () => {
       if (!conviteForm.email.trim()) throw new Error("Informe o e-mail.");
       const permissoes =
-        conviteForm.papel === "admin_escritorio" ? PERMISSOES_ADMIN : conviteForm.permissoes;
+        conviteForm.papel === "admin" ? PERMISSOES_ADMIN : conviteForm.permissoes;
       const { data, error } = await supabase
         .from("convites")
         .insert({
-          escritorio_id: perfil.escritorio_id,
+          org_id: perfil.org_id,
           email: conviteForm.email.trim().toLowerCase(),
           papel: conviteForm.papel,
           permissoes: permissoes as unknown as Record<string, unknown>,
@@ -282,7 +290,7 @@ function EquipeContent({
       toast.success("Convite enviado", { description: link, duration: 10000 });
       setConviteAberto(false);
       setConviteForm({ email: "", papel: "operador", permissoes: { ...PERMISSOES_PADRAO } });
-      queryClient.invalidateQueries({ queryKey: ["convites", perfil.escritorio_id] });
+      queryClient.invalidateQueries({ queryKey: ["convites", perfil.org_id] });
     },
     onError: (e: Error) => toast.error("Erro ao enviar convite", { description: e.message }),
   });
@@ -291,45 +299,42 @@ function EquipeContent({
     mutationFn: async () => {
       if (!editandoMembro) throw new Error("Nenhum membro selecionado.");
       const permissoes =
-        editForm.papel === "admin_escritorio" ? PERMISSOES_ADMIN : editForm.permissoes;
+        editForm.papel === "admin" ? PERMISSOES_ADMIN : editForm.permissoes;
       const { error } = await supabase
         .from("profiles")
-        .update({
-          papel: editForm.papel,
-          permissoes: permissoes as unknown as Record<string, unknown>,
-        })
+        .update({ papel: editForm.papel })
         .eq("id", editandoMembro.id);
       if (error) throw error;
     },
     onSuccess: () => {
       toast.success("Permissoes atualizadas");
       setEditandoMembro(null);
-      queryClient.invalidateQueries({ queryKey: ["equipe", perfil.escritorio_id] });
+      queryClient.invalidateQueries({ queryKey: ["equipe", perfil.org_id] });
     },
     onError: (e: Error) => toast.error("Erro ao atualizar", { description: e.message }),
   });
 
   const desativarMembro = useMutation({
     mutationFn: async (id: string) => {
-      const { error } = await supabase.from("profiles").update({ ativo: false }).eq("id", id);
+      const { error } = await supabase.from("profiles").update({ deleted_at: new Date().toISOString() }).eq("id", id);
       if (error) throw error;
     },
     onSuccess: () => {
       toast.success("Usuario desativado");
       setDesativandoId(null);
-      queryClient.invalidateQueries({ queryKey: ["equipe", perfil.escritorio_id] });
+      queryClient.invalidateQueries({ queryKey: ["equipe", perfil.org_id] });
     },
     onError: (e: Error) => toast.error("Erro ao desativar", { description: e.message }),
   });
 
   const reativarMembro = useMutation({
     mutationFn: async (id: string) => {
-      const { error } = await supabase.from("profiles").update({ ativo: true }).eq("id", id);
+      const { error } = await supabase.from("profiles").update({ deleted_at: null }).eq("id", id);
       if (error) throw error;
     },
     onSuccess: () => {
       toast.success("Usuario reativado");
-      queryClient.invalidateQueries({ queryKey: ["equipe", perfil.escritorio_id] });
+      queryClient.invalidateQueries({ queryKey: ["equipe", perfil.org_id] });
     },
     onError: (e: Error) => toast.error("Erro ao reativar", { description: e.message }),
   });
@@ -434,7 +439,7 @@ function EquipeContent({
                       {MODULOS.filter(
                         (mod) =>
                           m.papel === "super_admin" ||
-                          m.papel === "admin_escritorio" ||
+                          m.papel === "admin" ||
                           m.permissoes[mod.chave],
                       ).map((mod) => (
                         <Badge key={mod.chave} variant="outline" className="rounded-md text-[0.625rem]">
@@ -443,7 +448,7 @@ function EquipeContent({
                       ))}
                     </div>
                     <span className="hidden text-xs text-muted-foreground xl:block">
-                      {formatarData(m.ultimo_acesso_em)}
+                      {formatarData(m.created_at)}
                     </span>
                     <span
                       className={`status-dot ${
@@ -569,11 +574,11 @@ function EquipeContent({
               <Select
                 value={conviteForm.papel}
                 onValueChange={(v) => {
-                  const papel = v as "admin_escritorio" | "operador";
+                  const papel = v as "admin" | "operador";
                   setConviteForm({
                     ...conviteForm,
                     papel,
-                    permissoes: papel === "admin_escritorio" ? { ...PERMISSOES_ADMIN } : conviteForm.permissoes,
+                    permissoes: papel === "admin" ? { ...PERMISSOES_ADMIN } : conviteForm.permissoes,
                   });
                 }}
               >
@@ -581,7 +586,7 @@ function EquipeContent({
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="admin_escritorio">Admin</SelectItem>
+                  <SelectItem value="admin">Admin</SelectItem>
                   <SelectItem value="operador">Operador</SelectItem>
                 </SelectContent>
               </Select>
@@ -593,11 +598,11 @@ function EquipeContent({
                   <span className="text-sm">{mod.rotulo}</span>
                   <Switch
                     checked={
-                      conviteForm.papel === "admin_escritorio"
+                      conviteForm.papel === "admin"
                         ? true
                         : conviteForm.permissoes[mod.chave]
                     }
-                    disabled={conviteForm.papel === "admin_escritorio"}
+                    disabled={conviteForm.papel === "admin"}
                     onCheckedChange={(checked) =>
                       setConviteForm({
                         ...conviteForm,
@@ -637,7 +642,7 @@ function EquipeContent({
                   setEditForm({
                     ...editForm,
                     papel: v,
-                    permissoes: v === "admin_escritorio" ? { ...PERMISSOES_ADMIN } : editForm.permissoes,
+                    permissoes: v === "admin" ? { ...PERMISSOES_ADMIN } : editForm.permissoes,
                   });
                 }}
               >
@@ -645,7 +650,7 @@ function EquipeContent({
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="admin_escritorio">Admin</SelectItem>
+                  <SelectItem value="admin">Admin</SelectItem>
                   <SelectItem value="operador">Operador</SelectItem>
                 </SelectContent>
               </Select>
@@ -657,11 +662,11 @@ function EquipeContent({
                   <span className="text-sm">{mod.rotulo}</span>
                   <Switch
                     checked={
-                      editForm.papel === "admin_escritorio"
+                      editForm.papel === "admin"
                         ? true
                         : editForm.permissoes[mod.chave]
                     }
-                    disabled={editForm.papel === "admin_escritorio"}
+                    disabled={editForm.papel === "admin"}
                     onCheckedChange={(checked) =>
                       setEditForm({
                         ...editForm,
