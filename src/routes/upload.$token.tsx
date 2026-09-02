@@ -1,0 +1,318 @@
+import { useEffect, useRef, useState } from "react";
+import { createFileRoute } from "@tanstack/react-router";
+import { CheckCircle2, CloudUpload, FileWarning, Loader2, Paperclip } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
+import { Progress } from "@/components/ui/progress";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Card, CardContent } from "@/components/ui/card";
+import {
+  EXTENSOES_ACEITAS,
+  TAMANHO_MAXIMO_BYTES,
+  TIPOS_DOCUMENTO,
+} from "@/lib/dominio";
+import { formatarTamanho, mesAnterior } from "@/lib/formatadores";
+
+export const Route = createFileRoute("/upload/$token")({
+  head: () => ({
+    meta: [
+      { title: "Envio de documentos — P&A Consultoria" },
+      {
+        name: "description",
+        content:
+          "Página segura para envio de documentos contábeis à P&A Consultoria. Não é preciso fazer login.",
+      },
+      { property: "og:title", content: "Envio de documentos — P&A Consultoria" },
+      {
+        property: "og:description",
+        content: "Envie extratos, relatórios e notas em poucos cliques.",
+      },
+    ],
+  }),
+  component: UploadPublico,
+});
+
+type ItemEnvio = {
+  arquivo: File;
+  progresso: number;
+  status: "pendente" | "enviando" | "sucesso" | "erro";
+  mensagem?: string;
+};
+
+function opcoesMeses() {
+  const lista: { value: string; label: string }[] = [];
+  const hoje = new Date();
+  for (let i = 0; i < 12; i++) {
+    const d = new Date(hoje.getFullYear(), hoje.getMonth() - i, 1);
+    const value = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
+    lista.push({
+      value,
+      label: d.toLocaleDateString("pt-BR", { month: "long", year: "numeric" }),
+    });
+  }
+  return lista;
+}
+
+function UploadPublico() {
+  const { token } = Route.useParams();
+  const [carregando, setCarregando] = useState(true);
+  const [nomeFantasia, setNomeFantasia] = useState<string | null>(null);
+  const [linkInvalido, setLinkInvalido] = useState(false);
+  const [tipo, setTipo] = useState<string>("extrato");
+  const [mes, setMes] = useState<string>(mesAnterior());
+  const [itens, setItens] = useState<ItemEnvio[]>([]);
+  const [arrastando, setArrastando] = useState(false);
+  const inputRef = useRef<HTMLInputElement>(null);
+  const meses = opcoesMeses();
+
+  useEffect(() => {
+    fetch(`/api/public/upload-info?token=${encodeURIComponent(token)}`)
+      .then(async (r) => {
+        if (!r.ok) throw new Error("invalido");
+        const json = (await r.json()) as { nome_fantasia: string };
+        setNomeFantasia(json.nome_fantasia);
+      })
+      .catch(() => setLinkInvalido(true))
+      .finally(() => setCarregando(false));
+  }, [token]);
+
+  function adicionar(arquivos: FileList | null) {
+    if (!arquivos) return;
+    const novos: ItemEnvio[] = [];
+    for (const arquivo of Array.from(arquivos)) {
+      if (arquivo.size > TAMANHO_MAXIMO_BYTES) {
+        novos.push({
+          arquivo,
+          progresso: 0,
+          status: "erro",
+          mensagem: "Arquivo maior que 20 MB.",
+        });
+      } else {
+        novos.push({ arquivo, progresso: 0, status: "pendente" });
+      }
+    }
+    setItens((atual) => [...atual, ...novos]);
+  }
+
+  function enviarUm(item: ItemEnvio, indice: number) {
+    return new Promise<void>((resolve) => {
+      const form = new FormData();
+      form.append("token", token);
+      form.append("tipo", tipo);
+      form.append("mes", mes);
+      form.append("arquivo", item.arquivo);
+
+      const xhr = new XMLHttpRequest();
+      xhr.open("POST", "/api/public/upload");
+      xhr.upload.onprogress = (e) => {
+        if (!e.lengthComputable) return;
+        const pct = Math.round((e.loaded / e.total) * 95);
+        setItens((atual) =>
+          atual.map((it, i) => (i === indice ? { ...it, progresso: pct, status: "enviando" } : it)),
+        );
+      };
+      xhr.onload = () => {
+        let mensagem = "Não foi possível enviar. Tente novamente.";
+        try {
+          const json = JSON.parse(xhr.responseText) as { erro?: string };
+          if (json.erro) mensagem = json.erro;
+        } catch {
+          /* resposta sem json */
+        }
+        const ok = xhr.status >= 200 && xhr.status < 300;
+        setItens((atual) =>
+          atual.map((it, i) =>
+            i === indice
+              ? {
+                  ...it,
+                  progresso: 100,
+                  status: ok ? "sucesso" : "erro",
+                  mensagem: ok ? undefined : mensagem,
+                }
+              : it,
+          ),
+        );
+        resolve();
+      };
+      xhr.onerror = () => {
+        setItens((atual) =>
+          atual.map((it, i) =>
+            i === indice
+              ? { ...it, status: "erro", mensagem: "Falha de conexão. Tente novamente." }
+              : it,
+          ),
+        );
+        resolve();
+      };
+      xhr.send(form);
+    });
+  }
+
+  async function enviarTodos() {
+    for (let i = 0; i < itens.length; i++) {
+      const item = itens[i];
+      if (item.status !== "pendente") continue;
+      await enviarUm(item, i);
+    }
+  }
+
+  if (carregando) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-secondary/50">
+        <Loader2 className="size-6 animate-spin text-primary" />
+      </div>
+    );
+  }
+
+  if (linkInvalido) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-secondary/50 px-4">
+        <Card className="w-full max-w-md text-center">
+          <CardContent className="space-y-3 py-10">
+            <FileWarning className="mx-auto size-10 text-destructive" />
+            <h1 className="text-lg font-semibold">Este link não está mais válido</h1>
+            <p className="text-sm text-muted-foreground">
+              Peça um novo link para a equipe da P&amp;A Consultoria e tente novamente.
+            </p>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  const pendentes = itens.filter((i) => i.status === "pendente").length;
+
+  return (
+    <div className="min-h-screen bg-secondary/50 px-4 py-8">
+      <div className="mx-auto w-full max-w-lg space-y-5">
+        <header className="text-center">
+          <p className="text-xs font-semibold uppercase tracking-wide text-primary">
+            P&amp;A Consultoria
+          </p>
+          <h1 className="mt-2 text-2xl font-bold">Olá, {nomeFantasia}!</h1>
+          <p className="mt-2 text-sm text-muted-foreground">
+            Envie aqui os documentos do mês. É simples: escolha o tipo, o mês e anexe os arquivos.
+            Não precisa de senha.
+          </p>
+        </header>
+
+        <Card>
+          <CardContent className="space-y-4 pt-6">
+            <div className="space-y-2">
+              <Label>Que tipo de documento você está enviando?</Label>
+              <Select value={tipo} onValueChange={setTipo}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {TIPOS_DOCUMENTO.map((t) => (
+                    <SelectItem key={t.value} value={t.value}>
+                      {t.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-2">
+              <Label>De qual mês são esses documentos?</Label>
+              <Select value={mes} onValueChange={setMes}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {meses.map((m) => (
+                    <SelectItem key={m.value} value={m.value}>
+                      {m.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div
+              onDragOver={(e) => {
+                e.preventDefault();
+                setArrastando(true);
+              }}
+              onDragLeave={() => setArrastando(false)}
+              onDrop={(e) => {
+                e.preventDefault();
+                setArrastando(false);
+                adicionar(e.dataTransfer.files);
+              }}
+              className={`rounded-lg border-2 border-dashed p-6 text-center transition-colors ${
+                arrastando ? "border-primary bg-primary/5" : "border-border bg-muted/40"
+              }`}
+            >
+              <CloudUpload className="mx-auto size-8 text-primary" />
+              <p className="mt-2 text-sm font-medium">Arraste os arquivos até aqui</p>
+              <p className="text-xs text-muted-foreground">
+                PDF, OFX, planilhas, fotos ou prints — até 20 MB cada.
+              </p>
+              <Button
+                type="button"
+                variant="outline"
+                className="mt-3"
+                onClick={() => inputRef.current?.click()}
+              >
+                <Paperclip className="size-4" /> Escolher arquivos
+              </Button>
+              <input
+                ref={inputRef}
+                type="file"
+                multiple
+                accept={EXTENSOES_ACEITAS}
+                className="hidden"
+                onChange={(e) => {
+                  adicionar(e.target.files);
+                  e.target.value = "";
+                }}
+              />
+            </div>
+
+            {itens.length > 0 && (
+              <ul className="space-y-3">
+                {itens.map((item, i) => (
+                  <li key={`${item.arquivo.name}-${i}`} className="rounded-md border p-3">
+                    <div className="flex items-center justify-between gap-2 text-sm">
+                      <span className="truncate font-medium">{item.arquivo.name}</span>
+                      <span className="shrink-0 text-xs text-muted-foreground">
+                        {formatarTamanho(item.arquivo.size)}
+                      </span>
+                    </div>
+                    {item.status === "enviando" && (
+                      <Progress value={item.progresso} className="mt-2 h-2" />
+                    )}
+                    {item.status === "sucesso" && (
+                      <p className="mt-2 flex items-center gap-1 text-xs font-medium text-success">
+                        <CheckCircle2 className="size-4" /> Enviado com sucesso
+                      </p>
+                    )}
+                    {item.status === "erro" && (
+                      <p className="mt-2 text-xs font-medium text-destructive">{item.mensagem}</p>
+                    )}
+                  </li>
+                ))}
+              </ul>
+            )}
+
+            <Button className="w-full" disabled={pendentes === 0} onClick={enviarTodos}>
+              {pendentes === 0 ? "Nenhum arquivo para enviar" : `Enviar ${pendentes} arquivo(s)`}
+            </Button>
+          </CardContent>
+        </Card>
+
+        <p className="text-center text-xs text-muted-foreground">
+          Dúvidas? Fale com a equipe da P&amp;A Consultoria.
+        </p>
+      </div>
+    </div>
+  );
+}
