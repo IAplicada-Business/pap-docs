@@ -89,3 +89,13 @@ export function mesAtual() {
   const d = new Date();
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
 }
+
+export function formatarMoeda(valor: number | null | undefined) {
+  if (valor == null) return "R$ 0,00";
+  return valor.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
+}
+
+export function formatarPorcentagem(valor: number | null | undefined) {
+  if (valor == null) return "0%";
+  return `${valor.toFixed(0)}%`;
+}

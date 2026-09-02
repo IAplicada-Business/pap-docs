@@ -42,5 +42,19 @@ export function rotuloOrigemDocumento(origem: string) {
   return ORIGENS_DOCUMENTO.find((o) => o.value === origem)?.label ?? origem;
 }
 
+export const STATUS_LANCAMENTO: Record<string, string> = {
+  pendente: "Pendente",
+  classificado: "Classificado",
+  conciliado: "Conciliado",
+  revisado: "Revisado",
+};
+
+export const TIPOS_RELATORIO: Record<string, string> = {
+  balancete: "Balancete",
+  dre: "DRE",
+  balanco: "Balanço patrimonial",
+  dfc: "Fluxo de caixa (DFC)",
+};
+
 export const EXTENSOES_ACEITAS = ".pdf,.ofx,.xlsx,.xls,.csv,.jpg,.jpeg,.png";
 export const TAMANHO_MAXIMO_BYTES = 20 * 1024 * 1024;
