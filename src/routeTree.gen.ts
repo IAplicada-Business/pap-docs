@@ -18,12 +18,23 @@ import { Route as AuthenticatedDashboardRouteImport } from './routes/_authentica
 import { Route as AuthenticatedDocumentosRouteImport } from './routes/_authenticated/documentos'
 import { Route as AuthenticatedEquipeRouteImport } from './routes/_authenticated/equipe'
 import { Route as ConviteTokenRouteImport } from './routes/convite.$token'
+import { Route as PainelTokenRouteImport } from './routes/painel.$token'
 import { Route as UploadTokenRouteImport } from './routes/upload.$token'
 import { Route as AuthenticatedClientesIndexRouteImport } from './routes/_authenticated/clientes.index'
 import { Route as AuthenticatedClientesIdRouteImport } from './routes/_authenticated/clientes.$id'
+import { Route as AuthenticatedEmpresasIndexRouteImport } from './routes/_authenticated/empresas.index'
+import { Route as AuthenticatedEmpresasIdRouteRouteImport } from './routes/_authenticated/empresas.$id/route'
+import { Route as AuthenticatedEmpresasNovaRouteImport } from './routes/_authenticated/empresas.nova'
 import { Route as ApiPublicConviteInfoRouteImport } from './routes/api/public/convite-info'
+import { Route as ApiPublicPainelInfoRouteImport } from './routes/api/public/painel-info'
 import { Route as ApiPublicUploadRouteImport } from './routes/api/public/upload'
 import { Route as ApiPublicUploadInfoRouteImport } from './routes/api/public/upload-info'
+import { Route as AuthenticatedEmpresasIdIndexRouteImport } from './routes/_authenticated/empresas.$id/index'
+import { Route as AuthenticatedEmpresasIdCompetenciasRouteImport } from './routes/_authenticated/empresas.$id/competencias'
+import { Route as AuthenticatedEmpresasIdConfiguracoesRouteImport } from './routes/_authenticated/empresas.$id/configuracoes'
+import { Route as AuthenticatedEmpresasIdDocumentosRouteImport } from './routes/_authenticated/empresas.$id/documentos'
+import { Route as AuthenticatedEmpresasIdClientesIndexRouteImport } from './routes/_authenticated/empresas.$id/clientes.index'
+import { Route as AuthenticatedEmpresasIdClientesClienteIdRouteImport } from './routes/_authenticated/empresas.$id/clientes.$clienteId'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -71,6 +82,11 @@ const ConviteTokenRoute = ConviteTokenRouteImport.update({
   path: '/convite/$token',
   getParentRoute: () => rootRouteImport,
 } as any)
+const PainelTokenRoute = PainelTokenRouteImport.update({
+  id: '/painel/$token',
+  path: '/painel/$token',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const UploadTokenRoute = UploadTokenRouteImport.update({
   id: '/upload/$token',
   path: '/upload/$token',
@@ -87,9 +103,32 @@ const AuthenticatedClientesIdRoute = AuthenticatedClientesIdRouteImport.update({
   path: '/clientes/$id',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedEmpresasIndexRoute =
+  AuthenticatedEmpresasIndexRouteImport.update({
+    id: '/empresas/',
+    path: '/empresas/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedEmpresasIdRouteRoute =
+  AuthenticatedEmpresasIdRouteRouteImport.update({
+    id: '/empresas/$id',
+    path: '/empresas/$id',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedEmpresasNovaRoute =
+  AuthenticatedEmpresasNovaRouteImport.update({
+    id: '/empresas/nova',
+    path: '/empresas/nova',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const ApiPublicConviteInfoRoute = ApiPublicConviteInfoRouteImport.update({
   id: '/api/public/convite-info',
   path: '/api/public/convite-info',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiPublicPainelInfoRoute = ApiPublicPainelInfoRouteImport.update({
+  id: '/api/public/painel-info',
+  path: '/api/public/painel-info',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiPublicUploadRoute = ApiPublicUploadRouteImport.update({
@@ -102,6 +141,42 @@ const ApiPublicUploadInfoRoute = ApiPublicUploadInfoRouteImport.update({
   path: '/api/public/upload-info',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthenticatedEmpresasIdIndexRoute =
+  AuthenticatedEmpresasIdIndexRouteImport.update({
+    id: '/',
+    path: '/',
+    getParentRoute: () => AuthenticatedEmpresasIdRouteRoute,
+  } as any)
+const AuthenticatedEmpresasIdCompetenciasRoute =
+  AuthenticatedEmpresasIdCompetenciasRouteImport.update({
+    id: '/competencias',
+    path: '/competencias',
+    getParentRoute: () => AuthenticatedEmpresasIdRouteRoute,
+  } as any)
+const AuthenticatedEmpresasIdConfiguracoesRoute =
+  AuthenticatedEmpresasIdConfiguracoesRouteImport.update({
+    id: '/configuracoes',
+    path: '/configuracoes',
+    getParentRoute: () => AuthenticatedEmpresasIdRouteRoute,
+  } as any)
+const AuthenticatedEmpresasIdDocumentosRoute =
+  AuthenticatedEmpresasIdDocumentosRouteImport.update({
+    id: '/documentos',
+    path: '/documentos',
+    getParentRoute: () => AuthenticatedEmpresasIdRouteRoute,
+  } as any)
+const AuthenticatedEmpresasIdClientesIndexRoute =
+  AuthenticatedEmpresasIdClientesIndexRouteImport.update({
+    id: '/clientes/',
+    path: '/clientes/',
+    getParentRoute: () => AuthenticatedEmpresasIdRouteRoute,
+  } as any)
+const AuthenticatedEmpresasIdClientesClienteIdRoute =
+  AuthenticatedEmpresasIdClientesClienteIdRouteImport.update({
+    id: '/clientes/$clienteId',
+    path: '/clientes/$clienteId',
+    getParentRoute: () => AuthenticatedEmpresasIdRouteRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -112,12 +187,23 @@ export interface FileRoutesByFullPath {
   '/documentos': typeof AuthenticatedDocumentosRoute
   '/equipe': typeof AuthenticatedEquipeRoute
   '/convite/$token': typeof ConviteTokenRoute
+  '/painel/$token': typeof PainelTokenRoute
   '/upload/$token': typeof UploadTokenRoute
+  '/empresas/$id': typeof AuthenticatedEmpresasIdRouteRouteWithChildren
   '/clientes/$id': typeof AuthenticatedClientesIdRoute
+  '/empresas/nova': typeof AuthenticatedEmpresasNovaRoute
   '/api/public/convite-info': typeof ApiPublicConviteInfoRoute
+  '/api/public/painel-info': typeof ApiPublicPainelInfoRoute
   '/api/public/upload': typeof ApiPublicUploadRoute
   '/api/public/upload-info': typeof ApiPublicUploadInfoRoute
   '/clientes/': typeof AuthenticatedClientesIndexRoute
+  '/empresas/': typeof AuthenticatedEmpresasIndexRoute
+  '/empresas/$id/competencias': typeof AuthenticatedEmpresasIdCompetenciasRoute
+  '/empresas/$id/configuracoes': typeof AuthenticatedEmpresasIdConfiguracoesRoute
+  '/empresas/$id/documentos': typeof AuthenticatedEmpresasIdDocumentosRoute
+  '/empresas/$id/': typeof AuthenticatedEmpresasIdIndexRoute
+  '/empresas/$id/clientes/$clienteId': typeof AuthenticatedEmpresasIdClientesClienteIdRoute
+  '/empresas/$id/clientes/': typeof AuthenticatedEmpresasIdClientesIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -128,12 +214,22 @@ export interface FileRoutesByTo {
   '/documentos': typeof AuthenticatedDocumentosRoute
   '/equipe': typeof AuthenticatedEquipeRoute
   '/convite/$token': typeof ConviteTokenRoute
+  '/painel/$token': typeof PainelTokenRoute
   '/upload/$token': typeof UploadTokenRoute
   '/clientes/$id': typeof AuthenticatedClientesIdRoute
+  '/empresas/nova': typeof AuthenticatedEmpresasNovaRoute
   '/api/public/convite-info': typeof ApiPublicConviteInfoRoute
+  '/api/public/painel-info': typeof ApiPublicPainelInfoRoute
   '/api/public/upload': typeof ApiPublicUploadRoute
   '/api/public/upload-info': typeof ApiPublicUploadInfoRoute
   '/clientes': typeof AuthenticatedClientesIndexRoute
+  '/empresas': typeof AuthenticatedEmpresasIndexRoute
+  '/empresas/$id/competencias': typeof AuthenticatedEmpresasIdCompetenciasRoute
+  '/empresas/$id/configuracoes': typeof AuthenticatedEmpresasIdConfiguracoesRoute
+  '/empresas/$id/documentos': typeof AuthenticatedEmpresasIdDocumentosRoute
+  '/empresas/$id': typeof AuthenticatedEmpresasIdIndexRoute
+  '/empresas/$id/clientes/$clienteId': typeof AuthenticatedEmpresasIdClientesClienteIdRoute
+  '/empresas/$id/clientes': typeof AuthenticatedEmpresasIdClientesIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -146,12 +242,23 @@ export interface FileRoutesById {
   '/_authenticated/documentos': typeof AuthenticatedDocumentosRoute
   '/_authenticated/equipe': typeof AuthenticatedEquipeRoute
   '/convite/$token': typeof ConviteTokenRoute
+  '/painel/$token': typeof PainelTokenRoute
   '/upload/$token': typeof UploadTokenRoute
+  '/_authenticated/empresas/$id': typeof AuthenticatedEmpresasIdRouteRouteWithChildren
   '/_authenticated/clientes/$id': typeof AuthenticatedClientesIdRoute
+  '/_authenticated/empresas/nova': typeof AuthenticatedEmpresasNovaRoute
   '/api/public/convite-info': typeof ApiPublicConviteInfoRoute
+  '/api/public/painel-info': typeof ApiPublicPainelInfoRoute
   '/api/public/upload': typeof ApiPublicUploadRoute
   '/api/public/upload-info': typeof ApiPublicUploadInfoRoute
   '/_authenticated/clientes/': typeof AuthenticatedClientesIndexRoute
+  '/_authenticated/empresas/': typeof AuthenticatedEmpresasIndexRoute
+  '/_authenticated/empresas/$id/competencias': typeof AuthenticatedEmpresasIdCompetenciasRoute
+  '/_authenticated/empresas/$id/configuracoes': typeof AuthenticatedEmpresasIdConfiguracoesRoute
+  '/_authenticated/empresas/$id/documentos': typeof AuthenticatedEmpresasIdDocumentosRoute
+  '/_authenticated/empresas/$id/': typeof AuthenticatedEmpresasIdIndexRoute
+  '/_authenticated/empresas/$id/clientes/$clienteId': typeof AuthenticatedEmpresasIdClientesClienteIdRoute
+  '/_authenticated/empresas/$id/clientes/': typeof AuthenticatedEmpresasIdClientesIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -164,12 +271,23 @@ export interface FileRouteTypes {
     | '/documentos'
     | '/equipe'
     | '/convite/$token'
+    | '/painel/$token'
     | '/upload/$token'
+    | '/empresas/$id'
     | '/clientes/$id'
+    | '/empresas/nova'
     | '/api/public/convite-info'
+    | '/api/public/painel-info'
     | '/api/public/upload'
     | '/api/public/upload-info'
     | '/clientes/'
+    | '/empresas/'
+    | '/empresas/$id/competencias'
+    | '/empresas/$id/configuracoes'
+    | '/empresas/$id/documentos'
+    | '/empresas/$id/'
+    | '/empresas/$id/clientes/$clienteId'
+    | '/empresas/$id/clientes/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -180,12 +298,22 @@ export interface FileRouteTypes {
     | '/documentos'
     | '/equipe'
     | '/convite/$token'
+    | '/painel/$token'
     | '/upload/$token'
     | '/clientes/$id'
+    | '/empresas/nova'
     | '/api/public/convite-info'
+    | '/api/public/painel-info'
     | '/api/public/upload'
     | '/api/public/upload-info'
     | '/clientes'
+    | '/empresas'
+    | '/empresas/$id/competencias'
+    | '/empresas/$id/configuracoes'
+    | '/empresas/$id/documentos'
+    | '/empresas/$id'
+    | '/empresas/$id/clientes/$clienteId'
+    | '/empresas/$id/clientes'
   id:
     | '__root__'
     | '/'
@@ -197,12 +325,23 @@ export interface FileRouteTypes {
     | '/_authenticated/documentos'
     | '/_authenticated/equipe'
     | '/convite/$token'
+    | '/painel/$token'
     | '/upload/$token'
+    | '/_authenticated/empresas/$id'
     | '/_authenticated/clientes/$id'
+    | '/_authenticated/empresas/nova'
     | '/api/public/convite-info'
+    | '/api/public/painel-info'
     | '/api/public/upload'
     | '/api/public/upload-info'
     | '/_authenticated/clientes/'
+    | '/_authenticated/empresas/'
+    | '/_authenticated/empresas/$id/competencias'
+    | '/_authenticated/empresas/$id/configuracoes'
+    | '/_authenticated/empresas/$id/documentos'
+    | '/_authenticated/empresas/$id/'
+    | '/_authenticated/empresas/$id/clientes/$clienteId'
+    | '/_authenticated/empresas/$id/clientes/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -210,8 +349,10 @@ export interface RootRouteChildren {
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   AuthRoute: typeof AuthRoute
   ConviteTokenRoute: typeof ConviteTokenRoute
+  PainelTokenRoute: typeof PainelTokenRoute
   UploadTokenRoute: typeof UploadTokenRoute
   ApiPublicConviteInfoRoute: typeof ApiPublicConviteInfoRoute
+  ApiPublicPainelInfoRoute: typeof ApiPublicPainelInfoRoute
   ApiPublicUploadRoute: typeof ApiPublicUploadRoute
   ApiPublicUploadInfoRoute: typeof ApiPublicUploadInfoRoute
 }
@@ -281,6 +422,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ConviteTokenRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/painel/$token': {
+      id: '/painel/$token'
+      path: '/painel/$token'
+      fullPath: '/painel/$token'
+      preLoaderRoute: typeof PainelTokenRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/upload/$token': {
       id: '/upload/$token'
       path: '/upload/$token'
@@ -302,11 +450,39 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedClientesIdRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/empresas/': {
+      id: '/_authenticated/empresas/'
+      path: '/empresas'
+      fullPath: '/empresas/'
+      preLoaderRoute: typeof AuthenticatedEmpresasIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/empresas/$id': {
+      id: '/_authenticated/empresas/$id'
+      path: '/empresas/$id'
+      fullPath: '/empresas/$id'
+      preLoaderRoute: typeof AuthenticatedEmpresasIdRouteRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/empresas/nova': {
+      id: '/_authenticated/empresas/nova'
+      path: '/empresas/nova'
+      fullPath: '/empresas/nova'
+      preLoaderRoute: typeof AuthenticatedEmpresasNovaRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/api/public/convite-info': {
       id: '/api/public/convite-info'
       path: '/api/public/convite-info'
       fullPath: '/api/public/convite-info'
       preLoaderRoute: typeof ApiPublicConviteInfoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/painel-info': {
+      id: '/api/public/painel-info'
+      path: '/api/public/painel-info'
+      fullPath: '/api/public/painel-info'
+      preLoaderRoute: typeof ApiPublicPainelInfoRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/public/upload': {
@@ -323,8 +499,79 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicUploadInfoRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authenticated/empresas/$id/': {
+      id: '/_authenticated/empresas/$id/'
+      path: '/'
+      fullPath: '/empresas/$id/'
+      preLoaderRoute: typeof AuthenticatedEmpresasIdIndexRouteImport
+      parentRoute: typeof AuthenticatedEmpresasIdRouteRoute
+    }
+    '/_authenticated/empresas/$id/competencias': {
+      id: '/_authenticated/empresas/$id/competencias'
+      path: '/competencias'
+      fullPath: '/empresas/$id/competencias'
+      preLoaderRoute: typeof AuthenticatedEmpresasIdCompetenciasRouteImport
+      parentRoute: typeof AuthenticatedEmpresasIdRouteRoute
+    }
+    '/_authenticated/empresas/$id/configuracoes': {
+      id: '/_authenticated/empresas/$id/configuracoes'
+      path: '/configuracoes'
+      fullPath: '/empresas/$id/configuracoes'
+      preLoaderRoute: typeof AuthenticatedEmpresasIdConfiguracoesRouteImport
+      parentRoute: typeof AuthenticatedEmpresasIdRouteRoute
+    }
+    '/_authenticated/empresas/$id/documentos': {
+      id: '/_authenticated/empresas/$id/documentos'
+      path: '/documentos'
+      fullPath: '/empresas/$id/documentos'
+      preLoaderRoute: typeof AuthenticatedEmpresasIdDocumentosRouteImport
+      parentRoute: typeof AuthenticatedEmpresasIdRouteRoute
+    }
+    '/_authenticated/empresas/$id/clientes/': {
+      id: '/_authenticated/empresas/$id/clientes/'
+      path: '/clientes'
+      fullPath: '/empresas/$id/clientes/'
+      preLoaderRoute: typeof AuthenticatedEmpresasIdClientesIndexRouteImport
+      parentRoute: typeof AuthenticatedEmpresasIdRouteRoute
+    }
+    '/_authenticated/empresas/$id/clientes/$clienteId': {
+      id: '/_authenticated/empresas/$id/clientes/$clienteId'
+      path: '/clientes/$clienteId'
+      fullPath: '/empresas/$id/clientes/$clienteId'
+      preLoaderRoute: typeof AuthenticatedEmpresasIdClientesClienteIdRouteImport
+      parentRoute: typeof AuthenticatedEmpresasIdRouteRoute
+    }
   }
 }
+
+interface AuthenticatedEmpresasIdRouteRouteChildren {
+  AuthenticatedEmpresasIdCompetenciasRoute: typeof AuthenticatedEmpresasIdCompetenciasRoute
+  AuthenticatedEmpresasIdConfiguracoesRoute: typeof AuthenticatedEmpresasIdConfiguracoesRoute
+  AuthenticatedEmpresasIdDocumentosRoute: typeof AuthenticatedEmpresasIdDocumentosRoute
+  AuthenticatedEmpresasIdIndexRoute: typeof AuthenticatedEmpresasIdIndexRoute
+  AuthenticatedEmpresasIdClientesClienteIdRoute: typeof AuthenticatedEmpresasIdClientesClienteIdRoute
+  AuthenticatedEmpresasIdClientesIndexRoute: typeof AuthenticatedEmpresasIdClientesIndexRoute
+}
+
+const AuthenticatedEmpresasIdRouteRouteChildren: AuthenticatedEmpresasIdRouteRouteChildren =
+  {
+    AuthenticatedEmpresasIdCompetenciasRoute:
+      AuthenticatedEmpresasIdCompetenciasRoute,
+    AuthenticatedEmpresasIdConfiguracoesRoute:
+      AuthenticatedEmpresasIdConfiguracoesRoute,
+    AuthenticatedEmpresasIdDocumentosRoute:
+      AuthenticatedEmpresasIdDocumentosRoute,
+    AuthenticatedEmpresasIdIndexRoute: AuthenticatedEmpresasIdIndexRoute,
+    AuthenticatedEmpresasIdClientesClienteIdRoute:
+      AuthenticatedEmpresasIdClientesClienteIdRoute,
+    AuthenticatedEmpresasIdClientesIndexRoute:
+      AuthenticatedEmpresasIdClientesIndexRoute,
+  }
+
+const AuthenticatedEmpresasIdRouteRouteWithChildren =
+  AuthenticatedEmpresasIdRouteRoute._addFileChildren(
+    AuthenticatedEmpresasIdRouteRouteChildren,
+  )
 
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedCompetenciasRoute: typeof AuthenticatedCompetenciasRoute
@@ -332,8 +579,11 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
   AuthenticatedDocumentosRoute: typeof AuthenticatedDocumentosRoute
   AuthenticatedEquipeRoute: typeof AuthenticatedEquipeRoute
+  AuthenticatedEmpresasIdRouteRoute: typeof AuthenticatedEmpresasIdRouteRouteWithChildren
   AuthenticatedClientesIdRoute: typeof AuthenticatedClientesIdRoute
+  AuthenticatedEmpresasNovaRoute: typeof AuthenticatedEmpresasNovaRoute
   AuthenticatedClientesIndexRoute: typeof AuthenticatedClientesIndexRoute
+  AuthenticatedEmpresasIndexRoute: typeof AuthenticatedEmpresasIndexRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
@@ -342,8 +592,12 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
   AuthenticatedDocumentosRoute: AuthenticatedDocumentosRoute,
   AuthenticatedEquipeRoute: AuthenticatedEquipeRoute,
+  AuthenticatedEmpresasIdRouteRoute:
+    AuthenticatedEmpresasIdRouteRouteWithChildren,
   AuthenticatedClientesIdRoute: AuthenticatedClientesIdRoute,
+  AuthenticatedEmpresasNovaRoute: AuthenticatedEmpresasNovaRoute,
   AuthenticatedClientesIndexRoute: AuthenticatedClientesIndexRoute,
+  AuthenticatedEmpresasIndexRoute: AuthenticatedEmpresasIndexRoute,
 }
 
 const AuthenticatedRouteRouteWithChildren =
@@ -354,8 +608,10 @@ const rootRouteChildren: RootRouteChildren = {
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   AuthRoute: AuthRoute,
   ConviteTokenRoute: ConviteTokenRoute,
+  PainelTokenRoute: PainelTokenRoute,
   UploadTokenRoute: UploadTokenRoute,
   ApiPublicConviteInfoRoute: ApiPublicConviteInfoRoute,
+  ApiPublicPainelInfoRoute: ApiPublicPainelInfoRoute,
   ApiPublicUploadRoute: ApiPublicUploadRoute,
   ApiPublicUploadInfoRoute: ApiPublicUploadInfoRoute,
 }

@@ -324,6 +324,7 @@ export type Database = {
           deleted_at: string | null
           id: string
           logo_url: string | null
+          modulos_habilitados: string[] | null
           nome: string
           status: string
           updated_at: string
@@ -335,6 +336,7 @@ export type Database = {
           deleted_at?: string | null
           id?: string
           logo_url?: string | null
+          modulos_habilitados?: string[] | null
           nome: string
           status?: string
           updated_at?: string
@@ -346,6 +348,7 @@ export type Database = {
           deleted_at?: string | null
           id?: string
           logo_url?: string | null
+          modulos_habilitados?: string[] | null
           nome?: string
           status?: string
           updated_at?: string

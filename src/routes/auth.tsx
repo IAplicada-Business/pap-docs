@@ -111,7 +111,7 @@ function AuthPage() {
 
           background-color: var(--cl-bg);
           color: var(--cl-text);
-          font-family: 'Sora', 'Poppins', ui-sans-serif, system-ui, sans-serif;
+          font-family: 'Montserrat', 'Inter', ui-sans-serif, system-ui, sans-serif;
           height: 100vh;
           width: 100vw;
           overflow: hidden;
