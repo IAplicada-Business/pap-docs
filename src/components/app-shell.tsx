@@ -18,7 +18,7 @@ import {
   X,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
-import { usePerfil, useEmpresa, temPermissao } from "@/hooks/use-perfil";
+import { usePerfil, useEmpresa, temPermissao, moduloHabilitado } from "@/hooks/use-perfil";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 
@@ -28,15 +28,16 @@ type NavItem = {
   label: string;
   icon: typeof LayoutDashboard;
   permissao: "clientes" | "documentos" | "competencias" | "relatorios" | "configuracoes" | null;
+  modulo?: string;
 };
 
 function buildEmpresaNav(empresaId: string): NavItem[] {
   return [
     { to: "/empresas/$id", params: { id: empresaId }, label: "Dashboard", icon: LayoutDashboard, permissao: null },
-    { to: "/empresas/$id/clientes", params: { id: empresaId }, label: "Clientes", icon: Users, permissao: "clientes" },
-    { to: "/empresas/$id/documentos", params: { id: empresaId }, label: "Documentos", icon: FileText, permissao: "documentos" },
-    { to: "/empresas/$id/competencias", params: { id: empresaId }, label: "Competencias", icon: CalendarRange, permissao: "competencias" },
-    { to: "/empresas/$id/configuracoes", params: { id: empresaId }, label: "Configuracoes", icon: Settings, permissao: "configuracoes" },
+    { to: "/empresas/$id/clientes", params: { id: empresaId }, label: "Clientes", icon: Users, permissao: "clientes", modulo: "clientes" },
+    { to: "/empresas/$id/documentos", params: { id: empresaId }, label: "Documentos", icon: FileText, permissao: "documentos", modulo: "documentos" },
+    { to: "/empresas/$id/competencias", params: { id: empresaId }, label: "Competencias", icon: CalendarRange, permissao: "competencias", modulo: "competencias" },
+    { to: "/empresas/$id/configuracoes", params: { id: empresaId }, label: "Configuracoes", icon: Settings, permissao: "configuracoes", modulo: "configuracoes" },
   ];
 }
 
@@ -56,9 +57,9 @@ export function AppShell({ children }: { children: ReactNode }) {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const empresaMatch = pathname.match(/^\/empresas\/([^/]+)/);
   const empresaId = empresaMatch?.[1] ?? null;
-  const modoEmpresa = !!empresaId;
+  const modoEmpresa = !!empresaId && empresaId !== "nova";
 
-  const { data: empresa } = useEmpresa(empresaId ?? undefined);
+  const { data: empresa } = useEmpresa(modoEmpresa ? empresaId : undefined);
 
   useEffect(() => {
     localStorage.setItem("sidebar-collapsed", String(collapsed));
@@ -111,9 +112,11 @@ export function AppShell({ children }: { children: ReactNode }) {
     ? buildEmpresaNav(empresaId)
     : ADMIN_NAV;
 
-  const navFiltrada = navItems.filter(
-    (item) => item.permissao === null || temPermissao(perfil, item.permissao),
-  );
+  const navFiltrada = navItems.filter((item) => {
+    if (item.permissao !== null && !temPermissao(perfil, item.permissao)) return false;
+    if (modoEmpresa && item.modulo && !moduloHabilitado(empresa, item.modulo)) return false;
+    return true;
+  });
 
   const papelLabel =
     perfil?.papel === "admin"
@@ -182,11 +185,6 @@ export function AppShell({ children }: { children: ReactNode }) {
               </span>
             )}
           </div>
-        )}
-        {(!collapsed || mobile) && (
-          <p className="mt-1.5 text-[0.6875rem] font-medium text-sidebar-foreground/40">
-            {modoEmpresa ? "Powered by ConcilIA" : "Contabilidade inteligente"}
-          </p>
         )}
       </div>
 

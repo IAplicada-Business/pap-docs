@@ -5,9 +5,10 @@
 @custom-variant dark (&:is(.dark *));
 
 /*
- * Design system ConcilIA — v2 modern.
- * Primária: azul-petróleo #123B47 | Acento: verde-teal #1E8C80
- * Apoio: #2BB3A3 | Fundos: #F4F7F7
+ * Design system ConcilIA — v3 modern.
+ * Primaria: azul-petroleo #123B47 | Acento: verde-teal #1E8C80
+ * Apoio: #2BB3A3 | Fundos: #F7F8FA
+ * Tipografia: Montserrat (display) + Inter (body)
  * Tenant override: --primary, --accent via JS runtime
  */
 
@@ -19,7 +20,8 @@
   --radius-2xl: calc(var(--radius) + 8px);
   --radius-3xl: calc(var(--radius) + 12px);
   --radius-4xl: calc(var(--radius) + 16px);
-  --font-sans: "Sora", "Poppins", ui-sans-serif, system-ui, sans-serif;
+  --font-sans: "Inter", ui-sans-serif, system-ui, -apple-system, sans-serif;
+  --font-display: "Montserrat", "Inter", ui-sans-serif, system-ui, sans-serif;
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-card: var(--card);
@@ -57,41 +59,41 @@
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-ring: var(--sidebar-ring);
-  --shadow-card: 0 1px 2px oklch(0 0 0 / 0.03), 0 2px 8px oklch(0.32 0.05 220 / 0.04);
-  --shadow-card-hover: 0 4px 16px oklch(0 0 0 / 0.06), 0 8px 32px oklch(0.32 0.05 220 / 0.08);
-  --shadow-elevated: 0 8px 24px oklch(0 0 0 / 0.08), 0 20px 48px oklch(0.32 0.05 220 / 0.1);
-  --shadow-glow: 0 0 0 1px color-mix(in srgb, var(--color-primary) 8%, transparent), 0 1px 2px oklch(0 0 0 / 0.04);
+  --shadow-card: 0 1px 2px oklch(0 0 0 / 0.02), 0 1px 6px oklch(0.32 0.03 220 / 0.03);
+  --shadow-card-hover: 0 2px 8px oklch(0 0 0 / 0.04), 0 8px 24px oklch(0.32 0.03 220 / 0.06);
+  --shadow-elevated: 0 4px 16px oklch(0 0 0 / 0.05), 0 16px 40px oklch(0.32 0.03 220 / 0.07);
+  --shadow-glow: 0 0 0 1px color-mix(in srgb, var(--color-primary) 6%, transparent), 0 1px 2px oklch(0 0 0 / 0.02);
 }
 
 :root {
-  --radius: 0.75rem;
-  --background: oklch(0.975 0.003 220);
-  --foreground: oklch(0.16 0.025 220);
+  --radius: 0.625rem;
+  --background: oklch(0.98 0.002 230);
+  --foreground: oklch(0.18 0.02 225);
   --card: oklch(1 0 0);
-  --card-foreground: oklch(0.16 0.025 220);
+  --card-foreground: oklch(0.18 0.02 225);
   --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.16 0.025 220);
-  --primary: oklch(0.32 0.04 210);
-  --primary-foreground: oklch(0.98 0.004 210);
-  --secondary: oklch(0.965 0.006 220);
-  --secondary-foreground: oklch(0.32 0.04 210);
-  --muted: oklch(0.96 0.004 220);
-  --muted-foreground: oklch(0.46 0.02 220);
-  --accent: oklch(0.57 0.1 175);
-  --accent-foreground: oklch(0.98 0.004 175);
+  --popover-foreground: oklch(0.18 0.02 225);
+  --primary: oklch(0.34 0.045 210);
+  --primary-foreground: oklch(0.98 0.003 210);
+  --secondary: oklch(0.97 0.005 225);
+  --secondary-foreground: oklch(0.34 0.045 210);
+  --muted: oklch(0.965 0.003 225);
+  --muted-foreground: oklch(0.50 0.015 225);
+  --accent: oklch(0.58 0.1 175);
+  --accent-foreground: oklch(0.98 0.003 175);
   --destructive: oklch(0.577 0.245 27.325);
   --destructive-foreground: oklch(0.985 0.003 247.858);
-  --success: oklch(0.61 0.13 162);
+  --success: oklch(0.62 0.13 162);
   --success-foreground: oklch(0.99 0.01 162);
   --warning: oklch(0.79 0.15 74);
   --warning-foreground: oklch(0.28 0.05 74);
-  --border: oklch(0.93 0.004 220);
-  --input: oklch(0.93 0.004 220);
-  --ring: oklch(0.32 0.04 210);
-  --chart-1: oklch(0.32 0.04 210);
-  --chart-2: oklch(0.57 0.1 175);
-  --chart-3: oklch(0.61 0.13 162);
-  --chart-4: oklch(0.55 0.09 250);
+  --border: oklch(0.94 0.003 225);
+  --input: oklch(0.94 0.003 225);
+  --ring: oklch(0.34 0.045 210);
+  --chart-1: oklch(0.34 0.045 210);
+  --chart-2: oklch(0.58 0.1 175);
+  --chart-3: oklch(0.62 0.13 162);
+  --chart-4: oklch(0.56 0.09 250);
   --chart-5: oklch(0.65 0.16 30);
   --sidebar: oklch(0.20 0.03 215);
   --sidebar-foreground: oklch(0.92 0.008 200);
@@ -104,31 +106,31 @@
 }
 
 .dark {
-  --background: oklch(0.14 0.015 220);
-  --foreground: oklch(0.96 0.005 200);
-  --card: oklch(0.19 0.02 220);
-  --card-foreground: oklch(0.96 0.005 200);
-  --popover: oklch(0.19 0.02 220);
-  --popover-foreground: oklch(0.96 0.005 200);
-  --primary: oklch(0.60 0.07 195);
-  --primary-foreground: oklch(0.14 0.015 220);
-  --secondary: oklch(0.24 0.02 220);
-  --secondary-foreground: oklch(0.96 0.005 200);
-  --muted: oklch(0.24 0.02 220);
-  --muted-foreground: oklch(0.68 0.015 220);
-  --accent: oklch(0.62 0.1 175);
-  --accent-foreground: oklch(0.14 0.015 220);
+  --background: oklch(0.13 0.012 225);
+  --foreground: oklch(0.96 0.004 210);
+  --card: oklch(0.18 0.015 225);
+  --card-foreground: oklch(0.96 0.004 210);
+  --popover: oklch(0.18 0.015 225);
+  --popover-foreground: oklch(0.96 0.004 210);
+  --primary: oklch(0.62 0.07 195);
+  --primary-foreground: oklch(0.13 0.012 225);
+  --secondary: oklch(0.22 0.015 225);
+  --secondary-foreground: oklch(0.96 0.004 210);
+  --muted: oklch(0.22 0.015 225);
+  --muted-foreground: oklch(0.65 0.012 225);
+  --accent: oklch(0.63 0.1 175);
+  --accent-foreground: oklch(0.13 0.012 225);
   --destructive: oklch(0.704 0.191 22.216);
   --destructive-foreground: oklch(0.985 0.003 247.858);
   --success: oklch(0.66 0.13 162);
   --success-foreground: oklch(0.16 0.03 162);
   --warning: oklch(0.79 0.15 74);
   --warning-foreground: oklch(0.24 0.04 74);
-  --border: oklch(1 0 0 / 10%);
-  --input: oklch(1 0 0 / 14%);
-  --ring: oklch(0.60 0.07 195);
-  --chart-1: oklch(0.60 0.07 195);
-  --chart-2: oklch(0.62 0.1 175);
+  --border: oklch(1 0 0 / 8%);
+  --input: oklch(1 0 0 / 12%);
+  --ring: oklch(0.62 0.07 195);
+  --chart-1: oklch(0.62 0.07 195);
+  --chart-2: oklch(0.63 0.1 175);
   --chart-3: oklch(0.66 0.13 162);
   --chart-4: oklch(0.6 0.09 250);
   --chart-5: oklch(0.65 0.16 30);
@@ -152,48 +154,82 @@
     color: var(--color-foreground);
     font-family: var(--font-sans);
     -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+    text-rendering: optimizeLegibility;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-display);
+  }
+
+  /* Smooth page-level transition for content areas */
+  [data-slot="content"],
+  main,
+  [role="main"] {
+    animation: page-enter 0.3s cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+
+  @keyframes page-enter {
+    from {
+      opacity: 0;
+      transform: translateY(6px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
   }
 }
 
 @layer components {
+  /* ── Page header ─────────────────────────────────────────── */
   .page-header {
     display: flex;
     flex-wrap: wrap;
     align-items: flex-end;
     justify-content: space-between;
-    gap: 1rem;
-    padding-bottom: 0.5rem;
+    gap: 1.25rem;
+    padding-bottom: 0.75rem;
   }
 
   .page-title {
-    font-size: 1.5rem;
+    font-family: var(--font-display);
+    font-size: 1.625rem;
     font-weight: 700;
-    letter-spacing: -0.025em;
-    line-height: 1.2;
+    letter-spacing: -0.03em;
+    line-height: 1.15;
     color: var(--color-foreground);
   }
 
   .page-subtitle {
     font-size: 0.8125rem;
+    font-weight: 400;
     color: var(--color-muted-foreground);
-    margin-top: 0.25rem;
+    margin-top: 0.375rem;
+    line-height: 1.5;
+    letter-spacing: 0.005em;
   }
 
+  /* ── Stat card ───────────────────────────────────────────── */
   .stat-card {
     position: relative;
     overflow: hidden;
-    border-radius: var(--radius-2xl);
+    border-radius: var(--radius-xl);
     border: 1px solid var(--color-border);
     background: var(--color-card);
-    padding: 1.25rem 1.5rem;
-    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-    box-shadow: var(--shadow-glow);
+    padding: 1.375rem 1.5rem;
+    transition:
+      box-shadow 0.35s cubic-bezier(0.22, 1, 0.36, 1),
+      border-color 0.35s cubic-bezier(0.22, 1, 0.36, 1),
+      transform 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+    box-shadow: var(--shadow-card);
   }
 
   .stat-card:hover {
     box-shadow: var(--shadow-card-hover);
-    border-color: color-mix(in srgb, var(--color-border), var(--color-primary) 20%);
-    transform: translateY(-1px);
+    border-color: color-mix(in srgb, var(--color-border), var(--color-primary) 15%);
+    transform: translateY(-2px);
   }
 
   .stat-card-icon {
@@ -202,16 +238,29 @@
     justify-content: center;
     width: 2.75rem;
     height: 2.75rem;
-    border-radius: var(--radius-xl);
+    border-radius: var(--radius-lg);
     flex-shrink: 0;
+    transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1);
   }
 
+  .stat-card:hover .stat-card-icon {
+    transform: scale(1.05);
+  }
+
+  /* ── Card section ────────────────────────────────────────── */
   .card-section {
-    border-radius: var(--radius-2xl);
+    border-radius: var(--radius-xl);
     border: 1px solid var(--color-border);
     background: var(--color-card);
-    box-shadow: var(--shadow-glow);
+    box-shadow: var(--shadow-card);
     overflow: hidden;
+    transition:
+      box-shadow 0.35s cubic-bezier(0.22, 1, 0.36, 1),
+      border-color 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  .card-section:hover {
+    box-shadow: var(--shadow-card-hover);
   }
 
   .card-section-header {
@@ -219,26 +268,30 @@
     align-items: center;
     justify-content: space-between;
     gap: 1rem;
-    padding: 1.25rem 1.5rem;
-    border-bottom: 1px solid color-mix(in srgb, var(--color-border), transparent 40%);
+    padding: 1.375rem 1.75rem;
+    border-bottom: 1px solid color-mix(in srgb, var(--color-border), transparent 30%);
+    font-family: var(--font-display);
   }
 
   .card-section-body {
-    padding: 0.5rem;
+    padding: 0.75rem;
   }
 
+  /* ── List rows ───────────────────────────────────────────── */
   .list-row {
     display: flex;
     flex-wrap: wrap;
     align-items: center;
-    gap: 0.75rem;
-    border-radius: var(--radius-xl);
-    padding: 0.75rem 1rem;
-    transition: background-color 0.15s ease;
+    gap: 0.875rem;
+    border-radius: var(--radius-lg);
+    padding: 0.875rem 1.125rem;
+    transition:
+      background-color 0.2s cubic-bezier(0.22, 1, 0.36, 1),
+      transform 0.2s cubic-bezier(0.22, 1, 0.36, 1);
   }
 
   .list-row:hover {
-    background-color: color-mix(in srgb, var(--color-muted), transparent 50%);
+    background-color: color-mix(in srgb, var(--color-muted), transparent 40%);
   }
 
   .list-row-icon {
@@ -248,21 +301,28 @@
     flex-shrink: 0;
     align-items: center;
     justify-content: center;
-    border-radius: var(--radius-xl);
+    border-radius: var(--radius-lg);
+    transition: transform 0.2s cubic-bezier(0.22, 1, 0.36, 1);
   }
 
+  .list-row:hover .list-row-icon {
+    transform: scale(1.04);
+  }
+
+  /* ── Modern table ────────────────────────────────────────── */
   .modern-table {
     width: 100%;
     border-collapse: separate;
-    border-spacing: 0 0.25rem;
+    border-spacing: 0 0.125rem;
   }
 
   .modern-table thead th {
-    padding: 0.625rem 1rem;
+    padding: 0.75rem 1.125rem;
+    font-family: var(--font-display);
     font-size: 0.6875rem;
     font-weight: 600;
     text-transform: uppercase;
-    letter-spacing: 0.06em;
+    letter-spacing: 0.08em;
     color: var(--color-muted-foreground);
     border-bottom: none;
     background: transparent;
@@ -270,17 +330,17 @@
 
   .modern-table tbody tr {
     border-radius: var(--radius-lg);
-    transition: background-color 0.15s ease;
+    transition: background-color 0.2s cubic-bezier(0.22, 1, 0.36, 1);
   }
 
   .modern-table tbody tr:hover {
-    background-color: color-mix(in srgb, var(--color-muted), transparent 50%);
+    background-color: color-mix(in srgb, var(--color-muted), transparent 40%);
   }
 
   .modern-table tbody td {
-    padding: 0.75rem 1rem;
+    padding: 0.875rem 1.125rem;
     font-size: 0.875rem;
-    border-bottom: 1px solid color-mix(in srgb, var(--color-border), transparent 40%);
+    border-bottom: 1px solid color-mix(in srgb, var(--color-border), transparent 50%);
     vertical-align: middle;
   }
 
@@ -288,6 +348,7 @@
     border-bottom: none;
   }
 
+  /* ── Status dot ──────────────────────────────────────────── */
   .status-dot {
     display: inline-flex;
     align-items: center;
@@ -296,39 +357,62 @@
     font-weight: 500;
     padding: 0.25rem 0.75rem;
     border-radius: 9999px;
+    letter-spacing: 0.01em;
+    transition: opacity 0.2s ease;
   }
 
+  /* ── Glass card ──────────────────────────────────────────── */
   .glass-card {
-    background: color-mix(in srgb, var(--color-card), transparent 5%);
-    backdrop-filter: blur(16px);
-    border: 1px solid color-mix(in srgb, var(--color-border), transparent 30%);
-    border-radius: var(--radius-2xl);
-    box-shadow: var(--shadow-glow);
+    background: color-mix(in srgb, var(--color-card), transparent 3%);
+    backdrop-filter: blur(20px) saturate(1.2);
+    -webkit-backdrop-filter: blur(20px) saturate(1.2);
+    border: 1px solid color-mix(in srgb, var(--color-border), transparent 25%);
+    border-radius: var(--radius-xl);
+    box-shadow: var(--shadow-card);
+    transition:
+      box-shadow 0.35s cubic-bezier(0.22, 1, 0.36, 1),
+      border-color 0.35s cubic-bezier(0.22, 1, 0.36, 1),
+      transform 0.35s cubic-bezier(0.22, 1, 0.36, 1);
   }
 
+  .glass-card:hover {
+    box-shadow: var(--shadow-card-hover);
+    transform: translateY(-1px);
+  }
+
+  /* ── Filter bar ──────────────────────────────────────────── */
   .filter-bar {
     display: flex;
     flex-wrap: wrap;
     gap: 0.75rem;
-    padding: 1rem 1.5rem;
+    padding: 1rem 1.75rem;
     border-bottom: 1px solid color-mix(in srgb, var(--color-border), transparent 40%);
   }
 
+  /* ── Empty state ─────────────────────────────────────────── */
   .empty-state {
-    padding: 4rem 1rem;
+    padding: 5rem 1.5rem;
     text-align: center;
   }
 
   .empty-state-icon {
     margin: 0 auto;
-    width: 3rem;
-    height: 3rem;
-    color: color-mix(in srgb, var(--color-muted-foreground), transparent 70%);
+    width: 3.25rem;
+    height: 3.25rem;
+    color: color-mix(in srgb, var(--color-muted-foreground), transparent 65%);
+    transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  .empty-state:hover .empty-state-icon {
+    transform: scale(1.08);
   }
 
   .empty-state-text {
-    margin-top: 0.75rem;
+    margin-top: 1rem;
     font-size: 0.875rem;
     color: var(--color-muted-foreground);
+    line-height: 1.6;
+    max-width: 24rem;
+    margin-inline: auto;
   }
 }

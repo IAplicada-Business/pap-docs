@@ -25,6 +25,7 @@ export type Escritorio = {
   cor_primaria: string;
   cor_acento: string | null;
   status: string;
+  modulos_habilitados: string[] | null;
 };
 
 const DEFAULT_PERMISSOES: Permissoes = {
@@ -34,6 +35,8 @@ const DEFAULT_PERMISSOES: Permissoes = {
   relatorios: true,
   configuracoes: false,
 };
+
+const MODULOS_PADRAO = ["clientes", "documentos", "competencias", "configuracoes"];
 
 export function usePerfil() {
   return useQuery({
@@ -73,7 +76,7 @@ export function useEscritorio() {
       if (!perfil?.org_id) return null;
       const { data, error } = await supabase
         .from("organizations")
-        .select("id, nome, logo_url, cor_primaria, cor_acento, status")
+        .select("id, nome, logo_url, cor_primaria, cor_acento, status, modulos_habilitados")
         .eq("id", perfil.org_id)
         .maybeSingle();
       if (error) throw error;
@@ -91,7 +94,7 @@ export function useEmpresa(empresaId: string | undefined) {
       if (!empresaId) return null;
       const { data, error } = await supabase
         .from("organizations")
-        .select("id, nome, logo_url, cor_primaria, cor_acento, status")
+        .select("id, nome, logo_url, cor_primaria, cor_acento, status, modulos_habilitados")
         .eq("id", empresaId)
         .maybeSingle();
       if (error) throw error;
@@ -105,4 +108,10 @@ export function temPermissao(perfil: Perfil | null | undefined, modulo: keyof Pe
   if (perfil.papel === "super_admin") return true;
   if (perfil.papel === "admin") return true;
   return perfil.permissoes[modulo] === true;
+}
+
+export function moduloHabilitado(empresa: Escritorio | null | undefined, modulo: string): boolean {
+  if (!empresa) return true;
+  const habilitados = empresa.modulos_habilitados ?? MODULOS_PADRAO;
+  return habilitados.includes(modulo);
 }
