@@ -1,0 +1,2 @@
+ALTER TABLE public.plano_contas ADD COLUMN IF NOT EXISTS cliente_id uuid REFERENCES public.clientes(id) ON DELETE CASCADE;
+CREATE UNIQUE INDEX IF NOT EXISTS plano_contas_cliente_codigo_uidx ON public.plano_contas (cliente_id, codigo) WHERE deleted_at IS NULL;
