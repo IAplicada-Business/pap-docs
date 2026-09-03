@@ -197,24 +197,24 @@ function EmpresasPage() {
         {stats.map(({ label, valor, icone: Icone, gradiente, cor, destaque }) => (
           <div key={label} className="stat-card group">
             {destaque && (
-              <div className="absolute inset-x-0 top-0 h-0.5 bg-gradient-to-r from-destructive to-destructive/50" />
+              <div className="absolute inset-x-0 top-0 h-0.5 bg-gradient-to-r from-destructive via-destructive/60 to-transparent" />
             )}
             <div className="flex items-start justify-between">
-              <div className={`stat-card-icon bg-gradient-to-br ${gradiente}`}>
+              <div className={`stat-card-icon bg-gradient-to-br ${gradiente} ring-1 ring-white/10`}>
                 <Icone className={`size-[1.125rem] ${cor.split(" ").pop()}`} />
               </div>
               {!destaque && (
-                <TrendingUp className="size-4 text-success opacity-60 transition-opacity group-hover:opacity-100" />
+                <TrendingUp className="size-4 text-success opacity-50 transition-opacity group-hover:opacity-100" />
               )}
               {destaque && (data?.totalDocsErro ?? 0) > 0 && (
-                <span className="text-xs font-semibold text-destructive">Atencao</span>
+                <span className="rounded-md bg-destructive/10 px-2 py-0.5 text-[0.6875rem] font-semibold text-destructive backdrop-blur-sm">Atencao</span>
               )}
             </div>
             <div className="mt-4">
               {isLoading ? (
                 <Skeleton className="h-9 w-16" />
               ) : (
-                <div className="text-3xl font-bold tracking-tight">{valor ?? 0}</div>
+                <div className="text-3xl font-bold tracking-tight tabular-nums">{valor ?? 0}</div>
               )}
               <p className="mt-0.5 text-[0.8125rem] text-muted-foreground">{label}</p>
             </div>
@@ -223,11 +223,11 @@ function EmpresasPage() {
       </div>
 
       {/* search / filter */}
-      <div className="filter-bar">
+      <div className="flex flex-wrap gap-3">
         <div className="relative min-w-56 flex-1">
           <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
           <Input
-            className="rounded-xl pl-9"
+            className="rounded-xl border-border/40 bg-card/60 pl-9 backdrop-blur-sm transition-all focus:border-primary/30 focus:bg-card/80 focus:shadow-[0_0_16px_color-mix(in_srgb,var(--primary)_8%,transparent)]"
             placeholder="Buscar empresa por nome..."
             value={busca}
             onChange={(e) => setBusca(e.target.value)}
@@ -284,13 +284,13 @@ function EmpresasPage() {
                       <img
                         src={empresa.logo_url}
                         alt={empresa.nome}
-                        className="size-12 shrink-0 rounded-xl border border-border bg-white object-contain p-1"
+                        className="size-12 shrink-0 rounded-xl border border-border/40 bg-white/90 object-contain p-1 ring-1 ring-white/20 backdrop-blur-sm"
                       />
                     ) : (
                       <div
-                        className="flex size-12 shrink-0 items-center justify-center rounded-xl text-sm font-bold text-white"
+                        className="flex size-12 shrink-0 items-center justify-center rounded-xl text-sm font-bold text-white shadow-lg ring-1 ring-white/10"
                         style={{
-                          backgroundColor: empresa.cor_primaria || "#1B4B5A",
+                          background: `linear-gradient(135deg, ${empresa.cor_primaria || "#1B4B5A"}, color-mix(in srgb, ${empresa.cor_primaria || "#1B4B5A"}, #000 25%))`,
                         }}
                       >
                         {iniciais(empresa.nome)}
@@ -327,7 +327,7 @@ function EmpresasPage() {
                   </div>
 
                   {/* quick stats row */}
-                  <div className="grid grid-cols-3 gap-2 rounded-lg bg-muted/50 px-3 py-2 text-center text-xs">
+                  <div className="grid grid-cols-3 gap-2 rounded-xl bg-muted/30 px-3 py-2.5 text-center text-xs ring-1 ring-border/30 backdrop-blur-sm">
                     <div>
                       <div className="font-bold text-foreground">{nClientes}</div>
                       <div className="text-muted-foreground">Clientes</div>

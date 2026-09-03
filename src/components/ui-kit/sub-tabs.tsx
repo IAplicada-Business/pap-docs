@@ -28,7 +28,7 @@ export function SubTabs<T extends string>({
 }) {
   return (
     <div
-      className={`-mb-px flex gap-1 overflow-x-auto border-b border-border/60 ${className}`}
+      className={`-mb-px flex gap-1 overflow-x-auto border-b border-border/40 ${className}`}
       role="tablist"
     >
       {items.map(({ value: v, label, count, icon: Icon, tone = "default" }) => {
@@ -54,7 +54,7 @@ export function SubTabs<T extends string>({
               </span>
             )}
             {active && (
-              <span className="absolute inset-x-2 -bottom-px h-0.5 rounded-full bg-primary" />
+              <span className="absolute inset-x-2 -bottom-px h-0.5 rounded-full bg-gradient-to-r from-primary via-primary to-primary/40" />
             )}
           </button>
         );
@@ -75,7 +75,7 @@ export function Segmented<T extends string>({
   size?: "xs" | "sm";
 }) {
   return (
-    <div className="inline-flex items-center gap-0.5 rounded-lg bg-muted p-0.5">
+    <div className="inline-flex items-center gap-0.5 rounded-xl bg-muted/50 p-0.5 ring-1 ring-border/30 backdrop-blur-sm">
       {items.map(({ value: v, label, icon: Icon }) => {
         const active = v === value;
         return (
@@ -83,9 +83,9 @@ export function Segmented<T extends string>({
             key={v}
             type="button"
             onClick={() => onChange(v)}
-            className={`flex items-center gap-1.5 rounded-md font-medium transition-all ${
+            className={`flex items-center gap-1.5 rounded-lg font-medium transition-all ${
               size === "xs" ? "px-2 py-1 text-[0.6875rem]" : "px-2.5 py-1.5 text-xs"
-            } ${active ? "bg-card text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"}`}
+            } ${active ? "bg-card/80 text-foreground shadow-sm backdrop-blur-sm ring-1 ring-border/20" : "text-muted-foreground hover:text-foreground"}`}
           >
             {Icon && <Icon className="size-3.5" />}
             {label}

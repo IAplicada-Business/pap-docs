@@ -27,7 +27,7 @@ export function SearchInput({
     <div className={`relative ${className}`}>
       <Search className="pointer-events-none absolute left-2.5 top-1/2 size-3.5 -translate-y-1/2 text-muted-foreground" />
       <Input
-        className="h-8 rounded-lg pl-8 text-[0.8125rem]"
+        className="h-8 rounded-xl border-border/40 bg-card/60 pl-8 text-[0.8125rem] backdrop-blur-sm transition-all focus:border-primary/30 focus:bg-card/80"
         placeholder={placeholder}
         value={value}
         onChange={(e) => onChange(e.target.value)}
@@ -55,7 +55,7 @@ export function ActiveChips({ chips, onClear }: { chips: Chip[]; onClear?: () =>
       {chips.map((c) => (
         <span
           key={c.key}
-          className="inline-flex items-center gap-1 rounded-md bg-primary/8 px-2 py-1 text-[0.6875rem] font-medium text-primary"
+          className="inline-flex items-center gap-1 rounded-lg bg-primary/8 px-2 py-1 text-[0.6875rem] font-medium text-primary ring-1 ring-primary/10 backdrop-blur-sm"
         >
           {c.label}
           <button

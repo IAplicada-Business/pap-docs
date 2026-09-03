@@ -65,7 +65,7 @@ export function EmptyState({
     <div
       className={`flex flex-col items-center justify-center text-center ${compact ? "py-8" : "py-14"}`}
     >
-      <span className="flex size-10 items-center justify-center rounded-xl bg-muted text-muted-foreground/60">
+      <span className="flex size-10 items-center justify-center rounded-xl bg-muted/50 text-muted-foreground/60 ring-1 ring-border/20 backdrop-blur-sm">
         <Icon className="size-5" />
       </span>
       <p className="mt-3 text-sm font-medium">{title}</p>

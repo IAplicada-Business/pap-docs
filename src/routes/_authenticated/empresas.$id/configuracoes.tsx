@@ -206,7 +206,7 @@ function ConfiguracoesPage() {
             />
           ) : (
             <>
-              <div className="flex flex-wrap items-end gap-2 border-b border-border/50 px-4 py-3">
+              <div className="flex flex-wrap items-end gap-2 border-b border-border/30 bg-muted/20 px-4 py-3 backdrop-blur-sm">
                 <div className="space-y-1">
                   <Label className="text-[0.6875rem]">Código</Label>
                   <Input

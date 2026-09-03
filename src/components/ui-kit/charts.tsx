@@ -39,7 +39,7 @@ function TooltipBox({
 }) {
   if (!active || !payload?.length) return null;
   return (
-    <div className="rounded-lg border border-border bg-card px-3 py-2 text-xs shadow-elevated">
+    <div className="rounded-xl border border-border/40 bg-card/85 px-3 py-2 text-xs shadow-elevated backdrop-blur-xl">
       {label != null && <div className="mb-1 font-semibold">{label}</div>}
       {payload.map((p, i) => (
         <div key={i} className="flex items-center gap-2">

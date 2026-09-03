@@ -100,7 +100,7 @@ export function DataTable<T>({
   return (
     <div className="overflow-auto" style={maxHeight ? { maxHeight } : undefined}>
       <table className="w-full border-separate border-spacing-0 text-[0.8125rem]">
-        <thead className="sticky top-0 z-10 bg-card">
+        <thead className="sticky top-0 z-10 bg-card/80 backdrop-blur-lg">
           <tr>
             {selectable && (
               <th className="w-9 border-b border-border/60 px-3 py-2">
