@@ -25,7 +25,7 @@ export function StatusPill({
   const t = TONE[tone];
   return (
     <span
-      className={`inline-flex items-center gap-1.5 whitespace-nowrap rounded-md font-medium ${t.wrap} ${
+      className={`inline-flex items-center gap-1.5 whitespace-nowrap rounded-lg font-medium backdrop-blur-sm ${t.wrap} ${
         size === "xs" ? "px-1.5 py-0.5 text-[0.6875rem]" : "px-2 py-0.5 text-xs"
       }`}
     >
@@ -92,7 +92,7 @@ export function ConfidenceBar({ value }: { value: number | null | undefined }) {
   const tone = pct >= 85 ? "bg-success" : pct >= 60 ? "bg-warning" : "bg-destructive";
   return (
     <div className="flex items-center gap-2">
-      <div className="h-1.5 w-14 overflow-hidden rounded-full bg-muted">
+      <div className="h-1.5 w-14 overflow-hidden rounded-full bg-muted/50 ring-1 ring-border/10">
         <div className={`h-full rounded-full ${tone}`} style={{ width: `${pct}%` }} />
       </div>
       <span className="text-xs tabular-nums text-muted-foreground">{pct}%</span>
@@ -110,7 +110,7 @@ export function ProgressBar({
   height?: string;
 }) {
   return (
-    <div className={`${height} w-full overflow-hidden rounded-full bg-muted`}>
+    <div className={`${height} w-full overflow-hidden rounded-full bg-muted/50 ring-1 ring-border/10`}>
       <div
         className={`h-full rounded-full ${TONE[tone].dot} transition-all`}
         style={{ width: `${Math.max(0, Math.min(100, value))}%` }}

@@ -315,10 +315,10 @@ export function AppShell({ children }: { children: ReactNode }) {
             <img
               src={brandLogo}
               alt={brandName}
-              className="size-8 shrink-0 rounded-lg bg-white object-contain p-0.5 shadow-sm"
+              className="size-8 shrink-0 rounded-lg bg-white/90 object-contain p-0.5 shadow-sm ring-1 ring-white/10"
             />
           ) : (
-            <span className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-sidebar-primary/20 text-sidebar-primary">
+            <span className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-sidebar-primary/30 to-sidebar-primary/10 text-sidebar-primary backdrop-blur-sm ring-1 ring-sidebar-primary/20">
               {modoEmpresa ? <Building2 className="size-4" /> : <Sparkles className="size-4" />}
             </span>
           )}
@@ -367,11 +367,11 @@ export function AppShell({ children }: { children: ReactNode }) {
                           to={item.to}
                           onClick={() => setMobileOpen(false)}
                           title={mini ? item.label : undefined}
-                          className={`flex flex-1 items-center gap-2.5 rounded-lg text-[0.8125rem] transition-colors ${
+                          className={`flex flex-1 items-center gap-2.5 rounded-lg text-[0.8125rem] transition-all duration-200 ${
                             mini ? "justify-center px-0 py-2" : "px-2.5 py-2"
                           } ${
                             active
-                              ? "bg-sidebar-accent font-semibold text-sidebar-accent-foreground"
+                              ? "bg-sidebar-accent font-semibold text-sidebar-accent-foreground shadow-[inset_3px_0_0_var(--color-sidebar-primary),0_0_12px_color-mix(in_srgb,var(--color-sidebar-primary)_10%,transparent)]"
                               : "font-medium text-sidebar-foreground/65 hover:bg-sidebar-accent/60 hover:text-sidebar-accent-foreground"
                           }`}
                         >
@@ -427,7 +427,7 @@ export function AppShell({ children }: { children: ReactNode }) {
           <div
             className={`flex items-center gap-2.5 rounded-lg ${mini ? "flex-col" : "px-2 py-1.5"}`}
           >
-            <span className="flex size-8 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-sidebar-primary to-sidebar-primary/70 text-[0.6875rem] font-bold text-sidebar-primary-foreground">
+            <span className="flex size-8 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-sidebar-primary to-sidebar-primary/70 text-[0.6875rem] font-bold text-sidebar-primary-foreground ring-2 ring-sidebar-primary/20 ring-offset-1 ring-offset-sidebar">
               {iniciais}
             </span>
             {!mini && (
@@ -443,7 +443,7 @@ export function AppShell({ children }: { children: ReactNode }) {
             <button
               onClick={sair}
               title="Sair"
-              className="flex size-7 shrink-0 items-center justify-center rounded-md text-sidebar-foreground/45 transition-colors hover:bg-sidebar-accent hover:text-sidebar-foreground"
+              className="flex size-7 shrink-0 items-center justify-center rounded-md text-sidebar-foreground/45 transition-all hover:bg-sidebar-accent hover:text-sidebar-foreground hover:shadow-[0_0_8px_color-mix(in_srgb,var(--color-destructive)_15%,transparent)]"
             >
               <LogOut className="size-3.5" />
             </button>
@@ -456,7 +456,7 @@ export function AppShell({ children }: { children: ReactNode }) {
   return (
     <div className="flex min-h-screen bg-background">
       <aside
-        className={`sticky top-0 hidden h-screen shrink-0 flex-col bg-sidebar text-sidebar-foreground transition-[width] duration-200 ease-in-out md:flex ${
+        className={`sticky top-0 hidden h-screen shrink-0 flex-col sidebar-glass text-sidebar-foreground transition-[width] duration-200 ease-in-out md:flex ${
           collapsed ? "w-[64px]" : "w-[240px]"
         }`}
       >
@@ -469,7 +469,7 @@ export function AppShell({ children }: { children: ReactNode }) {
             className="absolute inset-0 bg-black/50 backdrop-blur-sm"
             onClick={() => setMobileOpen(false)}
           />
-          <aside className="relative flex h-full w-[270px] flex-col bg-sidebar text-sidebar-foreground shadow-elevated animate-in slide-in-from-left duration-200">
+          <aside className="relative flex h-full w-[270px] flex-col sidebar-glass text-sidebar-foreground shadow-elevated animate-in slide-in-from-left duration-200">
             <button
               onClick={() => setMobileOpen(false)}
               className="absolute right-3 top-4 flex size-8 items-center justify-center rounded-lg text-sidebar-foreground/50 hover:bg-sidebar-accent"
@@ -482,7 +482,7 @@ export function AppShell({ children }: { children: ReactNode }) {
       )}
 
       <div className="flex min-w-0 flex-1 flex-col">
-        <header className="sticky top-0 z-30 flex h-13 items-center gap-2 border-b border-border bg-card px-3 shadow-[0_1px_3px_rgba(15,23,42,0.06)] md:px-5">
+        <header className="sticky top-0 z-30 flex h-13 items-center gap-2 glass-header px-3 md:px-5">
           <button
             onClick={() => setMobileOpen(true)}
             className="flex size-8 items-center justify-center rounded-lg text-muted-foreground hover:bg-muted md:hidden"
@@ -535,7 +535,7 @@ export function AppShell({ children }: { children: ReactNode }) {
           <button
             type="button"
             onClick={() => setPaletteOpen(true)}
-            className="flex h-8 items-center gap-2 rounded-lg border border-border/70 bg-card px-2.5 text-xs text-muted-foreground transition-colors hover:border-border hover:text-foreground sm:w-56"
+            className="flex h-8 items-center gap-2 rounded-xl border border-border/40 bg-card/60 backdrop-blur-sm px-2.5 text-xs text-muted-foreground transition-all hover:border-primary/20 hover:bg-card/80 hover:shadow-sm sm:w-56"
           >
             <Search className="size-3.5" />
             <span className="hidden flex-1 text-left sm:block">Buscar…</span>
@@ -549,7 +549,7 @@ export function AppShell({ children }: { children: ReactNode }) {
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <button className="flex items-center gap-2 rounded-lg p-1 pr-2 transition-colors hover:bg-muted">
-                <span className="flex size-7 items-center justify-center rounded-full bg-gradient-to-br from-primary to-primary/70 text-[0.6875rem] font-bold text-primary-foreground">
+                <span className="flex size-7 items-center justify-center rounded-full bg-gradient-to-br from-primary to-primary/70 text-[0.6875rem] font-bold text-primary-foreground ring-2 ring-primary/15">
                   {iniciais}
                 </span>
                 <ChevronDown className="hidden size-3.5 text-muted-foreground sm:block" />
@@ -581,7 +581,7 @@ export function AppShell({ children }: { children: ReactNode }) {
             </DropdownMenuContent>
           </DropdownMenu>
         </header>
-        <main className="flex-1 overflow-x-hidden p-4 md:p-6">{children}</main>
+        <main className="flex-1 overflow-x-hidden p-4 md:p-6 mesh-gradient">{children}</main>
       </div>
 
       <CommandPalette

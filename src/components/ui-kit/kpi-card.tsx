@@ -93,7 +93,7 @@ export function KpiCard({
         )}
       </div>
       {progress != null && !loading && (
-        <div className="mt-3 h-1 overflow-hidden rounded-full bg-muted">
+        <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-muted/50 ring-1 ring-border/10">
           <div
             className={`h-full rounded-full ${t.bar}`}
             style={{ width: `${Math.max(0, Math.min(100, progress))}%` }}
