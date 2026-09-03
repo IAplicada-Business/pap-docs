@@ -326,6 +326,7 @@ export type Database = {
           logo_url: string | null
           modulos_habilitados: string[] | null
           nome: string
+          nome_curto: string | null
           status: string
           updated_at: string
         }
@@ -350,6 +351,7 @@ export type Database = {
           logo_url?: string | null
           modulos_habilitados?: string[] | null
           nome?: string
+          nome_curto?: string | null
           status?: string
           updated_at?: string
         }

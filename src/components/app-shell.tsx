@@ -258,7 +258,7 @@ export function AppShell({ children }: { children: ReactNode }) {
         .join("")
     : "?";
 
-  const brandName = modoEmpresa ? (empresa?.nome ?? "Empresa") : "ConcilIA";
+  const brandName = modoEmpresa ? empresa?.nome_curto || empresa?.nome || "Empresa" : "ConcilIA";
   const brandLogo = modoEmpresa ? empresa?.logo_url : null;
 
   const isActive = (item: NavItem) =>
@@ -275,7 +275,10 @@ export function AppShell({ children }: { children: ReactNode }) {
     const out: { label: string; to?: string }[] = [];
     if (modoEmpresa && empresaId) {
       out.push({ label: "Empresas", to: "/empresas" });
-      out.push({ label: empresa?.nome ?? "Empresa", to: `/empresas/${empresaId}` });
+      out.push({
+        label: empresa?.nome_curto || empresa?.nome || "Empresa",
+        to: `/empresas/${empresaId}`,
+      });
       const rest = parts.slice(2);
       if (rest.length === 0) out.push({ label: "Dashboard" });
       else {
@@ -288,7 +291,7 @@ export function AppShell({ children }: { children: ReactNode }) {
       }
     } else if (modoGerenciar && empresaId) {
       out.push({ label: "Empresas", to: "/empresas" });
-      out.push({ label: empresa?.nome ?? "Empresa" });
+      out.push({ label: empresa?.nome_curto || empresa?.nome || "Empresa" });
       out.push({ label: "Gerenciar" });
     } else {
       out.push({ label: "ConcilIA", to: "/empresas" });
@@ -312,19 +315,20 @@ export function AppShell({ children }: { children: ReactNode }) {
             <img
               src={brandLogo}
               alt={brandName}
-              className={`object-contain ${mini ? "size-8 rounded-lg bg-white/95 p-0.5" : "h-8 max-w-[160px]"}`}
+              className="size-8 shrink-0 rounded-lg bg-white object-contain p-0.5 shadow-sm"
             />
           ) : (
-            <>
-              <span className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-sidebar-primary/20 text-sidebar-primary">
-                {modoEmpresa ? <Building2 className="size-4" /> : <Sparkles className="size-4" />}
-              </span>
-              {!mini && (
-                <span className="truncate text-[0.9375rem] font-bold tracking-tight text-sidebar-accent-foreground">
-                  {brandName}
-                </span>
-              )}
-            </>
+            <span className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-sidebar-primary/20 text-sidebar-primary">
+              {modoEmpresa ? <Building2 className="size-4" /> : <Sparkles className="size-4" />}
+            </span>
+          )}
+          {!mini && (
+            <span
+              className="truncate text-[0.9375rem] font-bold tracking-tight text-sidebar-accent-foreground"
+              title={modoEmpresa ? (empresa?.nome ?? undefined) : undefined}
+            >
+              {brandName}
+            </span>
           )}
         </div>
 
@@ -478,7 +482,7 @@ export function AppShell({ children }: { children: ReactNode }) {
       )}
 
       <div className="flex min-w-0 flex-1 flex-col">
-        <header className="sticky top-0 z-30 flex h-13 items-center gap-2 border-b border-border/60 bg-background/85 px-3 backdrop-blur-xl md:px-5">
+        <header className="sticky top-0 z-30 flex h-13 items-center gap-2 border-b border-border bg-card px-3 shadow-[0_1px_3px_rgba(15,23,42,0.06)] md:px-5">
           <button
             onClick={() => setMobileOpen(true)}
             className="flex size-8 items-center justify-center rounded-lg text-muted-foreground hover:bg-muted md:hidden"

@@ -21,6 +21,7 @@ export type Perfil = {
 export type Escritorio = {
   id: string;
   nome: string;
+  nome_curto: string | null;
   logo_url: string | null;
   cor_primaria: string;
   cor_acento: string | null;
@@ -76,7 +77,9 @@ export function useEscritorio() {
       if (!perfil?.org_id) return null;
       const { data, error } = await supabase
         .from("organizations")
-        .select("id, nome, logo_url, cor_primaria, cor_acento, status, modulos_habilitados")
+        .select(
+          "id, nome, nome_curto, logo_url, cor_primaria, cor_acento, status, modulos_habilitados",
+        )
         .eq("id", perfil.org_id)
         .maybeSingle();
       if (error) throw error;
@@ -94,7 +97,9 @@ export function useEmpresa(empresaId: string | undefined) {
       if (!empresaId) return null;
       const { data, error } = await supabase
         .from("organizations")
-        .select("id, nome, logo_url, cor_primaria, cor_acento, status, modulos_habilitados")
+        .select(
+          "id, nome, nome_curto, logo_url, cor_primaria, cor_acento, status, modulos_habilitados",
+        )
         .eq("id", empresaId)
         .maybeSingle();
       if (error) throw error;
