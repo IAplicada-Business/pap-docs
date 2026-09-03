@@ -10,7 +10,7 @@ import { toast } from "sonner";
 export const Route = createFileRoute("/convite/$token")({
   head: () => ({
     meta: [
-      { title: "Aceitar convite — ConcilIA" },
+      { title: "Aceitar convite — P&A Contabilidade Digital" },
       {
         name: "description",
         content:
@@ -137,8 +137,8 @@ function ConvitePage() {
             />
           ) : (
             <img
-              src="/logo-concilia.svg"
-              alt="ConcilIA"
+              src="/logo-pa.svg"
+              alt="P&A Contabilidade Digital"
               className="mx-auto mb-4 h-10 w-auto"
             />
           )}

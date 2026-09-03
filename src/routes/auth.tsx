@@ -6,20 +6,22 @@ import { toast } from "sonner";
 export const Route = createFileRoute("/auth")({
   head: () => ({
     meta: [
-      { title: "Entrar — ConcilIA" },
+      { title: "Entrar — P&A Contabilidade Digital" },
       {
         name: "description",
-        content: "Plataforma de contabilidade inteligente para escritórios contábeis.",
+        content: "Acesso ao sistema de contabilidade da P&A Contabilidade Digital.",
       },
-      { property: "og:title", content: "ConcilIA — Contabilidade inteligente" },
+      { property: "og:title", content: "P&A Contabilidade Digital" },
       {
         property: "og:description",
-        content: "Plataforma SaaS de conciliação contábil para escritórios.",
+        content: "Sistema de conciliação e contabilidade digital da P&A.",
       },
     ],
   }),
   component: AuthPage,
 });
+
+type PillColor = "blue" | "graphite" | "sky";
 
 function AuthPage() {
   const navigate = useNavigate();
@@ -29,14 +31,14 @@ function AuthPage() {
 
   const pillsData = useMemo(() => {
     const seed = [
-      { w: 220, h: 70, left: 5, top: 12, delay: 0, dur: 22, color: "navy" as const },
-      { w: 180, h: 55, left: 60, top: 8, delay: -4, dur: 26, color: "green" as const },
-      { w: 260, h: 80, left: 15, top: 65, delay: -8, dur: 20, color: "green" as const },
-      { w: 150, h: 50, left: 70, top: 70, delay: -12, dur: 24, color: "navy" as const },
-      { w: 200, h: 65, left: 40, top: 35, delay: -6, dur: 28, color: "teal" as const },
-      { w: 170, h: 55, left: -5, top: 45, delay: -15, dur: 23, color: "navy" as const },
-      { w: 240, h: 75, left: 50, top: 50, delay: -10, dur: 25, color: "green" as const },
-      { w: 140, h: 45, left: 25, top: 85, delay: -3, dur: 21, color: "teal" as const },
+      { w: 220, h: 70, left: 5, top: 12, delay: 0, dur: 22, color: "graphite" as PillColor },
+      { w: 180, h: 55, left: 60, top: 8, delay: -4, dur: 26, color: "blue" as PillColor },
+      { w: 260, h: 80, left: 15, top: 65, delay: -8, dur: 20, color: "blue" as PillColor },
+      { w: 150, h: 50, left: 70, top: 70, delay: -12, dur: 24, color: "graphite" as PillColor },
+      { w: 200, h: 65, left: 40, top: 35, delay: -6, dur: 28, color: "sky" as PillColor },
+      { w: 170, h: 55, left: -5, top: 45, delay: -15, dur: 23, color: "graphite" as PillColor },
+      { w: 240, h: 75, left: 50, top: 50, delay: -10, dur: 25, color: "blue" as PillColor },
+      { w: 140, h: 45, left: 25, top: 85, delay: -3, dur: 21, color: "sky" as PillColor },
     ];
     return seed;
   }, []);
@@ -74,43 +76,43 @@ function AuthPage() {
     navigate({ to: "/dashboard" });
   }
 
-  const pillGradient = (color: "navy" | "green" | "teal") => {
+  // Marca P&A: azul #0072CE e grafite #3A3A3A (manual de identidade).
+  const pillGradient = (color: PillColor) => {
     switch (color) {
-      case "navy":
-        return "linear-gradient(135deg, #1C2B3A, #0D1B24)";
-      case "green":
-        return "linear-gradient(135deg, #3CC25E, #2A9E47)";
-      case "teal":
-        return "linear-gradient(135deg, #1E8C80, #155F57)";
+      case "blue":
+        return "linear-gradient(135deg, #0072CE, #0058A3)";
+      case "graphite":
+        return "linear-gradient(135deg, #3A3A3A, #1E1E1E)";
+      case "sky":
+        return "linear-gradient(135deg, #3D9BE9, #0072CE)";
     }
   };
 
-  const pillShadow = (color: "navy" | "green" | "teal") => {
+  const pillShadow = (color: PillColor) => {
     switch (color) {
-      case "navy":
-        return "inset -8px -8px 16px rgba(0,0,0,0.6), 6px 6px 20px rgba(28,43,58,0.3)";
-      case "green":
-        return "inset -8px -8px 16px rgba(0,0,0,0.3), 6px 6px 20px rgba(60,194,94,0.25)";
-      case "teal":
-        return "inset -8px -8px 16px rgba(0,0,0,0.4), 6px 6px 20px rgba(30,140,128,0.25)";
+      case "blue":
+        return "inset -8px -8px 16px rgba(0,0,0,0.35), 6px 6px 20px rgba(0,114,206,0.3)";
+      case "graphite":
+        return "inset -8px -8px 16px rgba(0,0,0,0.6), 6px 6px 20px rgba(58,58,58,0.3)";
+      case "sky":
+        return "inset -8px -8px 16px rgba(0,0,0,0.3), 6px 6px 20px rgba(61,155,233,0.25)";
     }
   };
 
   return (
-    <div className="concilia-login-wrapper">
+    <div className="pa-login-wrapper">
       <style>{`
-        .concilia-login-wrapper {
-          --cl-bg: #0A1A1F;
-          --cl-navy: #1C2B3A;
-          --cl-green: #3CC25E;
-          --cl-teal: #1E8C80;
-          --cl-support: #2BB3A3;
-          --cl-text: #FFFFFF;
-          --cl-dim: rgba(255, 255, 255, 0.45);
-          --cl-goo: url('#gooey-pills');
+        .pa-login-wrapper {
+          --pa-bg: #0B1622;
+          --pa-blue: #0072CE;
+          --pa-sky: #3D9BE9;
+          --pa-graphite: #3A3A3A;
+          --pa-text: #FFFFFF;
+          --pa-dim: rgba(255, 255, 255, 0.45);
+          --pa-goo: url('#gooey-pills');
 
-          background-color: var(--cl-bg);
-          color: var(--cl-text);
+          background-color: var(--pa-bg);
+          color: var(--pa-text);
           font-family: 'Montserrat', 'Inter', ui-sans-serif, system-ui, sans-serif;
           height: 100vh;
           width: 100vw;
@@ -121,29 +123,29 @@ function AuthPage() {
           position: relative;
         }
 
-        .concilia-login-wrapper * {
+        .pa-login-wrapper * {
           box-sizing: border-box;
           -webkit-font-smoothing: antialiased;
         }
 
-        .cl-stage {
+        .pa-stage {
           position: absolute;
           width: 100%;
           height: 100%;
           z-index: 0;
-          filter: var(--cl-goo);
+          filter: var(--pa-goo);
           opacity: 0.5;
         }
 
-        .cl-pill {
+        .pa-pill {
           position: absolute;
           border-radius: 999px;
           filter: blur(18px);
-          animation: cl-float 20s infinite alternate ease-in-out;
+          animation: pa-float 20s infinite alternate ease-in-out;
           transition: margin 0.1s ease-out;
         }
 
-        @keyframes cl-float {
+        @keyframes pa-float {
           0%   { transform: translate(0, 0) scale(1) rotate(0deg); }
           25%  { transform: translate(8vw, 12vh) scale(1.15) rotate(3deg); }
           50%  { transform: translate(-4vw, 8vh) scale(0.85) rotate(-2deg); }
@@ -151,7 +153,11 @@ function AuthPage() {
           100% { transform: translate(3vw, -8vh) scale(1.05) rotate(-1deg); }
         }
 
-        .cl-auth-container {
+        @media (prefers-reduced-motion: reduce) {
+          .pa-pill { animation: none; }
+        }
+
+        .pa-auth-container {
           position: relative;
           z-index: 10;
           width: 100%;
@@ -159,49 +165,85 @@ function AuthPage() {
           padding: 40px;
         }
 
-        .cl-header {
-          margin-bottom: 48px;
+        .pa-brand {
+          display: flex;
+          align-items: center;
+          gap: 14px;
+          margin-bottom: 40px;
+        }
+
+        .pa-brand-icon {
+          width: 52px;
+          height: 52px;
+          flex-shrink: 0;
+          filter: drop-shadow(0 8px 24px rgba(0, 114, 206, 0.45));
+        }
+
+        .pa-brand-name {
+          font-weight: 800;
+          font-size: 1.75rem;
+          line-height: 1;
+          letter-spacing: -0.5px;
+        }
+
+        .pa-brand-sub {
+          margin-top: 5px;
+          font-size: 0.625rem;
+          font-weight: 500;
+          letter-spacing: 1.6px;
+          text-transform: uppercase;
+          color: var(--pa-dim);
+        }
+
+        .pa-header {
+          margin-bottom: 40px;
           text-align: left;
         }
 
-        .cl-header h1 {
+        .pa-header h1 {
           font-weight: 800;
-          font-size: 2.8rem;
-          line-height: 0.95;
-          letter-spacing: -1.5px;
-          margin: 0 0 0 -3px;
+          font-size: 2.4rem;
+          line-height: 1;
+          letter-spacing: -1.2px;
+          margin: 0 0 0 -2px;
         }
 
-        .cl-header h1 .cl-green {
-          color: var(--cl-green);
+        .pa-header h1 .pa-accent {
+          color: var(--pa-sky);
         }
 
-        .cl-form-group {
+        .pa-header p {
+          margin: 12px 0 0;
+          font-size: 0.8125rem;
+          color: var(--pa-dim);
+        }
+
+        .pa-form-group {
           position: relative;
           margin-bottom: 28px;
           transition: transform 0.4s cubic-bezier(0.2, 1, 0.3, 1);
         }
 
-        .cl-form-group:focus-within {
+        .pa-form-group:focus-within {
           transform: translateX(8px);
         }
 
-        .cl-form-group label {
+        .pa-form-group label {
           display: block;
           font-size: 11px;
           font-weight: 500;
-          color: var(--cl-dim);
+          color: var(--pa-dim);
           margin-bottom: 10px;
           text-transform: uppercase;
           letter-spacing: 1px;
         }
 
-        .cl-form-group input {
+        .pa-form-group input {
           width: 100%;
           background: transparent;
           border: none;
           border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-          color: var(--cl-text);
+          color: var(--pa-text);
           padding: 12px 0;
           font-family: inherit;
           font-size: 16px;
@@ -209,34 +251,34 @@ function AuthPage() {
           transition: border-color 0.4s;
         }
 
-        .cl-form-group input::placeholder {
+        .pa-form-group input::placeholder {
           color: rgba(255, 255, 255, 0.2);
         }
 
-        .cl-input-glow {
+        .pa-input-glow {
           position: absolute;
           bottom: 0;
           left: 0;
           width: 0%;
           height: 2px;
-          background: linear-gradient(90deg, var(--cl-teal), var(--cl-green));
+          background: linear-gradient(90deg, var(--pa-blue), var(--pa-sky));
           transition: width 0.6s cubic-bezier(0.2, 1, 0.3, 1);
-          box-shadow: 0 0 12px var(--cl-teal);
+          box-shadow: 0 0 12px var(--pa-blue);
         }
 
-        .cl-form-group input:focus + .cl-input-glow {
+        .pa-form-group input:focus + .pa-input-glow {
           width: 100%;
         }
 
-        .cl-submit-wrap {
+        .pa-submit-wrap {
           margin-top: 44px;
           position: relative;
-          filter: var(--cl-goo);
+          filter: var(--pa-goo);
         }
 
-        .cl-btn-base {
-          background: var(--cl-green);
-          color: #0A1A1F;
+        .pa-btn-base {
+          background: var(--pa-blue);
+          color: #FFFFFF;
           border: none;
           padding: 18px 40px;
           font-family: inherit;
@@ -251,36 +293,41 @@ function AuthPage() {
           transition: letter-spacing 0.3s, background 0.3s;
         }
 
-        .cl-btn-base:hover {
+        .pa-btn-base:hover {
           letter-spacing: 3.5px;
-          background: #45D468;
+          background: #1A84DB;
         }
 
-        .cl-btn-base:disabled {
+        .pa-btn-base:focus-visible {
+          outline: 2px solid var(--pa-sky);
+          outline-offset: 3px;
+        }
+
+        .pa-btn-base:disabled {
           opacity: 0.6;
           cursor: not-allowed;
           letter-spacing: 2px;
         }
 
-        .cl-mercury-drop {
+        .pa-mercury-drop {
           position: absolute;
           top: 50%;
           left: 50%;
           width: 100%;
           height: 100%;
-          background: linear-gradient(135deg, var(--cl-teal), var(--cl-green));
+          background: linear-gradient(135deg, var(--pa-blue), var(--pa-sky));
           transform: translate(-50%, -50%);
           z-index: 1;
           border-radius: 50px;
           transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
 
-        .cl-submit-wrap:hover .cl-mercury-drop {
+        .pa-submit-wrap:hover .pa-mercury-drop {
           transform: translate(-50%, -50%) scale(1.04, 1.15);
           filter: brightness(1.15);
         }
 
-        .cl-footer-nav {
+        .pa-footer-nav {
           margin-top: 36px;
           display: flex;
           justify-content: space-between;
@@ -288,25 +335,25 @@ function AuthPage() {
           font-weight: 500;
         }
 
-        .cl-footer-nav a {
-          color: var(--cl-dim);
+        .pa-footer-nav a {
+          color: var(--pa-dim);
           text-decoration: none;
           letter-spacing: 0.5px;
           transition: color 0.3s;
         }
 
-        .cl-footer-nav a:hover {
-          color: var(--cl-text);
+        .pa-footer-nav a:hover {
+          color: var(--pa-text);
         }
 
-        .cl-svg-hidden {
+        .pa-svg-hidden {
           position: absolute;
           width: 0;
           height: 0;
         }
       `}</style>
 
-      <svg className="cl-svg-hidden">
+      <svg className="pa-svg-hidden">
         <defs>
           <filter id="gooey-pills">
             <feGaussianBlur in="SourceGraphic" stdDeviation="12" result="blur" />
@@ -321,12 +368,14 @@ function AuthPage() {
         </defs>
       </svg>
 
-      <div className="cl-stage">
+      <div className="pa-stage">
         {pillsData.map((data, index) => (
           <div
             key={index}
-            ref={(el) => { pillRefs.current[index] = el; }}
-            className="cl-pill"
+            ref={(el) => {
+              pillRefs.current[index] = el;
+            }}
+            className="pa-pill"
             style={{
               width: `${data.w}px`,
               height: `${data.h}px`,
@@ -341,48 +390,77 @@ function AuthPage() {
         ))}
       </div>
 
-      <main className="cl-auth-container">
-        <header className="cl-header">
+      <main className="pa-auth-container">
+        <div className="pa-brand">
+          <svg className="pa-brand-icon" viewBox="0 0 56 56" fill="none" aria-hidden="true">
+            <rect
+              x="10"
+              y="10"
+              width="36"
+              height="36"
+              rx="10"
+              transform="rotate(45 28 28)"
+              fill="#0072CE"
+            />
+            <path d="M28 17v11" stroke="#fff" strokeWidth="3.2" strokeLinecap="round" />
+            <path
+              d="M20.5 21a11 11 0 1 0 15 0"
+              stroke="#fff"
+              strokeWidth="3"
+              strokeLinecap="round"
+              fill="none"
+            />
+          </svg>
+          <div>
+            <div className="pa-brand-name">P&amp;A</div>
+            <div className="pa-brand-sub">Contabilidade Digital</div>
+          </div>
+        </div>
+
+        <header className="pa-header">
           <h1>
-            Acesse seu<br />
-            escritório<span className="cl-green">.</span>
+            Acesse o<br />
+            sistema<span className="pa-accent">.</span>
           </h1>
+          <p>Conciliação, documentos e competências dos seus clientes em um só lugar.</p>
         </header>
 
         <form autoComplete="off" onSubmit={entrar}>
-          <div className="cl-form-group">
-            <label>E-mail</label>
+          <div className="pa-form-group">
+            <label htmlFor="email">E-mail</label>
             <input
+              id="email"
               type="email"
               placeholder="seu@email.com"
               required
               value={email}
               onChange={(e) => setEmail(e.target.value)}
             />
-            <div className="cl-input-glow" />
+            <div className="pa-input-glow" />
           </div>
 
-          <div className="cl-form-group">
-            <label>Senha</label>
+          <div className="pa-form-group">
+            <label htmlFor="senha">Senha</label>
             <input
+              id="senha"
               type="password"
               placeholder="••••••••"
               required
               value={senha}
               onChange={(e) => setSenha(e.target.value)}
             />
-            <div className="cl-input-glow" />
+            <div className="pa-input-glow" />
           </div>
 
-          <div className="cl-submit-wrap">
-            <div className="cl-mercury-drop" />
-            <button type="submit" className="cl-btn-base" disabled={carregando}>
+          <div className="pa-submit-wrap">
+            <div className="pa-mercury-drop" />
+            <button type="submit" className="pa-btn-base" disabled={carregando}>
               {carregando ? "Entrando..." : "Entrar"}
             </button>
           </div>
         </form>
 
-        <footer className="cl-footer-nav">
+        <footer className="pa-footer-nav">
           <a href="#recuperar">Esqueci minha senha</a>
           <a href="#ajuda">Preciso de ajuda</a>
         </footer>

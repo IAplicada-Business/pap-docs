@@ -75,10 +75,10 @@ import { linkWhatsApp, mensagemCobranca } from "@/lib/cobranca";
 
 type AtualizacaoCliente = Database["public"]["Tables"]["clientes"]["Update"];
 
-export const Route = createFileRoute("/_authenticated/empresas/$id/clientes/$clienteId")({
+export const Route = createFileRoute("/_authenticated/clientes/$clienteId")({
   head: () => ({
     meta: [
-      { title: "Cliente — ConcilIA" },
+      { title: "Cliente — P&A Contabilidade Digital" },
       {
         name: "description",
         content:
@@ -131,7 +131,8 @@ type Rel = {
 };
 
 function ClienteDetalhe() {
-  const { id: empresaId, clienteId } = Route.useParams();
+  const { clienteId } = Route.useParams();
+  const { orgId: empresaId } = Route.useRouteContext();
   const { data: empresa } = useEmpresa(empresaId);
   const queryClient = useQueryClient();
   const [aba, setAba] = useState<Aba>("visao");
@@ -326,7 +327,7 @@ function ClienteDetalhe() {
   const linkPainel = `${origin}/painel/${cliente.painel_token}`;
   const waLink = linkWhatsApp(
     cliente.telefone,
-    mensagemCobranca(nome, mesAtual(), empresa?.nome ?? "ConcilIA", linkUpload),
+    mensagemCobranca(nome, mesAtual(), empresa?.nome ?? "P&A Contabilidade Digital", linkUpload),
   );
   const copiar = (t: string) => {
     navigator.clipboard.writeText(t);
@@ -493,8 +494,7 @@ function ClienteDetalhe() {
       align: "right",
       cell: (c) => (
         <Link
-          to="/empresas/$id/conciliacao"
-          params={{ id: empresaId }}
+          to="/conciliacao"
           search={{ cliente: clienteId, competencia: c.id }}
           className="inline-flex items-center gap-1 text-xs font-medium text-primary hover:underline"
         >
@@ -566,8 +566,7 @@ function ClienteDetalhe() {
   return (
     <div className="space-y-5">
       <Link
-        to="/empresas/$id/clientes"
-        params={{ id: empresaId }}
+        to="/clientes"
         className="inline-flex items-center gap-1 text-xs font-medium text-muted-foreground hover:text-foreground"
       >
         <ArrowLeft className="size-3.5" /> Clientes
@@ -763,8 +762,7 @@ function ClienteDetalhe() {
                 {(competencias ?? []).slice(0, 5).map((c) => (
                   <Link
                     key={c.id}
-                    to="/empresas/$id/conciliacao"
-                    params={{ id: empresaId }}
+                    to="/conciliacao"
                     search={{ cliente: clienteId, competencia: c.id }}
                     className="flex items-center gap-3 py-2 hover:bg-muted/40"
                   >
@@ -841,8 +839,7 @@ function ClienteDetalhe() {
           icon={FileText}
           actions={
             <Link
-              to="/empresas/$id/documentos"
-              params={{ id: empresaId }}
+              to="/documentos"
               search={{ cliente: clienteId, novo: "1" }}
               className="text-xs font-medium text-primary hover:underline"
             >
@@ -870,8 +867,7 @@ function ClienteDetalhe() {
           icon={BookOpen}
           actions={
             <Link
-              to="/empresas/$id/conciliacao"
-              params={{ id: empresaId }}
+              to="/conciliacao"
               search={{ cliente: clienteId }}
               className="inline-flex items-center gap-1 text-xs font-medium text-primary hover:underline"
             >
@@ -897,11 +893,7 @@ function ClienteDetalhe() {
           title="Competências"
           icon={CalendarRange}
           actions={
-            <Link
-              to="/empresas/$id/competencias"
-              params={{ id: empresaId }}
-              className="text-xs font-medium text-primary hover:underline"
-            >
+            <Link to="/competencias" className="text-xs font-medium text-primary hover:underline">
               Gerenciar
             </Link>
           }
@@ -923,11 +915,7 @@ function ClienteDetalhe() {
           title="Relatórios"
           icon={FileBarChart2}
           actions={
-            <Link
-              to="/empresas/$id/relatorios"
-              params={{ id: empresaId }}
-              className="text-xs font-medium text-primary hover:underline"
-            >
+            <Link to="/relatorios" className="text-xs font-medium text-primary hover:underline">
               Pacotes mensais
             </Link>
           }
@@ -1057,11 +1045,7 @@ function ClienteDetalhe() {
             </div>
             <p className="mt-4 text-[0.6875rem] text-muted-foreground">
               A identidade visual (logo e cores) é configurada no nível da empresa, em{" "}
-              <Link
-                to="/empresas/$id/configuracoes"
-                params={{ id: empresaId }}
-                className="font-medium text-primary hover:underline"
-              >
+              <Link to="/configuracoes" className="font-medium text-primary hover:underline">
                 Configurações
               </Link>
               , e vale para todos os clientes.

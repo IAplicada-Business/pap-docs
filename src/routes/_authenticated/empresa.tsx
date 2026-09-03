@@ -1,15 +1,12 @@
 import { useRef, useState } from "react";
-import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import {
-  ArrowLeft,
   Building2,
   CalendarRange,
-  ExternalLink,
   FileText,
   ImagePlus,
   Palette,
-  Power,
   Settings,
   ShieldAlert,
   Trash2,
@@ -21,34 +18,20 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { toast } from "sonner";
-import {
-  EmptyState,
-  InfoTip,
-  PageHeader,
-  SectionCard,
-  StatusPill,
-  SubTabs,
-} from "@/components/ui-kit";
+import { EmptyState, InfoTip, PageHeader, SectionCard, SubTabs } from "@/components/ui-kit";
 
-export const Route = createFileRoute("/_authenticated/empresas/$id/gerenciar")({
+export const Route = createFileRoute("/_authenticated/empresa")({
   head: () => ({
     meta: [
-      { title: "Gerenciar empresa — ConcilIA" },
+      { title: "Minha empresa — P&A Contabilidade Digital" },
       {
         name: "description",
-        content: "Marca, cores, módulos visíveis e status da empresa (visão administrativa).",
+        content: "Marca, cores e módulos visíveis no sistema.",
       },
     ],
   }),
-  component: GerenciarEmpresaPage,
+  component: MinhaEmpresaPage,
 });
 
 const MODULOS_PADRAO = ["clientes", "documentos", "competencias", "configuracoes"];
@@ -84,17 +67,10 @@ const MODULOS_CONFIG = [
   },
 ] as const;
 
-const STATUS_OPCOES = [
-  { value: "ativa", label: "Ativa", tone: "success" as const },
-  { value: "trial", label: "Trial", tone: "warning" as const },
-  { value: "suspensa", label: "Suspensa", tone: "neutral" as const },
-];
+type Aba = "marca" | "modulos";
 
-type Aba = "marca" | "modulos" | "acesso";
-
-function GerenciarEmpresaPage() {
-  const { id: empresaId } = Route.useParams();
-  const navigate = useNavigate();
+function MinhaEmpresaPage() {
+  const { orgId: empresaId } = Route.useRouteContext();
   const { data: perfil } = usePerfil();
   const { data: empresa } = useEmpresa(empresaId);
   const queryClient = useQueryClient();
@@ -102,13 +78,7 @@ function GerenciarEmpresaPage() {
   const [uploading, setUploading] = useState(false);
   const [aba, setAba] = useState<Aba>("marca");
 
-  const podeGerenciar =
-    perfil?.papel === "super_admin" || (perfil?.papel === "admin" && perfil.org_id === empresaId);
-
-  function invalidar() {
-    queryClient.invalidateQueries({ queryKey: ["empresa", empresaId] });
-    queryClient.invalidateQueries({ queryKey: ["painel-empresas"] });
-  }
+  const podeGerenciar = perfil?.papel === "super_admin" || perfil?.papel === "admin";
 
   const salvar = useMutation({
     mutationFn: async (v: {
@@ -117,7 +87,6 @@ function GerenciarEmpresaPage() {
       cor_primaria?: string;
       cor_acento?: string;
       logo_url?: string | null;
-      status?: string;
       modulos_habilitados?: string[];
     }) => {
       const { data, error } = await supabase
@@ -131,7 +100,7 @@ function GerenciarEmpresaPage() {
     },
     onSuccess: () => {
       toast.success("Salvo");
-      invalidar();
+      queryClient.invalidateQueries({ queryKey: ["empresa", empresaId] });
     },
     onError: (e: Error) => toast.error("Não foi possível salvar", { description: e.message }),
   });
@@ -161,41 +130,17 @@ function GerenciarEmpresaPage() {
     }
   }
 
-  const desativar = useMutation({
-    mutationFn: async () => {
-      const { data, error } = await supabase
-        .from("organizations")
-        .update({ deleted_at: new Date().toISOString() })
-        .eq("id", empresaId)
-        .select("id");
-      if (error) throw error;
-      if (!data || data.length === 0) throw new Error("Sem permissão para desativar.");
-    },
-    onSuccess: () => {
-      toast.success("Empresa desativada");
-      queryClient.invalidateQueries({ queryKey: ["painel-empresas"] });
-      navigate({ to: "/empresas" });
-    },
-    onError: (e: Error) => toast.error("Não foi possível desativar", { description: e.message }),
-  });
-
-  const corPrimaria = empresa?.cor_primaria || "#123B47";
-  const corAcento = empresa?.cor_acento || "#1E8C80";
+  const corPrimaria = empresa?.cor_primaria || "#0072CE";
+  const corAcento = empresa?.cor_acento || "#3A3A3A";
   const modulos = empresa?.modulos_habilitados ?? MODULOS_PADRAO;
-  const statusAtual = STATUS_OPCOES.find((s) => s.value === empresa?.status) ?? {
-    value: "ativa",
-    label: "Ativa",
-    tone: "success" as const,
-  };
 
   if (perfil && !podeGerenciar) {
     return (
       <div className="space-y-5">
-        <Voltar />
         <EmptyState
           icon={ShieldAlert}
           title="Acesso restrito"
-          hint="Apenas a administração da plataforma pode gerenciar marca, módulos e status das empresas."
+          hint="Apenas administradores podem alterar marca, cores e módulos."
         />
       </div>
     );
@@ -247,20 +192,9 @@ function GerenciarEmpresaPage() {
 
   return (
     <div className="space-y-5">
-      <Voltar />
       <PageHeader
-        title={empresa?.nome ?? "Empresa"}
-        description="Visão administrativa da ConcilIA. O que você define aqui vale para toda a equipe da empresa e para os links dos clientes dela. A empresa não vê esta tela."
-        actions={
-          <div className="flex items-center gap-2">
-            <StatusPill tone={statusAtual.tone} label={statusAtual.label} />
-            <Button asChild size="sm" variant="outline" className="h-8 rounded-lg text-xs">
-              <Link to="/empresas/$id" params={{ id: empresaId }}>
-                <ExternalLink className="size-3.5" /> Abrir painel
-              </Link>
-            </Button>
-          </div>
-        }
+        title="Minha empresa"
+        description="Identidade visual e módulos do sistema. O que você define aqui vale para toda a equipe e para os links enviados aos clientes."
       />
 
       <SubTabs
@@ -268,8 +202,7 @@ function GerenciarEmpresaPage() {
         onChange={setAba}
         items={[
           { value: "marca", label: "Marca e cores", icon: Palette },
-          { value: "modulos", label: "O que a empresa vê", icon: Settings },
-          { value: "acesso", label: "Status e acesso", icon: Power },
+          { value: "modulos", label: "Módulos", icon: Settings },
         ]}
       />
 
@@ -442,7 +375,7 @@ function GerenciarEmpresaPage() {
               </div>
             </div>
             <p className="mt-3 text-[0.6875rem] text-muted-foreground">
-              É assim que a equipe da empresa e os clientes dela verão o sistema.
+              É assim que a equipe e os clientes verão o sistema.
             </p>
           </SectionCard>
         </div>
@@ -450,8 +383,8 @@ function GerenciarEmpresaPage() {
 
       {aba === "modulos" && (
         <SectionCard
-          title="Módulos visíveis para a empresa"
-          description="Desligue o que esta empresa não contratou; o item some do menu de toda a equipe dela."
+          title="Módulos visíveis"
+          description="Desligue o que não está em uso; o item some do menu de toda a equipe."
           icon={Settings}
         >
           <div className="grid gap-2.5 sm:grid-cols-2">
@@ -489,68 +422,6 @@ function GerenciarEmpresaPage() {
           </div>
         </SectionCard>
       )}
-
-      {aba === "acesso" && (
-        <div className="grid gap-4 lg:grid-cols-2">
-          <SectionCard
-            title="Status da empresa"
-            description="Trial e Suspensa aparecem como aviso na lista de empresas."
-            icon={Power}
-          >
-            <div className="space-y-1.5">
-              <Label className="text-xs">Status</Label>
-              <Select
-                value={empresa?.status ?? "ativa"}
-                onValueChange={(v) => salvar.mutate({ status: v })}
-              >
-                <SelectTrigger className="h-9 w-56 rounded-lg text-sm">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {STATUS_OPCOES.map((s) => (
-                    <SelectItem key={s.value} value={s.value}>
-                      {s.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-          </SectionCard>
-
-          <SectionCard
-            title="Desativar empresa"
-            description="A empresa deixa de aparecer na lista e a equipe dela perde o acesso. Os dados são mantidos."
-            icon={ShieldAlert}
-          >
-            <Button
-              variant="outline"
-              className="h-9 rounded-lg border-destructive/40 text-destructive hover:bg-destructive/5 hover:text-destructive"
-              disabled={desativar.isPending || perfil?.papel !== "super_admin"}
-              onClick={() => {
-                if (window.confirm(`Desativar "${empresa?.nome ?? "esta empresa"}"?`))
-                  desativar.mutate();
-              }}
-            >
-              <Trash2 className="size-4" /> Desativar empresa
-            </Button>
-            {perfil?.papel !== "super_admin" && (
-              <p className="mt-2 text-[0.6875rem] text-muted-foreground">
-                Somente a administração da plataforma pode desativar.
-              </p>
-            )}
-          </SectionCard>
-        </div>
-      )}
     </div>
-  );
-}
-
-function Voltar() {
-  return (
-    <Button asChild variant="ghost" size="sm" className="-ml-2 h-8 rounded-lg text-xs">
-      <Link to="/empresas">
-        <ArrowLeft className="size-3.5" /> Empresas
-      </Link>
-    </Button>
   );
 }
