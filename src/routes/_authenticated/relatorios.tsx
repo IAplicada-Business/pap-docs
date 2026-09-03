@@ -43,10 +43,10 @@ import { TIPOS_RELATORIO } from "@/lib/dominio";
 import { formatarCompetencia, formatarDataHora, mesAnterior } from "@/lib/formatadores";
 import { baixarDocumento } from "@/lib/documentos";
 
-export const Route = createFileRoute("/_authenticated/empresas/$id/relatorios")({
+export const Route = createFileRoute("/_authenticated/relatorios")({
   head: () => ({
     meta: [
-      { title: "Relatórios — ConcilIA" },
+      { title: "Relatórios — P&A Contabilidade Digital" },
       {
         name: "description",
         content:
@@ -89,7 +89,7 @@ type Linha = Comp & {
 };
 
 function RelatoriosPage() {
-  const { id: empresaId } = Route.useParams();
+  const { orgId: empresaId } = Route.useRouteContext();
   const { data: perfil } = usePerfil();
   const queryClient = useQueryClient();
   const [mes, setMes] = useState(mesAnterior());
@@ -264,8 +264,8 @@ function RelatoriosPage() {
       cell: (l) => (
         <div className="min-w-0">
           <Link
-            to="/empresas/$id/clientes/$clienteId"
-            params={{ id: empresaId, clienteId: l.cliente_id }}
+            to="/clientes/$clienteId"
+            params={{ clienteId: l.cliente_id }}
             className="block truncate font-medium hover:underline"
           >
             {l.clientes?.nome_fantasia ?? l.clientes?.nome ?? "—"}
@@ -495,8 +495,7 @@ function RelatoriosPage() {
               </li>
             </ol>
             <Link
-              to="/empresas/$id/clientes"
-              params={{ id: empresaId }}
+              to="/clientes"
               className="mt-3 flex items-center gap-1 text-xs font-medium text-primary hover:underline"
             >
               Links dos painéis dos clientes <ExternalLink className="size-3" />

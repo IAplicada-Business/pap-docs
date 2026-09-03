@@ -1,4 +1,4 @@
-import { useQuery } from "@tanstack/react-query";
+import { queryOptions, useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 
 export type Permissoes = {
@@ -39,55 +39,40 @@ const DEFAULT_PERMISSOES: Permissoes = {
 
 const MODULOS_PADRAO = ["clientes", "documentos", "competencias", "configuracoes"];
 
+// Compartilhado entre o guard de rota (_authenticated) e o hook usePerfil,
+// para que o org_id seja resolvido uma única vez por sessão.
+export const perfilQueryOptions = queryOptions({
+  queryKey: ["perfil"],
+  staleTime: 5 * 60 * 1000,
+  queryFn: async (): Promise<Perfil | null> => {
+    const { data: auth } = await supabase.auth.getUser();
+    if (!auth.user) return null;
+    const { data, error } = await supabase
+      .from("profiles")
+      .select("id, org_id, nome, email, papel")
+      .eq("id", auth.user.id)
+      .maybeSingle();
+    if (error) throw error;
+    if (!data) return null;
+    const papel = data.papel as Perfil["papel"];
+    return {
+      ...data,
+      email: data.email ?? auth.user.email ?? null,
+      papel,
+      permissoes:
+        papel === "super_admin" || papel === "admin"
+          ? { ...DEFAULT_PERMISSOES, configuracoes: true }
+          : { ...DEFAULT_PERMISSOES },
+    };
+  },
+});
+
 export function usePerfil() {
-  return useQuery({
-    queryKey: ["perfil"],
-    staleTime: 5 * 60 * 1000,
-    queryFn: async (): Promise<Perfil | null> => {
-      const { data: auth } = await supabase.auth.getUser();
-      if (!auth.user) return null;
-      const { data, error } = await supabase
-        .from("profiles")
-        .select("id, org_id, nome, email, papel")
-        .eq("id", auth.user.id)
-        .maybeSingle();
-      if (error) throw error;
-      if (!data) return null;
-      const papel = data.papel as Perfil["papel"];
-      return {
-        ...data,
-        email: data.email ?? auth.user.email ?? null,
-        papel,
-        permissoes:
-          papel === "super_admin" || papel === "admin"
-            ? { ...DEFAULT_PERMISSOES, configuracoes: true }
-            : { ...DEFAULT_PERMISSOES },
-      };
-    },
-  });
+  return useQuery(perfilQueryOptions);
 }
 
-export function useEscritorio() {
-  const { data: perfil } = usePerfil();
-  return useQuery({
-    queryKey: ["escritorio", perfil?.org_id],
-    enabled: !!perfil?.org_id,
-    staleTime: 10 * 60 * 1000,
-    queryFn: async (): Promise<Escritorio | null> => {
-      if (!perfil?.org_id) return null;
-      const { data, error } = await supabase
-        .from("organizations")
-        .select(
-          "id, nome, nome_curto, logo_url, cor_primaria, cor_acento, status, modulos_habilitados",
-        )
-        .eq("id", perfil.org_id)
-        .maybeSingle();
-      if (error) throw error;
-      return data;
-    },
-  });
-}
-
+// Empresa do usuário logado (única no sistema). O id vem do contexto da rota
+// autenticada, resolvido a partir de profiles.org_id.
 export function useEmpresa(empresaId: string | undefined) {
   return useQuery({
     queryKey: ["empresa", empresaId],

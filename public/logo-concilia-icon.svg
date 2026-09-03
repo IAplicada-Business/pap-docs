@@ -1,9 +1,0 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="48" height="48">
-  <!-- ConcilIA Icon: Two offset pills in a square viewBox -->
-  <g>
-    <!-- Top pill - dark navy, wider, left-aligned -->
-    <rect x="3" y="10" width="30" height="11" rx="5.5" ry="5.5" fill="#1C2B3A"/>
-    <!-- Bottom pill - green, slightly shorter, offset right -->
-    <rect x="15" y="27" width="30" height="11" rx="5.5" ry="5.5" fill="#3CC25E"/>
-  </g>
-</svg>

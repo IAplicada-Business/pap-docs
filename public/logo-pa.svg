@@ -1,13 +1,10 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 280 60" fill="none">
-  <!-- Diamond icon with power symbol -->
-  <g transform="translate(0, 2)">
-    <rect x="4" y="4" width="48" height="48" rx="12" transform="rotate(0 28 28)" fill="#0072CE"/>
-    <!-- Power icon -->
-    <path d="M28 18v10" stroke="#fff" stroke-width="3" stroke-linecap="round"/>
-    <path d="M20.5 22.5a11 11 0 1 0 15 0" stroke="#fff" stroke-width="2.5" stroke-linecap="round" fill="none"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 290 64" fill="none">
+  <!-- P&A Contabilidade Digital — losango com botão liga/desliga -->
+  <g transform="translate(4, 4)">
+    <rect x="10" y="10" width="36" height="36" rx="10" transform="rotate(45 28 28)" fill="#0072CE"/>
+    <path d="M28 17v11" stroke="#fff" stroke-width="3.2" stroke-linecap="round"/>
+    <path d="M20.5 21a11 11 0 1 0 15 0" stroke="#fff" stroke-width="3" stroke-linecap="round" fill="none"/>
   </g>
-  <!-- P&A text -->
-  <text x="66" y="35" font-family="Montserrat, sans-serif" font-weight="800" font-size="32" fill="#3A3A3A">P&amp;A</text>
-  <!-- CONTABILIDADE DIGITAL -->
-  <text x="66" y="50" font-family="Montserrat, sans-serif" font-weight="500" font-size="10" letter-spacing="0.5" fill="#3A3A3A">CONTABILIDADE DIGITAL</text>
+  <text x="72" y="36" font-family="Montserrat, sans-serif" font-weight="800" font-size="34" fill="#3A3A3A">P&amp;A</text>
+  <text x="72" y="52" font-family="Montserrat, sans-serif" font-weight="500" font-size="10.5" letter-spacing="0.6" fill="#3A3A3A">CONTABILIDADE DIGITAL</text>
 </svg>

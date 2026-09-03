@@ -22,7 +22,7 @@ import {
 export const Route = createFileRoute("/painel/$token")({
   head: () => ({
     meta: [
-      { title: "Painel do cliente — ConcilIA" },
+      { title: "Painel do cliente — P&A Contabilidade Digital" },
       {
         name: "description",
         content: "Acompanhe relatorios e status das competencias do seu escritorio.",
@@ -87,7 +87,7 @@ function PainelPublico() {
         const cb = json.cliente_branding;
         const esc = json.escritorio;
         setEscritorio({
-          nome: esc?.nome ?? "ConcilIA",
+          nome: esc?.nome ?? "P&A Contabilidade Digital",
           logo_url: cb?.logo_url ?? esc?.logo_url ?? null,
           cor_primaria: cb?.cor_primaria ?? esc?.cor_primaria ?? null,
         });
@@ -148,13 +148,13 @@ function PainelPublico() {
             />
           ) : (
             <img
-              src="/logo-concilia.svg"
-              alt="ConcilIA"
+              src="/logo-pa.svg"
+              alt="P&A Contabilidade Digital"
               className="mx-auto mb-3 h-8 w-auto"
             />
           )}
           <p className="text-xs font-semibold uppercase tracking-wider text-primary">
-            {escritorio?.nome ?? "ConcilIA"}
+            {escritorio?.nome ?? "P&A Contabilidade Digital"}
           </p>
           <h1 className="mt-3 text-2xl font-bold tracking-tight">
             Painel de {nomeFantasia}

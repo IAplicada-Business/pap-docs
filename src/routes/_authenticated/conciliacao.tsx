@@ -47,7 +47,7 @@ import { formatarCompetencia, formatarData, formatarMoeda } from "@/lib/formatad
 
 type Search = { cliente?: string | undefined; competencia?: string | undefined };
 
-export const Route = createFileRoute("/_authenticated/empresas/$id/conciliacao")({
+export const Route = createFileRoute("/_authenticated/conciliacao")({
   validateSearch: (s: Record<string, unknown>): Search => {
     const out: Search = {};
     if (typeof s["cliente"] === "string") out.cliente = s["cliente"];
@@ -56,7 +56,7 @@ export const Route = createFileRoute("/_authenticated/empresas/$id/conciliacao")
   },
   head: () => ({
     meta: [
-      { title: "Conciliação — ConcilIA" },
+      { title: "Conciliação — P&A Contabilidade Digital" },
       {
         name: "description",
         content:
@@ -93,7 +93,7 @@ function normalizarPadrao(descricao: string) {
 }
 
 function ConciliacaoPage() {
-  const { id: empresaId } = Route.useParams();
+  const { orgId: empresaId } = Route.useRouteContext();
   const search = Route.useSearch();
   const navigate = useNavigate({ from: Route.fullPath });
   const { data: perfil } = usePerfil();
@@ -586,9 +586,7 @@ function ConciliacaoPage() {
               ? {
                   action: (
                     <Button asChild size="sm" variant="outline" className="rounded-lg">
-                      <Link to="/empresas/$id/competencias" params={{ id: empresaId }}>
-                        Ir para competências
-                      </Link>
+                      <Link to="/competencias">Ir para competências</Link>
                     </Button>
                   ),
                 }
@@ -775,11 +773,7 @@ function ConciliacaoPage() {
               {(contas ?? []).length === 0 && (
                 <div className="rounded-lg border border-dashed border-border p-3 text-[0.6875rem] text-muted-foreground">
                   Este cliente não tem plano de contas cadastrado.{" "}
-                  <Link
-                    to="/empresas/$id/configuracoes"
-                    params={{ id: empresaId }}
-                    className="font-medium text-primary hover:underline"
-                  >
+                  <Link to="/configuracoes" className="font-medium text-primary hover:underline">
                     Cadastrar em Configurações →
                   </Link>
                 </div>

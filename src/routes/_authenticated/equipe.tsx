@@ -3,6 +3,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Copy, Pencil, Plus, Search, ShieldAlert, UserX, UsersRound } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import type { Json } from "@/integrations/supabase/types";
 import { usePerfil, temPermissao, type Permissoes } from "@/hooks/use-perfil";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -40,12 +41,12 @@ import { toast } from "sonner";
 export const Route = createFileRoute("/_authenticated/equipe")({
   head: () => ({
     meta: [
-      { title: "Equipe — ConcilIA" },
+      { title: "Equipe — P&A Contabilidade Digital" },
       {
         name: "description",
         content: "Gerencie os membros da equipe, convites e permissoes.",
       },
-      { property: "og:title", content: "Equipe — ConcilIA" },
+      { property: "og:title", content: "Equipe — P&A Contabilidade Digital" },
       { property: "og:description", content: "Gerenciamento de equipe do escritorio." },
     ],
   }),
@@ -277,7 +278,7 @@ function EquipeContent({
           org_id: perfil.org_id,
           email: conviteForm.email.trim().toLowerCase(),
           papel: conviteForm.papel,
-          permissoes: permissoes as unknown as Record<string, unknown>,
+          permissoes: permissoes as unknown as Json,
           criado_por: perfil.id,
         })
         .select("token")
