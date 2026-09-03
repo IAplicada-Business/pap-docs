@@ -43,10 +43,10 @@ type Props = {
   active?: boolean;
 };
 
+// `icon` é aceito por compatibilidade, mas não é renderizado: títulos de KPI não levam ícone.
 export function KpiCard({
   label,
   value,
-  icon: Icon,
   tone = "primary",
   hint,
   delta,
@@ -66,16 +66,9 @@ export function KpiCard({
       onClick={onClick}
       className={`kpi-card group text-left ${onClick ? "cursor-pointer" : ""} ${active ? "ring-2 ring-primary/40" : ""}`}
     >
-      <div className="flex items-start justify-between gap-2">
-        <div className="flex items-center gap-1.5">
-          <span className="text-[0.75rem] font-medium text-muted-foreground">{label}</span>
-          {hint && <InfoTip text={hint} />}
-        </div>
-        {Icon && (
-          <span className={`flex size-7 shrink-0 items-center justify-center rounded-lg ${t.icon}`}>
-            <Icon className="size-3.5" />
-          </span>
-        )}
+      <div className="flex items-center gap-1.5">
+        <span className="text-[0.75rem] font-medium text-muted-foreground">{label}</span>
+        {hint && <InfoTip text={hint} />}
       </div>
       <div className="mt-2 flex items-end justify-between gap-3">
         <div className="min-w-0">

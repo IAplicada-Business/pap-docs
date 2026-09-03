@@ -113,6 +113,7 @@ function GerenciarEmpresaPage() {
   const salvar = useMutation({
     mutationFn: async (v: {
       nome?: string;
+      nome_curto?: string | null;
       cor_primaria?: string;
       cor_acento?: string;
       logo_url?: string | null;
@@ -280,18 +281,38 @@ function GerenciarEmpresaPage() {
             icon={Building2}
           >
             <div className="space-y-5">
-              <div className="space-y-1.5">
-                <Label className="text-xs">Nome da empresa</Label>
-                <Input
-                  className="h-9 rounded-lg sm:max-w-md"
-                  defaultValue={empresa?.nome ?? ""}
-                  key={empresa?.nome ?? ""}
-                  onBlur={(e) =>
-                    e.target.value.trim() &&
-                    e.target.value !== empresa?.nome &&
-                    salvar.mutate({ nome: e.target.value.trim() })
-                  }
-                />
+              <div className="grid gap-4 sm:grid-cols-[minmax(0,1fr)_180px]">
+                <div className="space-y-1.5">
+                  <Label className="text-xs">Nome da empresa</Label>
+                  <Input
+                    className="h-9 rounded-lg"
+                    defaultValue={empresa?.nome ?? ""}
+                    key={empresa?.nome ?? ""}
+                    onBlur={(e) =>
+                      e.target.value.trim() &&
+                      e.target.value !== empresa?.nome &&
+                      salvar.mutate({ nome: e.target.value.trim() })
+                    }
+                  />
+                </div>
+                <div className="space-y-1.5">
+                  <Label className="flex items-center gap-1 text-xs">
+                    Nome curto{" "}
+                    <InfoTip text="Aparece no menu lateral e no cabeçalho, ao lado da logo. Ex.: P&A." />
+                  </Label>
+                  <Input
+                    className="h-9 rounded-lg"
+                    placeholder="P&A"
+                    maxLength={16}
+                    defaultValue={empresa?.nome_curto ?? ""}
+                    key={empresa?.nome_curto ?? ""}
+                    onBlur={(e) => {
+                      const v = e.target.value.trim();
+                      if (v !== (empresa?.nome_curto ?? ""))
+                        salvar.mutate({ nome_curto: v || null });
+                    }}
+                  />
+                </div>
               </div>
               <div className="space-y-1.5">
                 <Label className="text-xs">Logo</Label>

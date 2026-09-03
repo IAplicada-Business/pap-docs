@@ -13,10 +13,10 @@ type Props = {
   dense?: boolean;
 };
 
+// `icon` é aceito por compatibilidade, mas não é renderizado: títulos de card não levam ícone.
 export function SectionCard({
   title,
   description,
-  icon: Icon,
   actions,
   children,
   className = "",
@@ -31,11 +31,6 @@ export function SectionCard({
           className={`flex items-center justify-between gap-3 ${dense ? "px-4 py-2.5" : "px-5 py-3.5"}`}
         >
           <div className="flex min-w-0 items-center gap-2">
-            {Icon && (
-              <span className="flex size-6 shrink-0 items-center justify-center rounded-md bg-primary/8 text-primary">
-                <Icon className="size-3.5" />
-              </span>
-            )}
             {title && (
               <h2 className="truncate text-[0.8125rem] font-semibold tracking-tight">{title}</h2>
             )}
