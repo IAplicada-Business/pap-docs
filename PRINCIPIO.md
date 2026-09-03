@@ -1,4 +1,11 @@
-# PRINCIPIO.md — Fonte de Verdade do Produto ConcilIA
+# PRINCIPIO.md — Fonte de Verdade do Produto (P&A Contabilidade Digital)
+
+> ATUALIZACAO (set/2026): o sistema deixou de ser uma plataforma multi-empresa com painel administrativo.
+> Agora e o sistema de contabilidade de UMA empresa ja cadastrada — a P&A Contabilidade Digital.
+> O login cai direto nos modulos (`/dashboard`, `/clientes`, `/documentos`, ...); a empresa e resolvida
+> pelo `profiles.org_id` do usuario logado, nunca pela URL. Nao existem mais `/empresas`, `/empresas/nova`
+> nem "Trocar de empresa". Marca, cores e modulos ficam em `/empresa` ("Minha empresa", so admins).
+> As secoes abaixo que descrevem "Painel ConcilIA" e `/empresas/:id/*` sao HISTORICO do modelo anterior.
 
 > PARE. Leia este documento inteiro antes de escrever qualquer codigo.
 > Ele e a fonte de verdade do produto e substitui qualquer instrucao anterior que conflite.
@@ -11,7 +18,9 @@
 - PR #10 (merged): botao de recolher sidebar movido para o header. PRESERVAR.
 - Clientes de teste ("Igreja Batista Central" e "Igreja Vida Nova") ja deletados do Supabase.
 - Branch de trabalho: `claude/multi-client-platform-refactor-odhye3` (resetada em cima de origin/main).
-- CORRECAO IMPORTANTE: em instrucao anterior foi dito que o primeiro cliente real seria "BA" — isso estava ERRADO. O primeiro cliente real e "P&A Consultoria". Nenhuma referencia a "BA" deve existir.
+- CORRECAO IMPORTANTE: em instrucao anterior foi dito que o primeiro cliente real seria "BA" — isso estava ERRADO. A empresa real e "P&A Contabilidade Digital" (azul #0072CE, grafite #3A3A3A, fonte Montserrat). Nenhuma referencia a "BA" deve existir.
+- PR #18 (merged): glass morphism aplicado a todo o design system. PRESERVAR.
+- Refatoracao single-tenant: camada `/empresas` removida; modulos movidos para rotas de topo; login rebrandado P&A.
 
 ---
 

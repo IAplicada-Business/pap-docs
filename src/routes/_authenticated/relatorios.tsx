@@ -44,7 +44,7 @@ import {
 import { formatarCompetencia, formatarDataHora, mesAnterior } from "@/lib/formatadores";
 import { baixarDocumento, garantirCompetencia } from "@/lib/documentos";
 
-export const Route = createFileRoute("/_authenticated/empresas/$id/relatorios")({
+export const Route = createFileRoute("/_authenticated/relatorios")({
   head: () => ({
     meta: [
       { title: "Relatórios — ConcilIA" },
@@ -86,7 +86,6 @@ function nomeCliente(c: { nome_fantasia: string | null; nome: string | null } | 
 }
 
 function RelatoriosPage() {
-  const { id: empresaId } = Route.useParams();
   const { data: perfil } = usePerfil();
   const queryClient = useQueryClient();
 
@@ -113,7 +112,7 @@ function RelatoriosPage() {
   });
 
   const { data: emissoes, isLoading } = useQuery({
-    queryKey: ["relatorios", empresaId],
+    queryKey: ["relatorios"],
     queryFn: async () => {
       const { data, error } = await supabase
         .from("relatorios")
@@ -139,7 +138,7 @@ function RelatoriosPage() {
   }, [emissoes, fCliente, fModelo, fMes, fStatus]);
 
   function invalidar() {
-    queryClient.invalidateQueries({ queryKey: ["relatorios", empresaId] });
+    queryClient.invalidateQueries({ queryKey: ["relatorios"] });
   }
 
   const alternarPainel = useMutation({

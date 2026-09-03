@@ -25,12 +25,12 @@ import { formatarTamanho, mesAnterior } from "@/lib/formatadores";
 export const Route = createFileRoute("/upload/$token")({
   head: () => ({
     meta: [
-      { title: "Envio de documentos — ConcilIA" },
+      { title: "Envio de documentos — P&A Contabilidade Digital" },
       {
         name: "description",
         content: "Página segura para envio de documentos contábeis. Não é preciso fazer login.",
       },
-      { property: "og:title", content: "Envio de documentos — ConcilIA" },
+      { property: "og:title", content: "Envio de documentos — P&A Contabilidade Digital" },
       {
         property: "og:description",
         content: "Envie extratos, relatórios e notas em poucos cliques.",
@@ -132,7 +132,7 @@ function UploadPublico() {
         };
         setNomeFantasia(json.nome_fantasia);
         setEscritorio({
-          nome: json.escritorio?.nome ?? "ConcilIA",
+          nome: json.escritorio?.nome ?? "P&A Contabilidade Digital",
           logo_url: json.escritorio?.logo_url ?? null,
           cor_primaria: json.escritorio?.cor_primaria ?? null,
         });

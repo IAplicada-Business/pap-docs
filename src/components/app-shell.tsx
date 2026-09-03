@@ -1,10 +1,9 @@
 import type { ComponentType, ReactNode } from "react";
 import { useEffect, useMemo, useState } from "react";
-import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
+import { Link, useNavigate, useRouteContext, useRouterState } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import {
   AlertTriangle,
-  ArrowLeft,
   Bell,
   Building2,
   CalendarRange,
@@ -20,7 +19,6 @@ import {
   Scale,
   Search,
   Settings,
-  Sparkles,
   UserCog,
   Users,
   X,
@@ -65,90 +63,81 @@ type NavItem = {
   permissao: keyof Permissoes | null;
   modulo?: string;
   exact?: boolean;
+  somenteAdmin?: boolean;
   children?: NavChild[];
 };
 
 type NavGroup = { label: string; items: NavItem[] };
 
-function buildEmpresaNav(id: string): NavGroup[] {
-  const base = `/empresas/${id}`;
-  return [
-    {
-      label: "Visão geral",
-      items: [
-        { to: base, label: "Dashboard", icon: LayoutDashboard, permissao: null, exact: true },
-      ],
-    },
-    {
-      label: "Operação",
-      items: [
-        {
-          to: `${base}/documentos`,
-          label: "Documentos",
-          icon: FileText,
-          permissao: "documentos",
-          modulo: "documentos",
-          children: [
-            { to: `${base}/documentos`, label: "Todos" },
-            { to: `${base}/documentos`, label: "Fila de processamento", search: { aba: "fila" } },
-            { to: `${base}/documentos`, label: "Com erro", search: { aba: "erro" } },
-          ],
-        },
-        { to: `${base}/conciliacao`, label: "Conciliação", icon: Scale, permissao: "competencias" },
-        {
-          to: `${base}/competencias`,
-          label: "Competências",
-          icon: CalendarRange,
-          permissao: "competencias",
-          modulo: "competencias",
-        },
-        {
-          to: `${base}/relatorios`,
-          label: "Relatórios",
-          icon: FileBarChart2,
-          permissao: "relatorios",
-        },
-      ],
-    },
-    {
-      label: "Cadastros",
-      items: [
-        {
-          to: `${base}/clientes`,
-          label: "Clientes",
-          icon: Users,
-          permissao: "clientes",
-          modulo: "clientes",
-        },
-      ],
-    },
-    {
-      label: "Sistema",
-      items: [
-        {
-          to: `${base}/configuracoes`,
-          label: "Configurações",
-          icon: Settings,
-          permissao: "configuracoes",
-          modulo: "configuracoes",
-        },
-        { to: "/equipe", label: "Equipe", icon: UserCog, permissao: "configuracoes" },
-      ],
-    },
-  ];
-}
-
-const ADMIN_NAV: NavGroup[] = [
+const NAV: NavGroup[] = [
   {
-    label: "Administração",
+    label: "Visão geral",
     items: [
-      { to: "/empresas", label: "Empresas", icon: Building2, permissao: null, exact: true },
+      { to: "/dashboard", label: "Dashboard", icon: LayoutDashboard, permissao: null, exact: true },
+    ],
+  },
+  {
+    label: "Operação",
+    items: [
+      {
+        to: "/documentos",
+        label: "Documentos",
+        icon: FileText,
+        permissao: "documentos",
+        modulo: "documentos",
+        children: [
+          { to: "/documentos", label: "Todos" },
+          { to: "/documentos", label: "Fila de processamento", search: { aba: "fila" } },
+          { to: "/documentos", label: "Com erro", search: { aba: "erro" } },
+        ],
+      },
+      { to: "/conciliacao", label: "Conciliação", icon: Scale, permissao: "competencias" },
+      {
+        to: "/competencias",
+        label: "Competências",
+        icon: CalendarRange,
+        permissao: "competencias",
+        modulo: "competencias",
+      },
+      { to: "/relatorios", label: "Relatórios", icon: FileBarChart2, permissao: "relatorios" },
+    ],
+  },
+  {
+    label: "Cadastros",
+    items: [
+      {
+        to: "/clientes",
+        label: "Clientes",
+        icon: Users,
+        permissao: "clientes",
+        modulo: "clientes",
+      },
+    ],
+  },
+  {
+    label: "Sistema",
+    items: [
+      {
+        to: "/configuracoes",
+        label: "Configurações",
+        icon: Settings,
+        permissao: "configuracoes",
+        modulo: "configuracoes",
+      },
       { to: "/equipe", label: "Equipe", icon: UserCog, permissao: "configuracoes" },
+      {
+        to: "/empresa",
+        label: "Minha empresa",
+        icon: Building2,
+        permissao: "configuracoes",
+        somenteAdmin: true,
+      },
     ],
   },
 ];
 
 const PAGE_LABELS: Record<string, string> = {
+  dashboard: "Dashboard",
   documentos: "Documentos",
   conciliacao: "Conciliação",
   competencias: "Competências",
@@ -156,13 +145,13 @@ const PAGE_LABELS: Record<string, string> = {
   clientes: "Clientes",
   configuracoes: "Configurações",
   equipe: "Equipe",
-  empresas: "Empresas",
-  nova: "Nova empresa",
-  gerenciar: "Gerenciar",
+  empresa: "Minha empresa",
 };
 
 export function AppShell({ children }: { children: ReactNode }) {
+  const { orgId } = useRouteContext({ from: "/_authenticated" });
   const { data: perfil } = usePerfil();
+  const { data: empresa } = useEmpresa(orgId);
   const navigate = useNavigate();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [paletteOpen, setPaletteOpen] = useState(false);
@@ -174,14 +163,6 @@ export function AppShell({ children }: { children: ReactNode }) {
 
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const searchStr = useRouterState({ select: (s) => s.location.searchStr });
-  const empresaMatch = pathname.match(/^\/empresas\/([^/]+)(\/gerenciar)?/);
-  const empresaId = empresaMatch?.[1] ?? null;
-  const empresaValida = !!empresaId && empresaId !== "nova";
-  // /empresas/:id/gerenciar é visão administrativa da ConcilIA: sem menu nem cores da empresa.
-  const modoGerenciar = empresaValida && !!empresaMatch?.[2];
-  const modoEmpresa = empresaValida && !modoGerenciar;
-
-  const { data: empresa } = useEmpresa(empresaValida ? empresaId : undefined);
 
   useEffect(() => {
     localStorage.setItem("sidebar-collapsed", String(collapsed));
@@ -198,6 +179,7 @@ export function AppShell({ children }: { children: ReactNode }) {
     return () => window.removeEventListener("keydown", onKey);
   }, []);
 
+  // Cores da marca aplicadas em todo o sistema (definidas em "Minha empresa").
   useEffect(() => {
     const root = document.documentElement;
     const names = [
@@ -209,7 +191,7 @@ export function AppShell({ children }: { children: ReactNode }) {
       "--sidebar-border",
       "--sidebar-ring",
     ];
-    if (!modoEmpresa || !empresa?.cor_primaria) {
+    if (!empresa?.cor_primaria) {
       names.forEach((n) => root.style.removeProperty(n));
       return;
     }
@@ -222,7 +204,7 @@ export function AppShell({ children }: { children: ReactNode }) {
     root.style.setProperty("--sidebar-border", `color-mix(in srgb, ${p}, #080e14 38%)`);
     root.style.setProperty("--sidebar-ring", `color-mix(in srgb, ${p}, #fff 20%)`);
     return () => names.forEach((n) => root.style.removeProperty(n));
-  }, [modoEmpresa, empresa]);
+  }, [empresa]);
 
   async function sair() {
     await supabase.auth.signOut();
@@ -230,19 +212,19 @@ export function AppShell({ children }: { children: ReactNode }) {
     navigate({ to: "/auth" });
   }
 
+  const isAdmin = perfil?.papel === "admin" || perfil?.papel === "super_admin";
+
   const groups = useMemo(() => {
-    const src = modoEmpresa && empresaId ? buildEmpresaNav(empresaId) : ADMIN_NAV;
-    return src
-      .map((g) => ({
-        ...g,
-        items: g.items.filter((item) => {
-          if (item.permissao !== null && !temPermissao(perfil, item.permissao)) return false;
-          if (modoEmpresa && item.modulo && !moduloHabilitado(empresa, item.modulo)) return false;
-          return true;
-        }),
-      }))
-      .filter((g) => g.items.length > 0);
-  }, [modoEmpresa, empresaId, perfil, empresa]);
+    return NAV.map((g) => ({
+      ...g,
+      items: g.items.filter((item) => {
+        if (item.somenteAdmin && !isAdmin) return false;
+        if (item.permissao !== null && !temPermissao(perfil, item.permissao)) return false;
+        if (item.modulo && !moduloHabilitado(empresa, item.modulo)) return false;
+        return true;
+      }),
+    })).filter((g) => g.items.length > 0);
+  }, [perfil, empresa, isAdmin]);
 
   const papelLabel =
     perfil?.papel === "admin"
@@ -259,8 +241,8 @@ export function AppShell({ children }: { children: ReactNode }) {
         .join("")
     : "?";
 
-  const brandName = modoEmpresa ? empresa?.nome_curto || empresa?.nome || "Empresa" : "ConcilIA";
-  const brandLogo = modoEmpresa ? empresa?.logo_url : null;
+  const brandName = empresa?.nome_curto || empresa?.nome || "P&A";
+  const brandLogo = empresa?.logo_url || "/logo-pa-icon.svg";
 
   const isActive = (item: NavItem) =>
     item.exact ? pathname === item.to : pathname.startsWith(item.to);
@@ -273,37 +255,19 @@ export function AppShell({ children }: { children: ReactNode }) {
 
   const crumbs = useMemo(() => {
     const parts = pathname.split("/").filter(Boolean);
-    const out: { label: string; to?: string }[] = [];
-    if (modoEmpresa && empresaId) {
-      out.push({ label: "Empresas", to: "/empresas" });
-      out.push({
-        label: empresa?.nome_curto || empresa?.nome || "Empresa",
-        to: `/empresas/${empresaId}`,
-      });
-      const rest = parts.slice(2);
-      if (rest.length === 0) out.push({ label: "Dashboard" });
-      else {
-        const seg = rest[0] ?? "";
-        out.push({
-          label: PAGE_LABELS[seg] ?? seg,
-          ...(rest.length > 1 ? { to: `/empresas/${empresaId}/${seg}` } : {}),
-        });
-        if (rest.length > 1) out.push({ label: "Detalhe" });
-      }
-    } else if (modoGerenciar && empresaId) {
-      out.push({ label: "Empresas", to: "/empresas" });
-      out.push({ label: empresa?.nome_curto || empresa?.nome || "Empresa" });
-      out.push({ label: "Gerenciar" });
-    } else {
-      out.push({ label: "ConcilIA", to: "/empresas" });
-      parts.forEach((seg, i) => {
-        if (i === 0 && seg === "empresas" && parts.length === 1) return;
-        out.push({ label: PAGE_LABELS[seg] ?? seg });
-      });
-      if (out.length === 1) out.push({ label: "Empresas" });
+    const out: { label: string; to?: string }[] = [{ label: brandName, to: "/dashboard" }];
+    const seg = parts[0] ?? "dashboard";
+    if (seg === "dashboard" && parts.length <= 1) {
+      out.push({ label: "Dashboard" });
+      return out;
     }
+    out.push({
+      label: PAGE_LABELS[seg] ?? seg,
+      ...(parts.length > 1 ? { to: `/${seg}` } : {}),
+    });
+    if (parts.length > 1) out.push({ label: "Detalhe" });
     return out;
-  }, [pathname, modoEmpresa, modoGerenciar, empresaId, empresa]);
+  }, [pathname, brandName]);
 
   const sidebarContent = (mobile: boolean) => {
     const mini = collapsed && !mobile;
@@ -312,41 +276,23 @@ export function AppShell({ children }: { children: ReactNode }) {
         <div
           className={`flex items-center gap-2.5 ${mini ? "justify-center px-2 pt-5" : "px-4 pt-5"}`}
         >
-          {brandLogo ? (
-            <img
-              src={brandLogo}
-              alt={brandName}
-              className="size-9 shrink-0 rounded-xl object-contain"
-            />
-          ) : (
-            <span className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-sidebar-primary/30 to-sidebar-primary/10 text-sidebar-primary backdrop-blur-sm ring-1 ring-sidebar-primary/20">
-              {modoEmpresa ? <Building2 className="size-4" /> : <Sparkles className="size-4" />}
-            </span>
-          )}
+          <img
+            src={brandLogo}
+            alt={brandName}
+            className="size-9 shrink-0 rounded-xl object-contain"
+          />
           {!mini && (
             <span
               className="truncate text-[0.9375rem] font-bold tracking-tight text-sidebar-accent-foreground"
-              title={modoEmpresa ? (empresa?.nome ?? undefined) : undefined}
+              title={empresa?.nome ?? undefined}
             >
               {brandName}
             </span>
           )}
         </div>
 
-        {modoEmpresa && (
-          <Link
-            to="/empresas"
-            onClick={() => setMobileOpen(false)}
-            title="Trocar de empresa"
-            className={`mx-3 mt-3 flex items-center gap-1.5 rounded-md text-[0.6875rem] font-medium text-sidebar-foreground/45 transition-colors hover:bg-sidebar-accent hover:text-sidebar-foreground/80 ${mini ? "justify-center py-1.5" : "px-2 py-1.5"}`}
-          >
-            <ArrowLeft className="size-3" />
-            {!mini && "Trocar de empresa"}
-          </Link>
-        )}
-
         <nav
-          className={`mt-4 flex flex-1 flex-col gap-4 overflow-y-auto ${mini ? "px-2" : "px-3"}`}
+          className={`mt-5 flex flex-1 flex-col gap-4 overflow-y-auto ${mini ? "px-2" : "px-3"}`}
         >
           {groups.map((g) => (
             <div key={g.label}>
@@ -545,7 +491,7 @@ export function AppShell({ children }: { children: ReactNode }) {
             </kbd>
           </button>
 
-          {modoEmpresa && empresaId && <AlertsBell empresaId={empresaId} />}
+          <AlertsBell orgId={orgId} />
 
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
@@ -563,18 +509,18 @@ export function AppShell({ children }: { children: ReactNode }) {
                 <div className="mt-1 text-[0.6875rem] font-medium text-primary">{papelLabel}</div>
               </DropdownMenuLabel>
               <DropdownMenuSeparator />
-              {modoEmpresa && empresaId && (
+              <DropdownMenuItem asChild>
+                <Link to="/configuracoes">
+                  <Settings className="size-4" /> Configurações
+                </Link>
+              </DropdownMenuItem>
+              {isAdmin && (
                 <DropdownMenuItem asChild>
-                  <Link to="/empresas/$id/configuracoes" params={{ id: empresaId }}>
-                    <Settings className="size-4" /> Configurações
+                  <Link to="/empresa">
+                    <Building2 className="size-4" /> Minha empresa
                   </Link>
                 </DropdownMenuItem>
               )}
-              <DropdownMenuItem asChild>
-                <Link to="/empresas">
-                  <Building2 className="size-4" /> Trocar de empresa
-                </Link>
-              </DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem onClick={sair} className="text-destructive focus:text-destructive">
                 <LogOut className="size-4" /> Sair
@@ -585,29 +531,24 @@ export function AppShell({ children }: { children: ReactNode }) {
         <main className="flex-1 overflow-x-hidden p-4 md:p-6 mesh-gradient">{children}</main>
       </div>
 
-      <CommandPalette
-        open={paletteOpen}
-        onOpenChange={setPaletteOpen}
-        groups={groups}
-        empresaId={modoEmpresa ? empresaId : null}
-      />
+      <CommandPalette open={paletteOpen} onOpenChange={setPaletteOpen} groups={groups} />
 
-      {modoEmpresa && empresaId && empresa && (
+      {empresa && (
         <AssistentePA
-          empresaId={empresaId}
+          empresaId={orgId}
           nomeCurto={empresa.nome_curto || empresa.nome}
           nomeCompleto={empresa.nome}
-          logoUrl={empresa.logo_url}
-          corPrimaria={empresa.cor_primaria || "#123B47"}
+          logoUrl={empresa.logo_url || "/logo-pa-icon.svg"}
+          corPrimaria={empresa.cor_primaria || "#0072CE"}
         />
       )}
     </div>
   );
 }
 
-function AlertsBell({ empresaId }: { empresaId: string }) {
+function AlertsBell({ orgId }: { orgId: string }) {
   const { data } = useQuery({
-    queryKey: ["alertas", empresaId],
+    queryKey: ["alertas", orgId],
     refetchInterval: 60_000,
     queryFn: async () => {
       const [erros, conc] = await Promise.all([
@@ -660,8 +601,7 @@ function AlertsBell({ empresaId }: { empresaId: string }) {
           {data?.erros.map((d) => (
             <Link
               key={d.id}
-              to="/empresas/$id/documentos"
-              params={{ id: empresaId }}
+              to="/documentos"
               search={{ aba: "erro" }}
               className="flex items-start gap-2.5 rounded-lg px-2.5 py-2 hover:bg-muted"
             >
@@ -680,8 +620,7 @@ function AlertsBell({ empresaId }: { empresaId: string }) {
           {data?.conc.map((c) => (
             <Link
               key={c.id}
-              to="/empresas/$id/conciliacao"
-              params={{ id: empresaId }}
+              to="/conciliacao"
               className="flex items-start gap-2.5 rounded-lg px-2.5 py-2 hover:bg-muted"
             >
               <span className="mt-0.5 flex size-6 shrink-0 items-center justify-center rounded-md bg-warning/15 text-warning-foreground">
@@ -707,17 +646,15 @@ function CommandPalette({
   open,
   onOpenChange,
   groups,
-  empresaId,
 }: {
   open: boolean;
   onOpenChange: (o: boolean) => void;
   groups: NavGroup[];
-  empresaId: string | null;
 }) {
   const navigate = useNavigate();
   const { data: clientes } = useQuery({
     queryKey: ["clientes-select"],
-    enabled: open && !!empresaId,
+    enabled: open,
     queryFn: async () => {
       const { data } = await supabase
         .from("clientes")
@@ -752,13 +689,13 @@ function CommandPalette({
             ))}
           </CommandGroup>
         ))}
-        {empresaId && clientes && clientes.length > 0 && (
+        {clientes && clientes.length > 0 && (
           <CommandGroup heading="Clientes">
             {clientes.map((c) => (
               <CommandItem
                 key={c.id}
                 value={`cliente ${c.nome_fantasia ?? c.nome ?? ""} ${c.cnpj}`}
-                onSelect={() => go(`/empresas/${empresaId}/clientes/${c.id}`)}
+                onSelect={() => go(`/clientes/${c.id}`)}
               >
                 <Users className="size-4 text-muted-foreground" />
                 <span className="truncate">{c.nome_fantasia ?? c.nome}</span>

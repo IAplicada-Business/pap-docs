@@ -13,32 +13,23 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedCompetenciasRouteImport } from './routes/_authenticated/competencias'
+import { Route as AuthenticatedConciliacaoRouteImport } from './routes/_authenticated/conciliacao'
 import { Route as AuthenticatedConfiguracoesRouteImport } from './routes/_authenticated/configuracoes'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
 import { Route as AuthenticatedDocumentosRouteImport } from './routes/_authenticated/documentos'
+import { Route as AuthenticatedEmpresaRouteImport } from './routes/_authenticated/empresa'
 import { Route as AuthenticatedEquipeRouteImport } from './routes/_authenticated/equipe'
+import { Route as AuthenticatedRelatoriosRouteImport } from './routes/_authenticated/relatorios'
 import { Route as ApiAssistenteRouteImport } from './routes/api/assistente'
 import { Route as ConviteTokenRouteImport } from './routes/convite.$token'
 import { Route as PainelTokenRouteImport } from './routes/painel.$token'
 import { Route as UploadTokenRouteImport } from './routes/upload.$token'
 import { Route as AuthenticatedClientesIndexRouteImport } from './routes/_authenticated/clientes.index'
-import { Route as AuthenticatedClientesIdRouteImport } from './routes/_authenticated/clientes.$id'
-import { Route as AuthenticatedEmpresasIndexRouteImport } from './routes/_authenticated/empresas.index'
-import { Route as AuthenticatedEmpresasIdRouteRouteImport } from './routes/_authenticated/empresas.$id/route'
-import { Route as AuthenticatedEmpresasNovaRouteImport } from './routes/_authenticated/empresas.nova'
+import { Route as AuthenticatedClientesClienteIdRouteImport } from './routes/_authenticated/clientes.$clienteId'
 import { Route as ApiPublicConviteInfoRouteImport } from './routes/api/public/convite-info'
 import { Route as ApiPublicPainelInfoRouteImport } from './routes/api/public/painel-info'
 import { Route as ApiPublicUploadRouteImport } from './routes/api/public/upload'
 import { Route as ApiPublicUploadInfoRouteImport } from './routes/api/public/upload-info'
-import { Route as AuthenticatedEmpresasIdIndexRouteImport } from './routes/_authenticated/empresas.$id/index'
-import { Route as AuthenticatedEmpresasIdCompetenciasRouteImport } from './routes/_authenticated/empresas.$id/competencias'
-import { Route as AuthenticatedEmpresasIdConciliacaoRouteImport } from './routes/_authenticated/empresas.$id/conciliacao'
-import { Route as AuthenticatedEmpresasIdConfiguracoesRouteImport } from './routes/_authenticated/empresas.$id/configuracoes'
-import { Route as AuthenticatedEmpresasIdDocumentosRouteImport } from './routes/_authenticated/empresas.$id/documentos'
-import { Route as AuthenticatedEmpresasIdGerenciarRouteImport } from './routes/_authenticated/empresas.$id/gerenciar'
-import { Route as AuthenticatedEmpresasIdRelatoriosRouteImport } from './routes/_authenticated/empresas.$id/relatorios'
-import { Route as AuthenticatedEmpresasIdClientesIndexRouteImport } from './routes/_authenticated/empresas.$id/clientes.index'
-import { Route as AuthenticatedEmpresasIdClientesClienteIdRouteImport } from './routes/_authenticated/empresas.$id/clientes.$clienteId'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -60,6 +51,12 @@ const AuthenticatedCompetenciasRoute =
     path: '/competencias',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedConciliacaoRoute =
+  AuthenticatedConciliacaoRouteImport.update({
+    id: '/conciliacao',
+    path: '/conciliacao',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedConfiguracoesRoute =
   AuthenticatedConfiguracoesRouteImport.update({
     id: '/configuracoes',
@@ -76,9 +73,19 @@ const AuthenticatedDocumentosRoute = AuthenticatedDocumentosRouteImport.update({
   path: '/documentos',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedEmpresaRoute = AuthenticatedEmpresaRouteImport.update({
+  id: '/empresa',
+  path: '/empresa',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedEquipeRoute = AuthenticatedEquipeRouteImport.update({
   id: '/equipe',
   path: '/equipe',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedRelatoriosRoute = AuthenticatedRelatoriosRouteImport.update({
+  id: '/relatorios',
+  path: '/relatorios',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const ApiAssistenteRoute = ApiAssistenteRouteImport.update({
@@ -107,27 +114,10 @@ const AuthenticatedClientesIndexRoute =
     path: '/clientes/',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
-const AuthenticatedClientesIdRoute = AuthenticatedClientesIdRouteImport.update({
-  id: '/clientes/$id',
-  path: '/clientes/$id',
-  getParentRoute: () => AuthenticatedRouteRoute,
-} as any)
-const AuthenticatedEmpresasIndexRoute =
-  AuthenticatedEmpresasIndexRouteImport.update({
-    id: '/empresas/',
-    path: '/empresas/',
-    getParentRoute: () => AuthenticatedRouteRoute,
-  } as any)
-const AuthenticatedEmpresasIdRouteRoute =
-  AuthenticatedEmpresasIdRouteRouteImport.update({
-    id: '/empresas/$id',
-    path: '/empresas/$id',
-    getParentRoute: () => AuthenticatedRouteRoute,
-  } as any)
-const AuthenticatedEmpresasNovaRoute =
-  AuthenticatedEmpresasNovaRouteImport.update({
-    id: '/empresas/nova',
-    path: '/empresas/nova',
+const AuthenticatedClientesClienteIdRoute =
+  AuthenticatedClientesClienteIdRouteImport.update({
+    id: '/clientes/$clienteId',
+    path: '/clientes/$clienteId',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
 const ApiPublicConviteInfoRoute = ApiPublicConviteInfoRouteImport.update({
@@ -150,121 +140,50 @@ const ApiPublicUploadInfoRoute = ApiPublicUploadInfoRouteImport.update({
   path: '/api/public/upload-info',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AuthenticatedEmpresasIdIndexRoute =
-  AuthenticatedEmpresasIdIndexRouteImport.update({
-    id: '/',
-    path: '/',
-    getParentRoute: () => AuthenticatedEmpresasIdRouteRoute,
-  } as any)
-const AuthenticatedEmpresasIdCompetenciasRoute =
-  AuthenticatedEmpresasIdCompetenciasRouteImport.update({
-    id: '/competencias',
-    path: '/competencias',
-    getParentRoute: () => AuthenticatedEmpresasIdRouteRoute,
-  } as any)
-const AuthenticatedEmpresasIdConciliacaoRoute =
-  AuthenticatedEmpresasIdConciliacaoRouteImport.update({
-    id: '/conciliacao',
-    path: '/conciliacao',
-    getParentRoute: () => AuthenticatedEmpresasIdRouteRoute,
-  } as any)
-const AuthenticatedEmpresasIdConfiguracoesRoute =
-  AuthenticatedEmpresasIdConfiguracoesRouteImport.update({
-    id: '/configuracoes',
-    path: '/configuracoes',
-    getParentRoute: () => AuthenticatedEmpresasIdRouteRoute,
-  } as any)
-const AuthenticatedEmpresasIdDocumentosRoute =
-  AuthenticatedEmpresasIdDocumentosRouteImport.update({
-    id: '/documentos',
-    path: '/documentos',
-    getParentRoute: () => AuthenticatedEmpresasIdRouteRoute,
-  } as any)
-const AuthenticatedEmpresasIdGerenciarRoute =
-  AuthenticatedEmpresasIdGerenciarRouteImport.update({
-    id: '/gerenciar',
-    path: '/gerenciar',
-    getParentRoute: () => AuthenticatedEmpresasIdRouteRoute,
-  } as any)
-const AuthenticatedEmpresasIdRelatoriosRoute =
-  AuthenticatedEmpresasIdRelatoriosRouteImport.update({
-    id: '/relatorios',
-    path: '/relatorios',
-    getParentRoute: () => AuthenticatedEmpresasIdRouteRoute,
-  } as any)
-const AuthenticatedEmpresasIdClientesIndexRoute =
-  AuthenticatedEmpresasIdClientesIndexRouteImport.update({
-    id: '/clientes/',
-    path: '/clientes/',
-    getParentRoute: () => AuthenticatedEmpresasIdRouteRoute,
-  } as any)
-const AuthenticatedEmpresasIdClientesClienteIdRoute =
-  AuthenticatedEmpresasIdClientesClienteIdRouteImport.update({
-    id: '/clientes/$clienteId',
-    path: '/clientes/$clienteId',
-    getParentRoute: () => AuthenticatedEmpresasIdRouteRoute,
-  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/competencias': typeof AuthenticatedCompetenciasRoute
+  '/conciliacao': typeof AuthenticatedConciliacaoRoute
   '/configuracoes': typeof AuthenticatedConfiguracoesRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/documentos': typeof AuthenticatedDocumentosRoute
+  '/empresa': typeof AuthenticatedEmpresaRoute
   '/equipe': typeof AuthenticatedEquipeRoute
+  '/relatorios': typeof AuthenticatedRelatoriosRoute
   '/api/assistente': typeof ApiAssistenteRoute
   '/convite/$token': typeof ConviteTokenRoute
   '/painel/$token': typeof PainelTokenRoute
   '/upload/$token': typeof UploadTokenRoute
-  '/empresas/$id': typeof AuthenticatedEmpresasIdRouteRouteWithChildren
-  '/clientes/$id': typeof AuthenticatedClientesIdRoute
-  '/empresas/nova': typeof AuthenticatedEmpresasNovaRoute
+  '/clientes/$clienteId': typeof AuthenticatedClientesClienteIdRoute
   '/api/public/convite-info': typeof ApiPublicConviteInfoRoute
   '/api/public/painel-info': typeof ApiPublicPainelInfoRoute
   '/api/public/upload': typeof ApiPublicUploadRoute
   '/api/public/upload-info': typeof ApiPublicUploadInfoRoute
   '/clientes/': typeof AuthenticatedClientesIndexRoute
-  '/empresas/': typeof AuthenticatedEmpresasIndexRoute
-  '/empresas/$id/competencias': typeof AuthenticatedEmpresasIdCompetenciasRoute
-  '/empresas/$id/conciliacao': typeof AuthenticatedEmpresasIdConciliacaoRoute
-  '/empresas/$id/configuracoes': typeof AuthenticatedEmpresasIdConfiguracoesRoute
-  '/empresas/$id/documentos': typeof AuthenticatedEmpresasIdDocumentosRoute
-  '/empresas/$id/gerenciar': typeof AuthenticatedEmpresasIdGerenciarRoute
-  '/empresas/$id/relatorios': typeof AuthenticatedEmpresasIdRelatoriosRoute
-  '/empresas/$id/': typeof AuthenticatedEmpresasIdIndexRoute
-  '/empresas/$id/clientes/$clienteId': typeof AuthenticatedEmpresasIdClientesClienteIdRoute
-  '/empresas/$id/clientes/': typeof AuthenticatedEmpresasIdClientesIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/competencias': typeof AuthenticatedCompetenciasRoute
+  '/conciliacao': typeof AuthenticatedConciliacaoRoute
   '/configuracoes': typeof AuthenticatedConfiguracoesRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/documentos': typeof AuthenticatedDocumentosRoute
+  '/empresa': typeof AuthenticatedEmpresaRoute
   '/equipe': typeof AuthenticatedEquipeRoute
+  '/relatorios': typeof AuthenticatedRelatoriosRoute
   '/api/assistente': typeof ApiAssistenteRoute
   '/convite/$token': typeof ConviteTokenRoute
   '/painel/$token': typeof PainelTokenRoute
   '/upload/$token': typeof UploadTokenRoute
-  '/clientes/$id': typeof AuthenticatedClientesIdRoute
-  '/empresas/nova': typeof AuthenticatedEmpresasNovaRoute
+  '/clientes/$clienteId': typeof AuthenticatedClientesClienteIdRoute
   '/api/public/convite-info': typeof ApiPublicConviteInfoRoute
   '/api/public/painel-info': typeof ApiPublicPainelInfoRoute
   '/api/public/upload': typeof ApiPublicUploadRoute
   '/api/public/upload-info': typeof ApiPublicUploadInfoRoute
   '/clientes': typeof AuthenticatedClientesIndexRoute
-  '/empresas': typeof AuthenticatedEmpresasIndexRoute
-  '/empresas/$id/competencias': typeof AuthenticatedEmpresasIdCompetenciasRoute
-  '/empresas/$id/conciliacao': typeof AuthenticatedEmpresasIdConciliacaoRoute
-  '/empresas/$id/configuracoes': typeof AuthenticatedEmpresasIdConfiguracoesRoute
-  '/empresas/$id/documentos': typeof AuthenticatedEmpresasIdDocumentosRoute
-  '/empresas/$id/gerenciar': typeof AuthenticatedEmpresasIdGerenciarRoute
-  '/empresas/$id/relatorios': typeof AuthenticatedEmpresasIdRelatoriosRoute
-  '/empresas/$id': typeof AuthenticatedEmpresasIdIndexRoute
-  '/empresas/$id/clientes/$clienteId': typeof AuthenticatedEmpresasIdClientesClienteIdRoute
-  '/empresas/$id/clientes': typeof AuthenticatedEmpresasIdClientesIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -272,32 +191,23 @@ export interface FileRoutesById {
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/auth': typeof AuthRoute
   '/_authenticated/competencias': typeof AuthenticatedCompetenciasRoute
+  '/_authenticated/conciliacao': typeof AuthenticatedConciliacaoRoute
   '/_authenticated/configuracoes': typeof AuthenticatedConfiguracoesRoute
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
   '/_authenticated/documentos': typeof AuthenticatedDocumentosRoute
+  '/_authenticated/empresa': typeof AuthenticatedEmpresaRoute
   '/_authenticated/equipe': typeof AuthenticatedEquipeRoute
+  '/_authenticated/relatorios': typeof AuthenticatedRelatoriosRoute
   '/api/assistente': typeof ApiAssistenteRoute
   '/convite/$token': typeof ConviteTokenRoute
   '/painel/$token': typeof PainelTokenRoute
   '/upload/$token': typeof UploadTokenRoute
-  '/_authenticated/empresas/$id': typeof AuthenticatedEmpresasIdRouteRouteWithChildren
-  '/_authenticated/clientes/$id': typeof AuthenticatedClientesIdRoute
-  '/_authenticated/empresas/nova': typeof AuthenticatedEmpresasNovaRoute
+  '/_authenticated/clientes/$clienteId': typeof AuthenticatedClientesClienteIdRoute
   '/api/public/convite-info': typeof ApiPublicConviteInfoRoute
   '/api/public/painel-info': typeof ApiPublicPainelInfoRoute
   '/api/public/upload': typeof ApiPublicUploadRoute
   '/api/public/upload-info': typeof ApiPublicUploadInfoRoute
   '/_authenticated/clientes/': typeof AuthenticatedClientesIndexRoute
-  '/_authenticated/empresas/': typeof AuthenticatedEmpresasIndexRoute
-  '/_authenticated/empresas/$id/competencias': typeof AuthenticatedEmpresasIdCompetenciasRoute
-  '/_authenticated/empresas/$id/conciliacao': typeof AuthenticatedEmpresasIdConciliacaoRoute
-  '/_authenticated/empresas/$id/configuracoes': typeof AuthenticatedEmpresasIdConfiguracoesRoute
-  '/_authenticated/empresas/$id/documentos': typeof AuthenticatedEmpresasIdDocumentosRoute
-  '/_authenticated/empresas/$id/gerenciar': typeof AuthenticatedEmpresasIdGerenciarRoute
-  '/_authenticated/empresas/$id/relatorios': typeof AuthenticatedEmpresasIdRelatoriosRoute
-  '/_authenticated/empresas/$id/': typeof AuthenticatedEmpresasIdIndexRoute
-  '/_authenticated/empresas/$id/clientes/$clienteId': typeof AuthenticatedEmpresasIdClientesClienteIdRoute
-  '/_authenticated/empresas/$id/clientes/': typeof AuthenticatedEmpresasIdClientesIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -305,94 +215,68 @@ export interface FileRouteTypes {
     | '/'
     | '/auth'
     | '/competencias'
+    | '/conciliacao'
     | '/configuracoes'
     | '/dashboard'
     | '/documentos'
+    | '/empresa'
     | '/equipe'
+    | '/relatorios'
     | '/api/assistente'
     | '/convite/$token'
     | '/painel/$token'
     | '/upload/$token'
-    | '/empresas/$id'
-    | '/clientes/$id'
-    | '/empresas/nova'
+    | '/clientes/$clienteId'
     | '/api/public/convite-info'
     | '/api/public/painel-info'
     | '/api/public/upload'
     | '/api/public/upload-info'
     | '/clientes/'
-    | '/empresas/'
-    | '/empresas/$id/competencias'
-    | '/empresas/$id/conciliacao'
-    | '/empresas/$id/configuracoes'
-    | '/empresas/$id/documentos'
-    | '/empresas/$id/gerenciar'
-    | '/empresas/$id/relatorios'
-    | '/empresas/$id/'
-    | '/empresas/$id/clientes/$clienteId'
-    | '/empresas/$id/clientes/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/auth'
     | '/competencias'
+    | '/conciliacao'
     | '/configuracoes'
     | '/dashboard'
     | '/documentos'
+    | '/empresa'
     | '/equipe'
+    | '/relatorios'
     | '/api/assistente'
     | '/convite/$token'
     | '/painel/$token'
     | '/upload/$token'
-    | '/clientes/$id'
-    | '/empresas/nova'
+    | '/clientes/$clienteId'
     | '/api/public/convite-info'
     | '/api/public/painel-info'
     | '/api/public/upload'
     | '/api/public/upload-info'
     | '/clientes'
-    | '/empresas'
-    | '/empresas/$id/competencias'
-    | '/empresas/$id/conciliacao'
-    | '/empresas/$id/configuracoes'
-    | '/empresas/$id/documentos'
-    | '/empresas/$id/gerenciar'
-    | '/empresas/$id/relatorios'
-    | '/empresas/$id'
-    | '/empresas/$id/clientes/$clienteId'
-    | '/empresas/$id/clientes'
   id:
     | '__root__'
     | '/'
     | '/_authenticated'
     | '/auth'
     | '/_authenticated/competencias'
+    | '/_authenticated/conciliacao'
     | '/_authenticated/configuracoes'
     | '/_authenticated/dashboard'
     | '/_authenticated/documentos'
+    | '/_authenticated/empresa'
     | '/_authenticated/equipe'
+    | '/_authenticated/relatorios'
     | '/api/assistente'
     | '/convite/$token'
     | '/painel/$token'
     | '/upload/$token'
-    | '/_authenticated/empresas/$id'
-    | '/_authenticated/clientes/$id'
-    | '/_authenticated/empresas/nova'
+    | '/_authenticated/clientes/$clienteId'
     | '/api/public/convite-info'
     | '/api/public/painel-info'
     | '/api/public/upload'
     | '/api/public/upload-info'
     | '/_authenticated/clientes/'
-    | '/_authenticated/empresas/'
-    | '/_authenticated/empresas/$id/competencias'
-    | '/_authenticated/empresas/$id/conciliacao'
-    | '/_authenticated/empresas/$id/configuracoes'
-    | '/_authenticated/empresas/$id/documentos'
-    | '/_authenticated/empresas/$id/gerenciar'
-    | '/_authenticated/empresas/$id/relatorios'
-    | '/_authenticated/empresas/$id/'
-    | '/_authenticated/empresas/$id/clientes/$clienteId'
-    | '/_authenticated/empresas/$id/clientes/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -439,6 +323,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedCompetenciasRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/conciliacao': {
+      id: '/_authenticated/conciliacao'
+      path: '/conciliacao'
+      fullPath: '/conciliacao'
+      preLoaderRoute: typeof AuthenticatedConciliacaoRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/configuracoes': {
       id: '/_authenticated/configuracoes'
       path: '/configuracoes'
@@ -460,11 +351,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedDocumentosRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/empresa': {
+      id: '/_authenticated/empresa'
+      path: '/empresa'
+      fullPath: '/empresa'
+      preLoaderRoute: typeof AuthenticatedEmpresaRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/equipe': {
       id: '/_authenticated/equipe'
       path: '/equipe'
       fullPath: '/equipe'
       preLoaderRoute: typeof AuthenticatedEquipeRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/relatorios': {
+      id: '/_authenticated/relatorios'
+      path: '/relatorios'
+      fullPath: '/relatorios'
+      preLoaderRoute: typeof AuthenticatedRelatoriosRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/api/assistente': {
@@ -502,32 +407,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedClientesIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/_authenticated/clientes/$id': {
-      id: '/_authenticated/clientes/$id'
-      path: '/clientes/$id'
-      fullPath: '/clientes/$id'
-      preLoaderRoute: typeof AuthenticatedClientesIdRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
-    '/_authenticated/empresas/': {
-      id: '/_authenticated/empresas/'
-      path: '/empresas'
-      fullPath: '/empresas/'
-      preLoaderRoute: typeof AuthenticatedEmpresasIndexRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
-    '/_authenticated/empresas/$id': {
-      id: '/_authenticated/empresas/$id'
-      path: '/empresas/$id'
-      fullPath: '/empresas/$id'
-      preLoaderRoute: typeof AuthenticatedEmpresasIdRouteRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
-    '/_authenticated/empresas/nova': {
-      id: '/_authenticated/empresas/nova'
-      path: '/empresas/nova'
-      fullPath: '/empresas/nova'
-      preLoaderRoute: typeof AuthenticatedEmpresasNovaRouteImport
+    '/_authenticated/clientes/$clienteId': {
+      id: '/_authenticated/clientes/$clienteId'
+      path: '/clientes/$clienteId'
+      fullPath: '/clientes/$clienteId'
+      preLoaderRoute: typeof AuthenticatedClientesClienteIdRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/api/public/convite-info': {
@@ -558,135 +442,33 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicUploadInfoRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/_authenticated/empresas/$id/': {
-      id: '/_authenticated/empresas/$id/'
-      path: '/'
-      fullPath: '/empresas/$id/'
-      preLoaderRoute: typeof AuthenticatedEmpresasIdIndexRouteImport
-      parentRoute: typeof AuthenticatedEmpresasIdRouteRoute
-    }
-    '/_authenticated/empresas/$id/competencias': {
-      id: '/_authenticated/empresas/$id/competencias'
-      path: '/competencias'
-      fullPath: '/empresas/$id/competencias'
-      preLoaderRoute: typeof AuthenticatedEmpresasIdCompetenciasRouteImport
-      parentRoute: typeof AuthenticatedEmpresasIdRouteRoute
-    }
-    '/_authenticated/empresas/$id/conciliacao': {
-      id: '/_authenticated/empresas/$id/conciliacao'
-      path: '/conciliacao'
-      fullPath: '/empresas/$id/conciliacao'
-      preLoaderRoute: typeof AuthenticatedEmpresasIdConciliacaoRouteImport
-      parentRoute: typeof AuthenticatedEmpresasIdRouteRoute
-    }
-    '/_authenticated/empresas/$id/configuracoes': {
-      id: '/_authenticated/empresas/$id/configuracoes'
-      path: '/configuracoes'
-      fullPath: '/empresas/$id/configuracoes'
-      preLoaderRoute: typeof AuthenticatedEmpresasIdConfiguracoesRouteImport
-      parentRoute: typeof AuthenticatedEmpresasIdRouteRoute
-    }
-    '/_authenticated/empresas/$id/documentos': {
-      id: '/_authenticated/empresas/$id/documentos'
-      path: '/documentos'
-      fullPath: '/empresas/$id/documentos'
-      preLoaderRoute: typeof AuthenticatedEmpresasIdDocumentosRouteImport
-      parentRoute: typeof AuthenticatedEmpresasIdRouteRoute
-    }
-    '/_authenticated/empresas/$id/gerenciar': {
-      id: '/_authenticated/empresas/$id/gerenciar'
-      path: '/gerenciar'
-      fullPath: '/empresas/$id/gerenciar'
-      preLoaderRoute: typeof AuthenticatedEmpresasIdGerenciarRouteImport
-      parentRoute: typeof AuthenticatedEmpresasIdRouteRoute
-    }
-    '/_authenticated/empresas/$id/relatorios': {
-      id: '/_authenticated/empresas/$id/relatorios'
-      path: '/relatorios'
-      fullPath: '/empresas/$id/relatorios'
-      preLoaderRoute: typeof AuthenticatedEmpresasIdRelatoriosRouteImport
-      parentRoute: typeof AuthenticatedEmpresasIdRouteRoute
-    }
-    '/_authenticated/empresas/$id/clientes/': {
-      id: '/_authenticated/empresas/$id/clientes/'
-      path: '/clientes'
-      fullPath: '/empresas/$id/clientes/'
-      preLoaderRoute: typeof AuthenticatedEmpresasIdClientesIndexRouteImport
-      parentRoute: typeof AuthenticatedEmpresasIdRouteRoute
-    }
-    '/_authenticated/empresas/$id/clientes/$clienteId': {
-      id: '/_authenticated/empresas/$id/clientes/$clienteId'
-      path: '/clientes/$clienteId'
-      fullPath: '/empresas/$id/clientes/$clienteId'
-      preLoaderRoute: typeof AuthenticatedEmpresasIdClientesClienteIdRouteImport
-      parentRoute: typeof AuthenticatedEmpresasIdRouteRoute
-    }
   }
 }
-
-interface AuthenticatedEmpresasIdRouteRouteChildren {
-  AuthenticatedEmpresasIdCompetenciasRoute: typeof AuthenticatedEmpresasIdCompetenciasRoute
-  AuthenticatedEmpresasIdConciliacaoRoute: typeof AuthenticatedEmpresasIdConciliacaoRoute
-  AuthenticatedEmpresasIdConfiguracoesRoute: typeof AuthenticatedEmpresasIdConfiguracoesRoute
-  AuthenticatedEmpresasIdDocumentosRoute: typeof AuthenticatedEmpresasIdDocumentosRoute
-  AuthenticatedEmpresasIdGerenciarRoute: typeof AuthenticatedEmpresasIdGerenciarRoute
-  AuthenticatedEmpresasIdRelatoriosRoute: typeof AuthenticatedEmpresasIdRelatoriosRoute
-  AuthenticatedEmpresasIdIndexRoute: typeof AuthenticatedEmpresasIdIndexRoute
-  AuthenticatedEmpresasIdClientesClienteIdRoute: typeof AuthenticatedEmpresasIdClientesClienteIdRoute
-  AuthenticatedEmpresasIdClientesIndexRoute: typeof AuthenticatedEmpresasIdClientesIndexRoute
-}
-
-const AuthenticatedEmpresasIdRouteRouteChildren: AuthenticatedEmpresasIdRouteRouteChildren =
-  {
-    AuthenticatedEmpresasIdCompetenciasRoute:
-      AuthenticatedEmpresasIdCompetenciasRoute,
-    AuthenticatedEmpresasIdConciliacaoRoute:
-      AuthenticatedEmpresasIdConciliacaoRoute,
-    AuthenticatedEmpresasIdConfiguracoesRoute:
-      AuthenticatedEmpresasIdConfiguracoesRoute,
-    AuthenticatedEmpresasIdDocumentosRoute:
-      AuthenticatedEmpresasIdDocumentosRoute,
-    AuthenticatedEmpresasIdGerenciarRoute:
-      AuthenticatedEmpresasIdGerenciarRoute,
-    AuthenticatedEmpresasIdRelatoriosRoute:
-      AuthenticatedEmpresasIdRelatoriosRoute,
-    AuthenticatedEmpresasIdIndexRoute: AuthenticatedEmpresasIdIndexRoute,
-    AuthenticatedEmpresasIdClientesClienteIdRoute:
-      AuthenticatedEmpresasIdClientesClienteIdRoute,
-    AuthenticatedEmpresasIdClientesIndexRoute:
-      AuthenticatedEmpresasIdClientesIndexRoute,
-  }
-
-const AuthenticatedEmpresasIdRouteRouteWithChildren =
-  AuthenticatedEmpresasIdRouteRoute._addFileChildren(
-    AuthenticatedEmpresasIdRouteRouteChildren,
-  )
 
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedCompetenciasRoute: typeof AuthenticatedCompetenciasRoute
+  AuthenticatedConciliacaoRoute: typeof AuthenticatedConciliacaoRoute
   AuthenticatedConfiguracoesRoute: typeof AuthenticatedConfiguracoesRoute
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
   AuthenticatedDocumentosRoute: typeof AuthenticatedDocumentosRoute
+  AuthenticatedEmpresaRoute: typeof AuthenticatedEmpresaRoute
   AuthenticatedEquipeRoute: typeof AuthenticatedEquipeRoute
-  AuthenticatedEmpresasIdRouteRoute: typeof AuthenticatedEmpresasIdRouteRouteWithChildren
-  AuthenticatedClientesIdRoute: typeof AuthenticatedClientesIdRoute
-  AuthenticatedEmpresasNovaRoute: typeof AuthenticatedEmpresasNovaRoute
+  AuthenticatedRelatoriosRoute: typeof AuthenticatedRelatoriosRoute
+  AuthenticatedClientesClienteIdRoute: typeof AuthenticatedClientesClienteIdRoute
   AuthenticatedClientesIndexRoute: typeof AuthenticatedClientesIndexRoute
-  AuthenticatedEmpresasIndexRoute: typeof AuthenticatedEmpresasIndexRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedCompetenciasRoute: AuthenticatedCompetenciasRoute,
+  AuthenticatedConciliacaoRoute: AuthenticatedConciliacaoRoute,
   AuthenticatedConfiguracoesRoute: AuthenticatedConfiguracoesRoute,
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
   AuthenticatedDocumentosRoute: AuthenticatedDocumentosRoute,
+  AuthenticatedEmpresaRoute: AuthenticatedEmpresaRoute,
   AuthenticatedEquipeRoute: AuthenticatedEquipeRoute,
-  AuthenticatedEmpresasIdRouteRoute:
-    AuthenticatedEmpresasIdRouteRouteWithChildren,
-  AuthenticatedClientesIdRoute: AuthenticatedClientesIdRoute,
-  AuthenticatedEmpresasNovaRoute: AuthenticatedEmpresasNovaRoute,
+  AuthenticatedRelatoriosRoute: AuthenticatedRelatoriosRoute,
+  AuthenticatedClientesClienteIdRoute: AuthenticatedClientesClienteIdRoute,
   AuthenticatedClientesIndexRoute: AuthenticatedClientesIndexRoute,
-  AuthenticatedEmpresasIndexRoute: AuthenticatedEmpresasIndexRoute,
 }
 
 const AuthenticatedRouteRouteWithChildren =
