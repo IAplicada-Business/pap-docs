@@ -653,6 +653,8 @@ export type Database = {
           org_id: string
           publicado_painel: boolean
           tipo: string
+          formato: string
+          parametros: Json | null
           updated_at: string
         }
         Insert: {
@@ -665,6 +667,8 @@ export type Database = {
           org_id: string
           publicado_painel?: boolean
           tipo: string
+          formato?: string
+          parametros?: Json | null
           updated_at?: string
         }
         Update: {
@@ -677,6 +681,8 @@ export type Database = {
           org_id?: string
           publicado_painel?: boolean
           tipo?: string
+          formato?: string
+          parametros?: Json | null
           updated_at?: string
         }
         Relationships: [

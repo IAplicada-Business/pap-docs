@@ -20,6 +20,7 @@ import { Route as AuthenticatedDocumentosRouteImport } from './routes/_authentic
 import { Route as AuthenticatedEmpresaRouteImport } from './routes/_authenticated/empresa'
 import { Route as AuthenticatedEquipeRouteImport } from './routes/_authenticated/equipe'
 import { Route as AuthenticatedRelatoriosRouteImport } from './routes/_authenticated/relatorios'
+import { Route as ApiAssistenteRouteImport } from './routes/api/assistente'
 import { Route as ConviteTokenRouteImport } from './routes/convite.$token'
 import { Route as PainelTokenRouteImport } from './routes/painel.$token'
 import { Route as UploadTokenRouteImport } from './routes/upload.$token'
@@ -87,6 +88,11 @@ const AuthenticatedRelatoriosRoute = AuthenticatedRelatoriosRouteImport.update({
   path: '/relatorios',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const ApiAssistenteRoute = ApiAssistenteRouteImport.update({
+  id: '/api/assistente',
+  path: '/api/assistente',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ConviteTokenRoute = ConviteTokenRouteImport.update({
   id: '/convite/$token',
   path: '/convite/$token',
@@ -146,6 +152,7 @@ export interface FileRoutesByFullPath {
   '/empresa': typeof AuthenticatedEmpresaRoute
   '/equipe': typeof AuthenticatedEquipeRoute
   '/relatorios': typeof AuthenticatedRelatoriosRoute
+  '/api/assistente': typeof ApiAssistenteRoute
   '/convite/$token': typeof ConviteTokenRoute
   '/painel/$token': typeof PainelTokenRoute
   '/upload/$token': typeof UploadTokenRoute
@@ -167,6 +174,7 @@ export interface FileRoutesByTo {
   '/empresa': typeof AuthenticatedEmpresaRoute
   '/equipe': typeof AuthenticatedEquipeRoute
   '/relatorios': typeof AuthenticatedRelatoriosRoute
+  '/api/assistente': typeof ApiAssistenteRoute
   '/convite/$token': typeof ConviteTokenRoute
   '/painel/$token': typeof PainelTokenRoute
   '/upload/$token': typeof UploadTokenRoute
@@ -190,6 +198,7 @@ export interface FileRoutesById {
   '/_authenticated/empresa': typeof AuthenticatedEmpresaRoute
   '/_authenticated/equipe': typeof AuthenticatedEquipeRoute
   '/_authenticated/relatorios': typeof AuthenticatedRelatoriosRoute
+  '/api/assistente': typeof ApiAssistenteRoute
   '/convite/$token': typeof ConviteTokenRoute
   '/painel/$token': typeof PainelTokenRoute
   '/upload/$token': typeof UploadTokenRoute
@@ -213,6 +222,7 @@ export interface FileRouteTypes {
     | '/empresa'
     | '/equipe'
     | '/relatorios'
+    | '/api/assistente'
     | '/convite/$token'
     | '/painel/$token'
     | '/upload/$token'
@@ -234,6 +244,7 @@ export interface FileRouteTypes {
     | '/empresa'
     | '/equipe'
     | '/relatorios'
+    | '/api/assistente'
     | '/convite/$token'
     | '/painel/$token'
     | '/upload/$token'
@@ -256,6 +267,7 @@ export interface FileRouteTypes {
     | '/_authenticated/empresa'
     | '/_authenticated/equipe'
     | '/_authenticated/relatorios'
+    | '/api/assistente'
     | '/convite/$token'
     | '/painel/$token'
     | '/upload/$token'
@@ -271,6 +283,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   AuthRoute: typeof AuthRoute
+  ApiAssistenteRoute: typeof ApiAssistenteRoute
   ConviteTokenRoute: typeof ConviteTokenRoute
   PainelTokenRoute: typeof PainelTokenRoute
   UploadTokenRoute: typeof UploadTokenRoute
@@ -358,6 +371,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/relatorios'
       preLoaderRoute: typeof AuthenticatedRelatoriosRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/api/assistente': {
+      id: '/api/assistente'
+      path: '/api/assistente'
+      fullPath: '/api/assistente'
+      preLoaderRoute: typeof ApiAssistenteRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/convite/$token': {
       id: '/convite/$token'
@@ -458,6 +478,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   AuthRoute: AuthRoute,
+  ApiAssistenteRoute: ApiAssistenteRoute,
   ConviteTokenRoute: ConviteTokenRoute,
   PainelTokenRoute: PainelTokenRoute,
   UploadTokenRoute: UploadTokenRoute,

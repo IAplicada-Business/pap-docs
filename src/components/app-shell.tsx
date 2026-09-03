@@ -50,6 +50,7 @@ import {
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { toast } from "sonner";
 import { formatarCompetencia } from "@/lib/formatadores";
+import { AssistentePA } from "@/components/assistente-pa";
 
 type Icon = ComponentType<{ className?: string }>;
 
@@ -278,7 +279,7 @@ export function AppShell({ children }: { children: ReactNode }) {
           <img
             src={brandLogo}
             alt={brandName}
-            className="size-8 shrink-0 rounded-lg bg-white/90 object-contain p-0.5 shadow-sm ring-1 ring-white/10"
+            className="size-9 shrink-0 rounded-xl object-contain"
           />
           {!mini && (
             <span
@@ -531,6 +532,16 @@ export function AppShell({ children }: { children: ReactNode }) {
       </div>
 
       <CommandPalette open={paletteOpen} onOpenChange={setPaletteOpen} groups={groups} />
+
+      {empresa && (
+        <AssistentePA
+          empresaId={orgId}
+          nomeCurto={empresa.nome_curto || empresa.nome}
+          nomeCompleto={empresa.nome}
+          logoUrl={empresa.logo_url || "/logo-pa-icon.svg"}
+          corPrimaria={empresa.cor_primaria || "#0072CE"}
+        />
+      )}
     </div>
   );
 }
